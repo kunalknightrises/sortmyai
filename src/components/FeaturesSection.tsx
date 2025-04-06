@@ -1,5 +1,5 @@
 import React from 'react';
-import { FolderSort, Link2, FileStack } from "lucide-react";
+import { FolderCheck, Link2, FileStack } from "lucide-react";
 
 const FeaturesSection = () => {
   return (
@@ -14,7 +14,7 @@ const FeaturesSection = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <FeatureCard 
-            icon={<FolderSort className="w-10 h-10 text-sortmy-blue" />}
+            icon={<FolderCheck className="w-10 h-10 text-sortmy-blue" />}
             title="Sorts Files"
             description="Analyze and categorize all your content automatically, creating intelligent taxonomies that adapt to your needs."
           />
@@ -45,6 +45,11 @@ const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, titl
       <h3 className="text-xl font-bold mb-3">{title}</h3>
       <p className="text-gray-400">{description}</p>
     </div>
+  );
+};
+
+export default FeaturesSection;
+
   );
 };
 
