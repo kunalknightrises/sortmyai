@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "tools": {
+      ".read": "auth != null",
+      "$toolId": {
+        ".write": "auth != null && (!data.exists() || data.child('user_id').val() === auth.uid)"
+      }
+    },
+    "portfolio": {
+      ".read": true,
+      "$itemId": {
+        ".write": "auth != null && (!data.exists() || data.child('user_id').val() === auth.uid)"
+      }
+    }
+  }
+}

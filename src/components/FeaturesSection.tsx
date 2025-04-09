@@ -1,5 +1,5 @@
 import React from 'react';
-import { FolderCheck, Link2, FileStack } from "lucide-react";
+import { FolderCheck, Link2, FileStack, Sparkles } from "lucide-react";
 
 const FeaturesSection = () => {
   return (
@@ -12,7 +12,7 @@ const FeaturesSection = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <FeatureCard 
             icon={<FolderCheck className="w-10 h-10 text-sortmy-blue" />}
             title="Sorts Files"
@@ -30,26 +30,51 @@ const FeaturesSection = () => {
             title="Organizes Chaos"
             description="Transform scattered files, untagged content, and disorganized AI outputs into an elegant, searchable knowledge base."
           />
+          
+          <FeatureCard 
+            icon={<Sparkles className="w-10 h-10 text-yellow-400" />}
+            title="Claude 3.5 Sonnet"
+            description="Premium users get access to state-of-the-art AI assistance powered by Claude 3.5 Sonnet."
+            isPremium
+          />
         </div>
       </div>
     </section>
   );
 };
 
-const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => {
+const FeatureCard = ({ 
+  icon, 
+  title, 
+  description, 
+  isPremium 
+}: { 
+  icon: React.ReactNode, 
+  title: string, 
+  description: string,
+  isPremium?: boolean 
+}) => {
   return (
-    <div className="bg-sortmy-gray/10 border border-sortmy-gray/30 rounded-xl p-8 card-glow">
-      <div className="bg-sortmy-blue/10 w-20 h-20 rounded-lg flex items-center justify-center mb-6">
+    <div className={`${
+      isPremium 
+        ? 'bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-purple-500/30' 
+        : 'bg-sortmy-gray/10 border-sortmy-gray/30'
+    } rounded-xl p-8 card-glow`}>
+      <div className={`${
+        isPremium ? 'bg-purple-500/10' : 'bg-sortmy-blue/10'
+      } w-20 h-20 rounded-lg flex items-center justify-center mb-6`}>
         {icon}
       </div>
-      <h3 className="text-xl font-bold mb-3">{title}</h3>
+      <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+        {title}
+        {isPremium && (
+          <span className="text-xs bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-2 py-0.5 rounded-full">
+            Premium
+          </span>
+        )}
+      </h3>
       <p className="text-gray-400">{description}</p>
     </div>
-  );
-};
-
-export default FeaturesSection;
-
   );
 };
 

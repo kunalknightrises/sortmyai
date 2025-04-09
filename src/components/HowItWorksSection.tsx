@@ -26,7 +26,7 @@ const HowItWorksSection = () => {
             <Step 
               icon={<Brain className="w-8 h-8" />}
               title="AI Analysis"
-              description="SortMyAI categorizes, tags, and structures your content"
+              description="SortMyAI helps you categorize, tag, and structure your content"
               number={2}
             />
             
@@ -40,14 +40,7 @@ const HowItWorksSection = () => {
             />
           </div>
           
-          <div className="mt-16 bg-sortmy-gray/10 border border-sortmy-gray/30 rounded-xl p-4 md:p-8">
-            <div className="aspect-video rounded-lg overflow-hidden flex items-center justify-center bg-sortmy-dark/60">
-              <div className="text-center p-8">
-                <p className="text-gray-400 mb-3">Animation Placeholder</p>
-                <p className="text-sm text-gray-500">Drag-drop → SortMyAI brain → Clean output</p>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </div>
     </section>

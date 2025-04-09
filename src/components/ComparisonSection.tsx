@@ -1,5 +1,4 @@
-import React from 'react';
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle } from 'lucide-react';
 
 const ComparisonSection = () => {
   return (
@@ -20,7 +19,8 @@ const ComparisonSection = () => {
               { text: "Manual organization", available: false },
               { text: "Static folder structures", available: false },
               { text: "Limited search capabilities", available: false },
-              { text: "No content analysis", available: false },
+              { text: "Basic file management", available: true },
+              { text: "No AI assistance", available: false },
               { text: "Isolated from other tools", available: false }
             ]}
           />
@@ -32,8 +32,9 @@ const ComparisonSection = () => {
               { text: "AI-powered auto-organization", available: true },
               { text: "Dynamic, adaptive structures", available: true },
               { text: "Deep content understanding", available: true },
-              { text: "Contextual connections", available: true },
-              { text: "Seamless integrations", available: true }
+              { text: "Advanced file processing", available: true },
+              { text: "Claude 3.5 Sonnet AI (Premium)", available: true },
+              { text: "Seamless tool integrations", available: true }
             ]}
           />
         </div>

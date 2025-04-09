@@ -1,12 +1,12 @@
-import React from 'react';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
-import FeaturesSection from '@/components/FeaturesSection';
 import AudienceSection from '@/components/AudienceSection';
 import HowItWorksSection from '@/components/HowItWorksSection';
-import ComparisonSection from '@/components/ComparisonSection';
 import CTASection from '@/components/CTASection';
 import Footer from '@/components/Footer';
+import PortfolioFeatureSection from '@/components/PortfolioFeatureSection';
+import ToolTrackerPreview from '@/components/ToolTrackerPreview';
+import PricingComparison from '@/components/PricingComparision';
 
 const Index = () => {
   return (
@@ -14,10 +14,11 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <FeaturesSection />
+        <ToolTrackerPreview />
+        <PortfolioFeatureSection />
         <AudienceSection />
         <HowItWorksSection />
-        <ComparisonSection />
+        <PricingComparison />
         <CTASection />
       </main>
       <Footer />

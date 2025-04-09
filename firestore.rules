@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+      
+      // Nested collections under users
+      match /{allChildren=**} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+    }
+
+    // Portfolio items collection
+    match /portfolio/{itemId} {
+      allow read: if true; // Public read access
+      allow write: if isAuthenticated() && 
+        (resource == null || resource.data.user_id == request.auth.uid);
+    }
+
+    // Tools collection
+    match /tools/{toolId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && 
+        (resource == null || resource.data.user_id == request.auth.uid);
+    }
+  }
+}
