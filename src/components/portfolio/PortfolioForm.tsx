@@ -1,9 +1,9 @@
-import React from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { app } from '@/lib/firebase';
 import { Button } from '../ui/Button';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/types';
@@ -27,8 +27,8 @@ interface PortfolioFormProps {
 
 export function PortfolioForm({ user, initialData, onSubmit, isLoading }: PortfolioFormProps) {
   const { toast } = useToast();
-  const [previewUrl, setPreviewUrl] = React.useState<string>();
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<PortfolioFormData>({
     resolver: zodResolver(portfolioSchema),
@@ -37,7 +37,7 @@ export function PortfolioForm({ user, initialData, onSubmit, isLoading }: Portfo
 
   const watchFile = watch('media_file');
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (watchFile && watchFile[0]) {
       const file = watchFile[0];
       const url = URL.createObjectURL(file);
@@ -52,7 +52,7 @@ export function PortfolioForm({ user, initialData, onSubmit, isLoading }: Portfo
 
       if (data.media_file) {
         const file = data.media_file;
-        const fileRef = ref(storage, `portfolio/${user.id}/${Date.now()}_${file.name}`);
+        const fileRef = ref(getStorage(app), `portfolio/${user.id}/${Date.now()}_${file.name}`);
         await uploadBytes(fileRef, file);
         mediaUrl = await getDownloadURL(fileRef);
       }
