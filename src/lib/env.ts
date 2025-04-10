@@ -1,3 +1,4 @@
+
 interface ImportMetaEnv {
   VITE_FIREBASE_API_KEY: string;
   VITE_FIREBASE_AUTH_DOMAIN: string;
@@ -22,10 +23,19 @@ export const validateEnv = () => {
     'VITE_FIREBASE_MEASUREMENT_ID',
   ];
 
+  // For Lovable preview environments
   if (import.meta.env.VITE_IS_PREVIEW) {
     import.meta.env.IS_PREVIEW = true;
   }
 
+  // Check if we're in a Lovable preview environment
+  const isLovableEnvironment = window.location.hostname.includes('lovableproject.com');
+
+  // Skip validation in Lovable environment since we're injecting values in vite.config.ts
+  if (isLovableEnvironment) {
+    console.log('Running in Lovable environment, using injected Firebase config');
+    return import.meta.env as ImportMetaEnv;
+  }
 
   const missingVars = requiredEnvVars.filter(
     (envVar) => !import.meta.env[envVar as keyof ImportMetaEnv]
