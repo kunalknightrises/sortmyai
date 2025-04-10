@@ -28,7 +28,7 @@ export const validateEnv = () => {
     import.meta.env.IS_PREVIEW = true;
   }
 
-  // Check if we're in a Lovable preview environment
+  // Check if we're in a Lovable environment
   const isLovableEnvironment = window.location.hostname.includes('lovableproject.com');
 
   // Skip validation in Lovable environment since we're injecting values in vite.config.ts
