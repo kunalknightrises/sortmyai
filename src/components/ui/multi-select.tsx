@@ -21,9 +21,7 @@ export function MultiSelect({
   options,
   value,
   onChange,
-  // Renamed from placeholderText to avoid unused variable warning
-  // and removed default value since it wasn't being used
-  placeholderText: _unused,
+  placeholderText = "Search...",
   loading = false,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
@@ -65,7 +63,7 @@ export function MultiSelect({
         <div className="absolute w-full z-10 top-[calc(100%+4px)] rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
           <Command className="w-full">
             <CommandInput 
-              placeholder={loading ? "Loading..." : "Search..."}
+              placeholder={loading ? "Loading..." : placeholderText}
               value={search}
               onValueChange={setSearch}
               disabled={loading}
