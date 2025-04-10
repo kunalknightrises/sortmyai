@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { X, Check } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
@@ -12,7 +13,7 @@ interface MultiSelectProps {
   options: Option[];
   value: string[];
   onChange: (value: string[]) => void;
-  placeholder?: string;
+  placeholderText?: string;
   loading?: boolean;
 }
 
@@ -20,7 +21,7 @@ export function MultiSelect({
   options,
   value,
   onChange,
-  placeholder = "Select items...",
+  placeholderText = "Select items...",
   loading = false,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
