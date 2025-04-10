@@ -4,8 +4,8 @@ import { PortfolioItem, User } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import CreatorProfileHeader from '@/components/CreatorProfileHeader';
-import { PortfolioFilterTools } from '../components/portfolio/PortfolioFilterTools';
-import { PortfolioTabs } from '../components/portfolio/PortfolioTabs';
+import { PortfolioFilterTools } from '@/components/portfolio/PortfolioFilterTools';
+import { PortfolioTabs } from '@/components/portfolio/PortfolioTabs';
 import { fetchUserProfile, fetchPortfolioItems } from '@/services/portfolioService';
 
 const Portfolio = () => {

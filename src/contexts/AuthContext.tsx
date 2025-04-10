@@ -4,10 +4,6 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
-  GoogleAuthProvider,
-  GithubAuthProvider,
-  TwitterAuthProvider,
-  signInWithPopup,
   onAuthStateChanged,
   setPersistence,
   browserLocalPersistence
@@ -37,7 +33,6 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, username: string) => Promise<void>;
   signOut: () => Promise<void>;
-  signInWithProvider: (provider: 'google' | 'github' | 'twitter') => Promise<void>;
   updateUserData: (data: Partial<AuthUser>) => Promise<void>;
   isAdmin: boolean;
   isIntern: boolean;
@@ -57,6 +52,7 @@ export const AuthProvider = ({ children }: AuthContextProps) => {
       console.error('Error setting persistence:', error);
     });
 
+    setLoading(true)
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: UserInfo | null) => {
       try {
         if (firebaseUser) {
@@ -67,12 +63,13 @@ export const AuthProvider = ({ children }: AuthContextProps) => {
           const userRef = doc(db, 'users', firebaseUser.uid);
           const userSnap = await getDoc(userRef);
           
+          let userData : AuthUser | null = null;
           if (userSnap.exists()) {
-            setUser({
+            userData = {
               uid: firebaseUser.uid,
               email: firebaseUser.email || undefined,
               ...userSnap.data()
-            } as AuthUser);
+            } as AuthUser;
           } else {
             // If no profile exists yet, create one with default values
             const defaultProfile = {
@@ -87,18 +84,19 @@ export const AuthProvider = ({ children }: AuthContextProps) => {
             
             if (isOnline) {
               await setDoc(userRef, defaultProfile);
-              setUser(defaultProfile as AuthUser);
+              userData = defaultProfile as AuthUser;
             } else {
               // If offline, store minimal user data
-              setUser({
+              userData = {
                 uid: firebaseUser.uid,
                 email: firebaseUser.email || undefined,
                 displayName: firebaseUser.displayName || undefined,
-              } as AuthUser);
+              } as AuthUser;
             }
-          }
+          }          
+          setUser(userData);          
         } else {
-          setUser(null);
+          setUser(null);          
         }
       } catch (error) {
         console.error('Error in auth state change:', error);
@@ -120,7 +118,7 @@ export const AuthProvider = ({ children }: AuthContextProps) => {
           });
         }
       } finally {
-        setLoading(false);
+        setLoading(false);        
       }
     });
 
@@ -193,91 +191,21 @@ export const AuthProvider = ({ children }: AuthContextProps) => {
     }
   };
 
-  const getProvider = (name: string) => {
-    switch (name) {
-      case 'google':
-        const provider = new GoogleAuthProvider();
-        // Add scopes and custom parameters
-        provider.addScope('profile');
-        provider.addScope('email');
-        provider.setCustomParameters({
-          client_id: '220186510992-5oa2tojm2o51qh4324ao7fe0mmfkh021.apps.googleusercontent.com',
-          prompt: 'select_account'
-        });
-        return provider;
-      case 'github':
-        return new GithubAuthProvider();
-      case 'twitter':
-        return new TwitterAuthProvider();
-      default:
-        throw new Error('Unsupported provider');
-    }
-  };
-
-  const signInWithProvider = async (providerName: 'google' | 'github' | 'twitter') => {
-    if (!isOnline) {
-      toast({
-        title: "Network Error",
-        description: "You must be online to sign in. Please check your connection and try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const provider = getProvider(providerName);
-      const result = await signInWithPopup(auth, provider);
-      const firebaseUser = result.user;
-
-      // Check if user profile exists, if not create one
-      const userRef = doc(db, 'users', firebaseUser.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          username: firebaseUser.displayName || firebaseUser.email?.split('@')[0],
-          is_premium: false,
-          claude_enabled: false,
-          created_at: new Date().toISOString(),
-          avatar_url: firebaseUser.photoURL || undefined,
-          role: 'basic'
-        });
-      }
-
-      toast({
-        title: "Welcome!",
-        description: "You've successfully signed in.",
-      });
-    } catch (error) {
-      console.error(`Sign in with ${providerName} error:`, error);
-      
-      if (!isOnline) {
-        toast({
-          title: "Network Error",
-          description: "You appear to be offline. Please check your connection and try again.",
-          variant: "destructive",
-        });
-        await forceReconnect();
-      } else {
-        toast({
-          title: "Authentication error",
-          description: getErrorMessage(error),
-          variant: "destructive",
-        });
-      }
-      throw error;
-    }
-  };
-
   const updateUserData = async (data: Partial<AuthUser>) => {
-    if (!user?.uid) return;
-    
     try {
+      if(!user?.uid) return;
       const userRef = doc(db, 'users', user.uid);
-      await setDoc(userRef, { ...user, ...data }, { merge: true });
-      setUser((prev: AuthUser | null) => prev ? { ...prev, ...data } : null);
+      await setDoc(userRef, data, { merge: true });
+      const userSnap = await getDoc(userRef);
+          
+      let userData : AuthUser | null = null;
+      if (userSnap.exists()) {
+        userData = {
+          uid: userSnap.id,
+          ...userSnap.data()
+        } as AuthUser;
+        setUser(userData);
+      }
       
       toast({
         title: "Profile updated",
@@ -305,7 +233,6 @@ export const AuthProvider = ({ children }: AuthContextProps) => {
         signIn,
         signUp,
         signOut,
-        signInWithProvider,
         updateUserData,
         isAdmin,
         isIntern,

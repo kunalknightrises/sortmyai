@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { app } from '@/lib/firebase';
-import { Button } from '../ui/Button';
+import app from '@/lib/firebase';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/types';
 
@@ -20,7 +20,7 @@ type PortfolioFormData = z.infer<typeof portfolioSchema>;
 
 interface PortfolioFormProps {
   user: User;
-  initialData?: Partial<PortfolioFormData>;
+  initialData?: Partial<PortfolioFormData & {media_url?: string}>;
   onSubmit: (data: PortfolioFormData & { media_url?: string }) => Promise<void>;
   isLoading?: boolean;
 }
@@ -38,19 +38,23 @@ export function PortfolioForm({ user, initialData, onSubmit, isLoading }: Portfo
   const watchFile = watch('media_file');
 
   useEffect(() => {
-    if (watchFile && watchFile[0]) {
-      const file = watchFile[0];
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
+    if (watchFile && Array.isArray(watchFile) && watchFile.length > 0) {
+      const file = watchFile[0]
+      if (file) {
+        const URLobj = URL.createObjectURL(file);
+        setPreviewUrl(URLobj);
+      }
+      if(previewUrl){
+        return () => URL.revokeObjectURL(previewUrl);
+      }
     }
   }, [watchFile]);
 
   const handleFormSubmit = async (data: PortfolioFormData) => {
     try {
-      let mediaUrl = initialData?.media_url;
+      let mediaUrl = initialData?.media_url || undefined;
 
-      if (data.media_file) {
+       if (data.media_file) {
         const file = data.media_file;
         const fileRef = ref(getStorage(app), `portfolio/${user.id}/${Date.now()}_${file.name}`);
         await uploadBytes(fileRef, file);

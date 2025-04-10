@@ -18,6 +18,15 @@ export function FirebaseConnectionProvider({ children }: { children: React.React
   const prevOnlineState = useRef(true);
 
   useEffect(() => {
+    // Check if the environment is the preview
+    const isPreview = window.location.href.includes('cluster-iktsryn7xnhpexlu6255bftka4');
+
+    if (isPreview) {
+        setIsOnline(true);
+        setIsInitializing(false);
+        return;
+    }
+
     // Check online status using browser's navigator
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -37,6 +46,12 @@ export function FirebaseConnectionProvider({ children }: { children: React.React
 
   // Use a separate effect for toast notifications
   useEffect(() => {
+    // Check if the environment is the preview
+    const isPreview = window.location.href.includes('cluster-iktsryn7xnhpexlu6255bftka4');
+
+    if (isPreview) {
+      return;
+    }
     if (prevOnlineState.current !== isOnline) {
       if (isOnline) {
         toast({
@@ -44,7 +59,11 @@ export function FirebaseConnectionProvider({ children }: { children: React.React
           description: 'You are now connected to the server.',
         });
         // Enable Firestore network when coming back online
-        enableNetwork(db).catch(console.error);
+        try {
+            enableNetwork(db).catch(console.error);
+        } catch (e){
+          console.error(e)
+        }
       } else {
         toast({
           title: 'Disconnected',
@@ -52,7 +71,11 @@ export function FirebaseConnectionProvider({ children }: { children: React.React
           variant: 'destructive',
         });
         // Disable Firestore network when going offline
-        disableNetwork(db).catch(console.error);
+        try{
+            disableNetwork(db).catch(console.error);
+        } catch (e){
+          console.error(e)
+        }
       }
       prevOnlineState.current = isOnline;
     }
@@ -82,6 +105,7 @@ export function FirebaseConnectionProvider({ children }: { children: React.React
         description: 'Unable to reconnect. Please check your internet connection.',
         variant: 'destructive',
       });
+      throw error;
     } finally {
       setIsInitializing(false);
     }
@@ -92,7 +116,7 @@ export function FirebaseConnectionProvider({ children }: { children: React.React
       value={{
         isOnline,
         isInitializing,
-        forceReconnect,
+        forceReconnect
       }}
     >
       {children}

@@ -6,8 +6,9 @@ interface ImportMetaEnv {
   VITE_FIREBASE_MESSAGING_SENDER_ID: string;
   VITE_FIREBASE_APP_ID: string;
   VITE_FIREBASE_MEASUREMENT_ID: string;
-  VITE_FIREBASE_DATABASE_URL: string;
+  VITE_FIREBASE_DATABASE_URL?: string;
   VITE_USE_EMULATOR?: string;
+  VITE_IS_PREVIEW?: string;
 }
 
 export const validateEnv = () => {
@@ -19,8 +20,12 @@ export const validateEnv = () => {
     'VITE_FIREBASE_MESSAGING_SENDER_ID',
     'VITE_FIREBASE_APP_ID',
     'VITE_FIREBASE_MEASUREMENT_ID',
-    'VITE_FIREBASE_DATABASE_URL'
-  ] as const;
+  ];
+
+  if (import.meta.env.VITE_IS_PREVIEW) {
+    import.meta.env.IS_PREVIEW = true;
+  }
+
 
   const missingVars = requiredEnvVars.filter(
     (envVar) => !import.meta.env[envVar as keyof ImportMetaEnv]

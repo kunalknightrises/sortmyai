@@ -1,17 +1,22 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Github } from 'lucide-react';
+import { Github } from 'lucide-react';  
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirebaseConnection } from '@/contexts/FirebaseConnectionContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';  
+import { GoogleAuthProvider, GithubAuthProvider, TwitterAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
-  const { signInWithProvider, user } = useAuth();
-  const { isOnline, forceReconnect } = useFirebaseConnection();
+  const { user } = useAuth();
+  const { isOnline, forceReconnect } = useFirebaseConnection();  
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   
   useEffect(() => {
     if (user) {
@@ -19,16 +24,85 @@ const Login = () => {
       navigate(from, { replace: true });
     }
   }, [user, navigate, location]);
-  
-  const handleProviderSignIn = async (provider: 'google' | 'github' | 'twitter') => {
-    setIsLoading(true);
+
+  const getProvider = (name: string) => {
+    switch (name) {
+      case 'google':
+        const provider = new GoogleAuthProvider();
+        // Add scopes and custom parameters
+        provider.addScope('profile');
+        provider.addScope('email');
+        provider.setCustomParameters({
+          client_id: '220186510992-5oa2tojm2o51qh4324ao7fe0mmfkh021.apps.googleusercontent.com',
+          prompt: 'select_account'
+        });
+        return provider;
+      case 'github':
+        return new GithubAuthProvider();
+      case 'twitter':
+        return new TwitterAuthProvider();
+      default:
+        throw new Error('Unsupported provider');
+    }
+  };
+
+  const signInWithProvider = async (providerName: 'google' | 'github' | 'twitter') => {
+    try {
+      const provider = getProvider(providerName);
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+
+      // Check if user profile exists, if not create one
+      const userRef = doc(db, 'users', firebaseUser.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          username: firebaseUser.displayName || firebaseUser.email?.split('@')[0],
+          is_premium: false,
+          claude_enabled: false,
+          created_at: new Date().toISOString(),
+          avatar_url: firebaseUser.photoURL || undefined,
+          role: 'basic'
+        });
+      }
+
+      toast({
+        title: "Welcome!",
+        description: "You've successfully signed in.",
+      });
+    } catch (error) {
+        toast({
+          title: 'Authentication error',
+          description:
+            error instanceof Error
+              ? error.message
+              : 'An unknown error occurred',
+          variant: 'destructive',
+        });
+      if (!(error instanceof Error)) {
+        console.error('An unknown error occurred');
+      }
+      return;
+    }
+  };
+
+  const handleProviderSignIn = async (providerName: 'google' | 'github' | 'twitter') => {
+    setIsLoading(true);    
     try {
       if (!isOnline) {
-        await forceReconnect();
+        await forceReconnect().catch(() => {
+          toast({
+            title: "Network Error",
+            description: "Could not reconnect to the network.",
+            variant: "destructive",
+          });
+          return;
+        });
       }
-      await signInWithProvider(provider);
-    } catch (error) {
-      console.error('Login error:', error);
+       await signInWithProvider(providerName);
     } finally {
       setIsLoading(false);
     }
@@ -51,10 +125,9 @@ const Login = () => {
               disabled={isLoading}
               onClick={() => handleProviderSignIn('google')}
             >
-              <Github className="mr-2 h-4 w-4" />
               {isLoading ? 'Connecting...' : 'Sign in with Google'}
             </Button>
-            <Button 
+            <Button
               variant="outline" 
               type="button" 
               disabled={isLoading}
