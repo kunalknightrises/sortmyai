@@ -21,7 +21,9 @@ export function MultiSelect({
   options,
   value,
   onChange,
-  placeholderText = "Select items...",
+  // Renamed from placeholderText to avoid unused variable warning
+  // and removed default value since it wasn't being used
+  placeholderText: _unused,
   loading = false,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);

@@ -23,6 +23,10 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 8080
+    },
+    build: {
+      outDir: 'dist',
+      sourcemap: true
     }
   }
 })
