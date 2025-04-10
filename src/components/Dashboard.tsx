@@ -4,17 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button} from '@/components/ui/button';
 import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Sidebar from './Sidebar';
-import { Outlet } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 
 const Dashboard = () => {
   const { user } = useAuth();
   
   return (
-    <div className="space-y-8">
     <div className="flex h-screen bg-sortmy-dark text-white overflow-hidden">
-        <Sidebar />
         {/* Main Content */}
         <div className="flex-1 p-4 overflow-y-auto">
             <div className="space-y-8">
@@ -138,9 +134,7 @@ const Dashboard = () => {
               </div>
             </div>
         </div>
-        <Outlet/>
       </div>
-    </div>
   );
 };
 

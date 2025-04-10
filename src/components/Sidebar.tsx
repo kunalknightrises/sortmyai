@@ -1,37 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  Brain
+  Brain,
+  LayoutGrid,
+  Briefcase
 } from 'lucide-react';
 
-
 const Sidebar = () => {
-  const [pageComponents, setPageComponents] = useState<{ [key: string]: React.ComponentType }>({});
-  const excludedPages = ["Login", "Signup"];
-
-  useEffect(() => {
-    const fetchPages = async () => {
-      const pageModules = import.meta.glob('/src/pages/*.tsx');
-      const loadedComponents: { [key: string]: React.ComponentType } = {};
-
-      for (const path in pageModules) {
-        const pageName = path.match(/\/src\/pages\/(.+)\.tsx/)?.[1];
-        if (pageName && !excludedPages.includes(pageName)) {
-          const module = await pageModules[path]();
-          loadedComponents[pageName] = (module as any).default;
-        }
-      }
-      setPageComponents(loadedComponents);
-    };
-    fetchPages();
-  }, []);
-
-  const sidebarItems = Object.keys(pageComponents).map((pageName) => ({
-    icon: <LayoutDashboard size={20} />,
-    label: pageName,
-    path: `/dashboard/${pageName.toLowerCase()}`,
-  }));
+  const sidebarItems = [
+    {
+      icon: <LayoutDashboard size={20} />,
+      label: "Dashboard",
+      path: "/dashboard",
+    },
+    {
+      icon: <LayoutGrid size={20} />,
+      label: "Portfolio",
+      path: "/dashboard/portfolio",
+    },
+    {
+      icon: <Briefcase size={20} />,
+      label: "Tool Tracker",
+      path: "/dashboard/tools",
+    }
+  ];
 
   return (
     <div className="border-r border-sortmy-gray/30 bg-sortmy-darker w-64 flex-shrink-0 p-4 h-screen">
@@ -47,7 +40,7 @@ const Sidebar = () => {
             to={item.path}
             className={({ isActive }) => `
               flex items-center gap-3 py-3 px-4 rounded-md transition-colors
-              ${isActive
+              ${isActive 
                 ? 'bg-sortmy-blue/20 text-sortmy-blue'
                 : 'hover:bg-sortmy-gray/20 text-gray-300 hover:text-white'}
             `}

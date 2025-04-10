@@ -1,10 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import DashboardLayout from '@/components/DashboardLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute';
+import DashboardLayout from './components/DashboardLayout';
 
 // Pages
-import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 import Profile from '@/pages/Profile';
@@ -12,6 +11,7 @@ import ToolTracker from '@/components/dashboard/ToolTracker';
 import AddTool from '@/components/dashboard/AddTool';
 import Portfolio from '@/components/dashboard/Portfolio';
 import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
+import Index from '@/pages/Index';
 import Dashboard from '@/components/Dashboard';
 
 const queryClient = new QueryClient({
@@ -27,35 +27,30 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
-        {/* Public routes */}
+
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/portfolio/:username" element={<InstagramStylePortfolio />} />
-
-        {/* Protected dashboard routes */}
-        <Route path="/dashboard" element={<ProtectedRoute>
-          <DashboardLayout>
-            <div>
-              
-            </div>
-          </DashboardLayout>
-        </ProtectedRoute>}>
-
-
-          <Route index element={<DashboardLayout>
-            <Dashboard />
-          </DashboardLayout>} />
-           <Route path="profile" element={<DashboardLayout>
-            <Profile />
-          </DashboardLayout>} />
-          <Route path="tools" element={<DashboardLayout><ToolTracker /></DashboardLayout>} />
-          <Route path="tools/add" element={<DashboardLayout><AddTool /></DashboardLayout>} />
-          <Route path="portfolio" element={<DashboardLayout><Portfolio /></DashboardLayout>} />
+        
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
+          </ProtectedRoute>} >
+            <Route index element={<Dashboard />} />
+            <Route path="profile" element={<Profile />} />
         </Route>
 
+        <Route path="/dashboard/tools" element={<ProtectedRoute><DashboardLayout><ToolTracker /></DashboardLayout></ProtectedRoute>} />
+        <Route path="/dashboard/tools/add" element={<ProtectedRoute><AddTool /></ProtectedRoute>} />
+        <Route path="/dashboard/portfolio" element={<ProtectedRoute><DashboardLayout><Portfolio /></DashboardLayout></ProtectedRoute>} />
+
+        
         {/* Fallback route */}
         <Route path="*" element={<Navigate to="/" replace />} />
+        
       </Routes>
       {/* <ToastProvider /> */}
     </QueryClientProvider>
