@@ -1,10 +1,13 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Brain,
   LayoutGrid,
-  Briefcase
+  Briefcase,
+  Award,
+  User
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -23,6 +26,16 @@ const Sidebar = () => {
       icon: <Briefcase size={20} />,
       label: "Tool Tracker",
       path: "/dashboard/tools",
+    },
+    {
+      icon: <Award size={20} />,
+      label: "Achievements",
+      path: "/dashboard/achievements",
+    },
+    {
+      icon: <User size={20} />,
+      label: "Profile",
+      path: "/dashboard/profile", 
     }
   ];
 

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import type { AuthUser } from '@/contexts/AuthContext';
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,8 +14,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Crown } from 'lucide-react';
+import { Award, Crown, Flame, LightningBolt } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
+import XPProgress from '@/components/gamification/XPProgress';
+import StreakCounter from '@/components/gamification/StreakCounter';
+import BadgeDisplay from '@/components/gamification/BadgeDisplay';
+import { Badge as BadgeType } from '@/types/gamification';
 
 interface UserProfileUpdate extends Partial<AuthUser> {}
 
@@ -23,10 +28,54 @@ const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email" }).optional(),
 });
 
+// Mock data for development - would come from backend in production
+const mockBadges: BadgeType[] = [
+  {
+    id: 'badge1',
+    name: 'First Login',
+    description: 'Logged in for the first time',
+    icon: 'login',
+    category: 'milestone',
+    tier: 'bronze',
+    isEarned: true,
+    earnedDate: new Date().toISOString()
+  },
+  {
+    id: 'badge2',
+    name: 'Tool Master',
+    description: 'Added 5 AI tools to your tracker',
+    icon: 'tools',
+    category: 'achievement',
+    tier: 'silver',
+    isEarned: true,
+    earnedDate: new Date().toISOString()
+  },
+  {
+    id: 'badge3',
+    name: 'Getting Started',
+    description: 'Completed your first challenge',
+    icon: 'star',
+    category: 'milestone',
+    tier: 'bronze',
+    isEarned: true,
+    earnedDate: new Date().toISOString()
+  }
+];
+
 const Profile = () => {
   const { user, updateUserData } = useAuth();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
+  
+  // Enhance user with mock gamification data if not present
+  const enhancedUser = user ? {
+    ...user,
+    xp: user.xp || 250,
+    level: user.level || 3,
+    streak_days: user.streak_days || 5,
+    last_login: user.last_login || new Date().toISOString(),
+    badges: user.badges || ['badge1', 'badge2', 'badge3']
+  } : null;
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -100,6 +149,11 @@ const Profile = () => {
                         {getInitials()}
                       </AvatarFallback>
                     </Avatar>
+                    
+                    {/* XP Level Badge */}
+                    <div className="absolute -top-2 -right-2 bg-sortmy-blue text-white text-xs font-bold rounded-full w-7 h-7 flex items-center justify-center border-2 border-sortmy-dark">
+                      {enhancedUser?.level || 1}
+                    </div>
                   </div>
                   
                   <div className="flex-1 space-y-4">
@@ -136,7 +190,31 @@ const Profile = () => {
                   </div>
                 </div>
                 
-                <div className="flex justify-end">
+                {/* XP and Streak */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                  <div className="space-y-2">
+                    <XPProgress user={enhancedUser} />
+                  </div>
+                  <div className="flex items-center justify-center p-4 bg-sortmy-gray/20 rounded-lg">
+                    <StreakCounter user={enhancedUser} />
+                  </div>
+                </div>
+                
+                {/* Badges */}
+                <BadgeDisplay badges={mockBadges} showAll={true} />
+                
+                <div className="flex justify-between pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    asChild
+                  >
+                    <a href="/dashboard/achievements">
+                      <Award className="w-4 h-4 mr-2" />
+                      View All Achievements
+                    </a>
+                  </Button>
+                  
                   <Button 
                     type="submit" 
                     disabled={isUpdating}
@@ -163,6 +241,20 @@ const Profile = () => {
               <div>
                 <p className="text-sm text-gray-400">Joined</p>
                 <p>{new Date(user.created_at || '').toLocaleDateString()}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Experience</p>
+                <div className="flex items-center">
+                  <LightningBolt className="w-4 h-4 mr-1 text-sortmy-blue" />
+                  <span>{enhancedUser?.xp || 0} XP (Level {enhancedUser?.level || 1})</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Current Streak</p>
+                <div className="flex items-center">
+                  <Flame className="w-4 h-4 mr-1 text-orange-400" />
+                  <span>{enhancedUser?.streak_days || 0} days</span>
+                </div>
               </div>
             </CardContent>
           </Card>

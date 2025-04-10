@@ -8,6 +8,15 @@ export interface User {
   is_premium: boolean;
   claude_enabled: boolean;
   created_at: string;
+  xp?: number;
+  level?: number;
+  streak_days?: number;
+  last_login?: string;
+  badges?: string[];
+  ai_knowledge?: {
+    overall: number;
+    categories: Record<string, number>;
+  };
 }
 
 export interface AuthUser {
@@ -20,6 +29,15 @@ export interface AuthUser {
   claude_enabled: boolean;
   created_at: string;
   updated_at?: string;
+  xp?: number;
+  level?: number;
+  streak_days?: number;
+  last_login?: string;
+  badges?: string[];
+  ai_knowledge?: {
+    overall: number;
+    categories: Record<string, number>;
+  };
 }
 
 // Tool related types

@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -13,6 +14,7 @@ import Portfolio from '@/components/dashboard/Portfolio';
 import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
 import Index from '@/pages/Index';
 import Dashboard from '@/components/Dashboard';
+import Achievements from '@/pages/Achievements';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +48,7 @@ function App() {
         <Route path="/dashboard/tools" element={<ProtectedRoute><DashboardLayout><ToolTracker /></DashboardLayout></ProtectedRoute>} />
         <Route path="/dashboard/tools/add" element={<ProtectedRoute><AddTool /></ProtectedRoute>} />
         <Route path="/dashboard/portfolio" element={<ProtectedRoute><DashboardLayout><Portfolio /></DashboardLayout></ProtectedRoute>} />
+        <Route path="/dashboard/achievements" element={<ProtectedRoute><DashboardLayout><Achievements /></DashboardLayout></ProtectedRoute>} />
 
         
         {/* Fallback route */}
