@@ -1,5 +1,6 @@
 
 import * as React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -47,7 +48,12 @@ function Calendar({
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",        day_hidden: "invisible"
+          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        day_hidden: "invisible"
+      }}
+      components={{
+        IconLeft: (props: React.ComponentProps<typeof ChevronLeft>) => <ChevronLeft className="h-4 w-4" {...props} />,
+        IconRight: (props: React.ComponentProps<typeof ChevronRight>) => <ChevronRight className="h-4 w-4" {...props} />
       }}
       {...props}
     />

@@ -23,17 +23,20 @@ export const validateEnv = () => {
     'VITE_FIREBASE_MEASUREMENT_ID',
   ];
 
-  // Check if we're in a Lovable environment
-  const isLovableEnvironment = window.location.hostname.includes('lovableproject.com');
+  // Check if we're in a Lovable environment or if we're running in a development environment
+  const isLovableEnvironment = 
+    window.location.hostname.includes('lovableproject.com') || 
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1';
 
-  // Use dummy values for Lovable environment
+  // Use dummy values for Lovable environment or dev environment
   if (isLovableEnvironment) {
-    console.log('Running in Lovable environment, using default Firebase config');
+    console.log('Running in Lovable or development environment, using default Firebase config');
     return {
       VITE_FIREBASE_API_KEY: "AIzaSyCSSBKFkrnBoK0b1Y3RmA97WdwcY9YLKcA",
       VITE_FIREBASE_AUTH_DOMAIN: "smai-og.firebaseapp.com",
       VITE_FIREBASE_PROJECT_ID: "smai-og",
-      VITE_FIREBASE_STORAGE_BUCKET: "smai-og.appspot.com",
+      VITE_FIREBASE_STORAGE_BUCKET: "smai-og.firebasestorage.app",
       VITE_FIREBASE_MESSAGING_SENDER_ID: "220186510992",
       VITE_FIREBASE_APP_ID: "1:220186510992:web:3d9e07c3df55d1f4ea7a15",
       VITE_FIREBASE_MEASUREMENT_ID: "G-4MR0WK595H",
@@ -41,7 +44,7 @@ export const validateEnv = () => {
     } as ImportMetaEnv;
   }
 
-  // Validate environment variables in non-Lovable environments
+  // Check for missing environment variables in non-Lovable environments
   const missingVars = requiredEnvVars.filter(
     (envVar) => !import.meta.env[envVar as keyof ImportMetaEnv]
   );
