@@ -27,7 +27,7 @@ const BadgeDisplay = ({
   
   if (!badges || badges.length === 0) {
     return (
-      <div className={`bg-sortmy-gray/10 border border-sortmy-gray/30 rounded-lg p-4 text-center ${className}`}>
+      <div className={`bg-gray-800/10 border border-gray-700/30 rounded-lg p-4 text-center ${className}`}>
         <Award className="w-8 h-8 mx-auto text-gray-400 mb-2" />
         <p className="text-sm text-gray-400">No badges earned yet</p>
         <p className="text-xs text-gray-500 mt-1">Complete challenges to earn badges</p>
@@ -43,13 +43,13 @@ const BadgeDisplay = ({
     <div className={className}>
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-medium flex items-center">
-          <Award className="w-4 h-4 mr-1 text-sortmy-blue" />
+          <Award className="w-4 h-4 mr-1 text-blue-500" />
           Badges Earned ({earnedBadges.length})
         </h4>
         {earnedBadges.length > maxDisplay && !viewAll && (
           <button 
             onClick={() => setViewAll(true)}
-            className="text-xs text-sortmy-blue hover:underline flex items-center"
+            className="text-xs text-blue-500 hover:underline flex items-center"
           >
             View all <ExternalLink className="w-3 h-3 ml-1" />
           </button>
@@ -89,7 +89,7 @@ const BadgeDisplay = ({
         
         {!viewAll && remainingCount > 0 && (
           <div 
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-sortmy-gray/20 cursor-pointer"
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-700/20 cursor-pointer"
             onClick={() => setViewAll(true)}
           >
             <span className="text-xs font-medium">+{remainingCount}</span>
@@ -100,7 +100,7 @@ const BadgeDisplay = ({
       {viewAll && (
         <button 
           onClick={() => setViewAll(false)}
-          className="text-xs text-sortmy-blue hover:underline mt-2 flex items-center"
+          className="text-xs text-blue-500 hover:underline mt-2 flex items-center"
         >
           Show less
         </button>
@@ -121,7 +121,7 @@ const getBadgeTierClass = (tier: Badge['tier']) => {
     case 'platinum':
       return 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-purple-500/30';
     default:
-      return 'bg-sortmy-gray/20 border border-sortmy-gray/30';
+      return 'bg-gray-700/20 border border-gray-700/30';
   }
 };
 

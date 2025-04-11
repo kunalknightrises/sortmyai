@@ -1,23 +1,25 @@
-
 export interface User {
   id: string;
   uid: string;
-  email: string | undefined;
   username?: string;
+  email?: string;
+  avatar_url?: string;
+  created_at?: string;
+  role?: 'admin' | 'intern' | 'basic';
   is_premium?: boolean;
   claude_enabled?: boolean;
-  created_at?: string;
-  avatar_url?: string;
-  role?: 'admin' | 'intern' | 'basic';
-  // Gamification related properties
-  xp: number;
-  level: number;
-  streak_days: number;
-  last_login: string;
-  badges: string[];
+  
+  // Gamification-related fields
+  xp?: number;
+  level?: number;
+  streak_days?: number;
+  last_login?: string;
+  badges?: string[];
   ai_knowledge?: {
     overall: number;
-    categories: Record<string, number>;
+    categories: {
+      [key: string]: number;
+    };
   };
 }
 
@@ -43,7 +45,7 @@ export interface Tool {
   name: string;
   description: string;
   logo_url: string;
-  website: string;  // Changed from website_url to match what's being used
+  website: string;
   category: string;
   tags: string[];
   is_favorite: boolean;
@@ -53,7 +55,6 @@ export interface Tool {
   notes: string;
   created_at: string;
   updated_at: string;
-  // Fields used in the codebase but not defined in the interface
   user_id?: string;
 }
 

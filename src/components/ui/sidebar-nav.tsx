@@ -10,7 +10,9 @@ import {
   PlusCircle,
   ClipboardList,
   Settings,
-  Users
+  Users,
+  Award,
+  Trophy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -29,22 +31,22 @@ const SidebarNav = ({ isCollapsed }: SidebarNavProps) => {
       label: 'Dashboard'
     },
     {
-      href: '/chat',
+      href: '/dashboard/tools',
       icon: <MessageSquare className="h-5 w-5" />,
-      label: 'Chat'
+      label: 'Tools'
     },
     {
-      href: '/courses',
+      href: '/dashboard/portfolio',
       icon: <BookOpen className="h-5 w-5" />,
-      label: 'Courses'
+      label: 'Portfolio'
     },
     {
-      href: '/blogs',
-      icon: <PenTool className="h-5 w-5" />,
-      label: 'Blogs'
+      href: '/dashboard/achievements',
+      icon: <Trophy className="h-5 w-5" />,
+      label: 'Achievements'
     },
     {
-      href: '/profile',
+      href: '/dashboard/profile',
       icon: <User className="h-5 w-5" />,
       label: 'Profile'
     }

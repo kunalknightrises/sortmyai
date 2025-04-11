@@ -12,7 +12,7 @@ interface ChallengeCardProps {
   className?: string;
 }
 
-const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) => {
+export const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) => {
   const progressPercentage = Math.round((challenge.progress / challenge.totalSteps) * 100);
   
   const getDifficultyColor = (difficulty: Challenge['difficulty']) => {
@@ -31,7 +31,7 @@ const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) =>
   };
   
   return (
-    <Card className={`border-sortmy-gray/30 bg-sortmy-gray/10 ${className}`}>
+    <Card className={`border-gray-800/20 bg-gray-900/10 hover:bg-gray-900/20 transition-colors ${className}`}>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
@@ -49,7 +49,7 @@ const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) =>
       <CardContent className="space-y-4">
         <div className="flex justify-between items-center text-sm">
           <div className="flex items-center">
-            <Zap className="w-4 h-4 mr-1 text-sortmy-blue" />
+            <Zap className="w-4 h-4 mr-1 text-blue-500" />
             <span>{challenge.xpReward} XP</span>
           </div>
           {challenge.badgeReward && (
@@ -66,7 +66,7 @@ const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) =>
               <span>Progress</span>
               <span>{progressPercentage}%</span>
             </div>
-            <Progress value={progressPercentage} className="h-2 bg-sortmy-gray/30" />
+            <Progress value={progressPercentage} className="h-2 bg-gray-700/30" />
           </div>
         )}
       </CardContent>
