@@ -14,17 +14,6 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  // Update the custom components to match react-day-picker's type
-  const customComponents = {
-    // Use lowercase 'iconleft' and 'iconright' as per react-day-picker's type definition
-    iconleft: ({ ...iconProps }) => (
-      <ChevronLeft className="h-4 w-4" {...iconProps} />
-    ),
-    iconright: ({ ...iconProps }) => (
-      <ChevronRight className="h-4 w-4" {...iconProps} />
-    ),
-  };
-
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -63,7 +52,10 @@ function Calendar({
         day_hidden: "invisible",
         ...classNames,
       }}
-      components={customComponents}
+      components={{
+        IconLeft: (props) => <ChevronLeft className="h-4 w-4" {...props} />,
+        IconRight: (props) => <ChevronRight className="h-4 w-4" {...props} />,
+      }}
       {...props}
     />
   );
