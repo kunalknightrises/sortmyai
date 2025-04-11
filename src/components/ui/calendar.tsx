@@ -16,11 +16,11 @@ function Calendar({
 }: CalendarProps) {
   // Explicitly type the custom components using the library's type
   const customComponents: CustomComponents = {
-    // Use lowercase 'iconleft' and 'iconright' as per react-day-picker's type definition
-    iconleft: (props: React.ComponentProps<typeof ChevronLeft>) => (
+    // According to react-day-picker's API, the correct properties are IconLeft and IconRight (with capital I)
+    IconLeft: (props: React.ComponentProps<typeof ChevronLeft>) => (
       <ChevronLeft className="h-4 w-4" {...props} />
     ),
-    iconright: (props: React.ComponentProps<typeof ChevronRight>) => (
+    IconRight: (props: React.ComponentProps<typeof ChevronRight>) => (
       <ChevronRight className="h-4 w-4" {...props} />
     ),
   };
