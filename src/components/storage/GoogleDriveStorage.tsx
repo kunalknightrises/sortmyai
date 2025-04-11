@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Cloud, Upload, FolderOpen, Check, AlertCircle, LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getAuth } from 'firebase/auth';
 import { 
@@ -29,6 +29,7 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
   useEffect(() => {
     if (!auth.currentUser) return;
 
+    // Subscribe to user document to watch for Google Drive connection changes
     const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), (doc) => {
       const userData = doc.data();
       setIsConnected(!!userData?.googleDriveAuth?.accessToken);
@@ -43,24 +44,19 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
       await initializeGoogleDrive();
       
       // Create user folder after successful authentication
-      const folderName = `sortmyai_${userId}`;
-      await createFolder(folderName);
-
-      // Update user document with Google Drive connection status
-      if (auth.currentUser) {
-        await setDoc(doc(db, 'users', auth.currentUser.uid), {
-          googleDriveAuth: {
-            accessToken: true,
-            connectedAt: new Date().toISOString()
-          }
-        }, { merge: true });
+      try {
+        const folderName = `sortmyai_${userId}`;
+        await createFolder(folderName);
+      } catch (folderError) {
+        console.error('Error creating folder:', folderError);
+        // Don't fail the connection if folder creation fails
       }
 
-      setIsConnected(true);
       toast({
         title: "Connected to Google Drive",
         description: "You can now use Google Drive for storage",
       });
+      setIsConnected(true);
     } catch (error: any) {
       console.error('Error connecting to Google Drive:', error);
       toast({
@@ -77,16 +73,11 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
   const handleDisconnect = async () => {
     try {
       await disconnectGoogleDrive();
-      if (auth.currentUser) {
-        await setDoc(doc(db, 'users', auth.currentUser.uid), {
-          googleDriveAuth: null
-        }, { merge: true });
-      }
-      setIsConnected(false);
       toast({
         title: "Disconnected",
         description: "Successfully disconnected from Google Drive",
       });
+      setIsConnected(false);
     } catch (error) {
       console.error('Error disconnecting from Google Drive:', error);
       toast({
@@ -104,10 +95,11 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
     try {
       setUploadProgress(0);
       const folderName = `sortmyai_${userId}`;
-      const fileUrl = await uploadToGoogleDrive(file, folderName);
+      const fileId = await uploadToGoogleDrive(file, folderName);
       setUploadProgress(100);
       
       if (onFileUpload) {
+        const fileUrl = `https://drive.google.com/file/d/${fileId}/view`;
         onFileUpload(fileUrl);
       }
 
@@ -128,10 +120,10 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
   };
 
   return (
-    <Card className="p-6 bg-sortmy-gray/10 border-sortmy-gray/30">
+    <Card className="p-6 bg-gray-800/50 border-gray-700">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Cloud className="w-6 h-6 text-sortmy-blue" />
+          <Cloud className="w-6 h-6 text-blue-400" />
           <div>
             <h3 className="text-lg font-semibold">Google Drive Storage</h3>
             <p className="text-sm text-gray-400">Store your files securely in the cloud</p>
@@ -197,9 +189,9 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
             onChange={handleFileUpload}
           />
           {uploadProgress !== null && (
-            <div className="w-full bg-sortmy-gray/20 rounded-full h-2 mt-4">
+            <div className="w-full bg-gray-700 rounded-full h-2 mt-4">
               <div
-                className="bg-sortmy-blue h-full rounded-full transition-all duration-300"
+                className="bg-blue-500 h-full rounded-full transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>

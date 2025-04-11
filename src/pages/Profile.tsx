@@ -92,6 +92,11 @@ const Profile = () => {
     return null;
   }
 
+  const handleFileUpload = async (fileUrl: string) => {
+    // Handle the uploaded file URL
+    console.log('File uploaded:', fileUrl);
+  };
+
   return (
     <div className="min-h-screen bg-sortmy-dark">
       <div className="container mx-auto p-4 max-w-5xl">
@@ -139,7 +144,7 @@ const Profile = () => {
             </Card>
             
             {/* Add Google Drive Storage Card */}
-            {user && <GoogleDriveStorage userId={user.id} />}
+            {user && <GoogleDriveStorage userId={user.id} onFileUpload={handleFileUpload} />}
             
             <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
               <CardHeader>
