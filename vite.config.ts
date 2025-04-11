@@ -9,6 +9,7 @@ const config: UserConfig = {
     react(),
     componentTagger()
   ],
+  publicDir: 'public',
   define: {
     'process.env': process.env
   },
