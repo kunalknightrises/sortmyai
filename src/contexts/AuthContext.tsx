@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { 
   signInWithPopup, 
   GoogleAuthProvider, 
@@ -29,6 +28,8 @@ export interface AuthUser extends User {
 interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
+  isAdmin?: boolean;
+  isIntern?: boolean;
   signInWithProvider: (provider: Provider) => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -187,6 +188,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Determine user roles
+  const isAdmin = user?.role === 'admin';
+  const isIntern = user?.role === 'intern';
+
   // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -207,7 +212,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithProvider, signOut }}>
+    <AuthContext.Provider value={{ user, isLoading, isAdmin, isIntern, signInWithProvider, signOut }}>
       {children}
     </AuthContext.Provider>
   );

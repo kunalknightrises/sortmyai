@@ -43,7 +43,7 @@ export interface Tool {
   name: string;
   description: string;
   logo_url: string;
-  website: string;
+  website: string;  // Changed from website_url to match what's being used
   category: string;
   tags: string[];
   is_favorite: boolean;
@@ -53,6 +53,8 @@ export interface Tool {
   notes: string;
   created_at: string;
   updated_at: string;
+  // Fields used in the codebase but not defined in the interface
+  user_id?: string;
 }
 
 export * from './gamification';

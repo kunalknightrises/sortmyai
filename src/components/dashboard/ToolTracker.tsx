@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tool } from '@/types';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
@@ -18,7 +18,6 @@ const ToolTracker = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [tagFilter, setTagFilter] = useState('');
 
   const { data: tools, isLoading, error } = useQuery({
     queryKey: ['tools', user?.uid],
@@ -53,17 +52,11 @@ const ToolTracker = () => {
     }
   };
 
-  const handleTagFilter = (tag: string) => {
-    setTagFilter(tag);
-  };
-
   const filteredTools = tools?.filter(tool => 
     tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tool.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
-
-  const uniqueTags = Array.from(new Set(filteredTools?.flatMap(tool => tool.tags)));
 
   return (
     <div className="space-y-8">
@@ -157,7 +150,7 @@ const ToolTracker = () => {
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex space-x-2">
                     <Button variant="outline" size="sm" asChild>
-                      <a href={tool.website_url} target="_blank" rel="noopener noreferrer">
+                      <a href={tool.website} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="w-4 h-4 mr-1" />
                         Visit
                       </a>
