@@ -9,7 +9,9 @@ service cloud.firestore {
     // Helper function to check if user owns the document
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
-    }    // Users collection rules
+    }
+    
+    // Users collection rules
     match /users/{userId} {
       allow read: if true;  // Allow public read access to user profiles
       allow write: if isOwner(userId);
@@ -20,6 +22,9 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys()
           .hasAny(['portfolio', 'media_urls'])
       );
+      
+      // Allow querying users by username
+      allow list: if true;
       
       // Nested collections under users
       match /{allChildren=**} {

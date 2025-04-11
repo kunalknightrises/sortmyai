@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -29,33 +28,60 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
-
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/portfolio/:username" element={<InstagramStylePortfolio />} />
         
+        {/* Dashboard and related routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <DashboardLayout>
               <Dashboard />
             </DashboardLayout>
-          </ProtectedRoute>} >
-            <Route index element={<Dashboard />} />
-            <Route path="profile" element={<Profile />} />
-        </Route>
+          </ProtectedRoute>
+        } />        <Route path="/dashboard/profile" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Profile />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
 
-        <Route path="/dashboard/tools" element={<ProtectedRoute><DashboardLayout><ToolTracker /></DashboardLayout></ProtectedRoute>} />
-        <Route path="/dashboard/tools/add" element={<ProtectedRoute><AddTool /></ProtectedRoute>} />
-        <Route path="/dashboard/portfolio" element={<ProtectedRoute><DashboardLayout><Portfolio /></DashboardLayout></ProtectedRoute>} />
-        <Route path="/dashboard/achievements" element={<ProtectedRoute><DashboardLayout><Achievements /></DashboardLayout></ProtectedRoute>} />
+        <Route path="/dashboard/tools" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ToolTracker />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
 
-        
-        {/* Fallback route */}
+        <Route path="/dashboard/tools/add" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <AddTool />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/portfolio" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Portfolio />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/achievements" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Achievements />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
         <Route path="*" element={<Navigate to="/" replace />} />
-        
       </Routes>
-      {/* <ToastProvider /> */}
     </QueryClientProvider>
   );
 }

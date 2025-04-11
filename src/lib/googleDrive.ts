@@ -1,8 +1,8 @@
 /// <reference path="../types/google.d.ts" />
 
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const API_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const GOOGLE_CLIENT_ID = '50349625267-dnm78o1jp29usa4c8ud0gg0n9dhpepgj.apps.googleusercontent.com';
+const API_SCOPE = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly';
 
 const loadScript = (src: string): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -74,12 +74,7 @@ const loadGapiClient = async (): Promise<void> => {
 export const getAccessToken = (): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
     try {
-      const isPopupBlocked = window.screenY === 0 && !window.opener;
-      if (isPopupBlocked) {
-        reject(new Error('Popup blocked by browser. Please allow popups for this site.'));
-        return;
-      }
-
+      // Set the callback before requesting the token
       tokenClient.callback = (response: google.accounts.oauth2.TokenResponse) => {
         if (response.error !== undefined) {
           reject(new Error(response.error));
@@ -88,11 +83,8 @@ export const getAccessToken = (): Promise<string> => {
         resolve(response.access_token);
       };
 
-      tokenClient.requestAccessToken({
-        prompt: '',
-        hint: '',
-        hosted_domain: window.location.hostname,
-      });
+      // Request the token with proper configuration
+      tokenClient.requestAccessToken({ prompt: 'consent' });
     } catch (error: unknown) {
       reject(error instanceof Error ? error : new Error('Failed to get access token'));
     }
