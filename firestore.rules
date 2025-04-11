@@ -9,16 +9,21 @@ service cloud.firestore {
     // Helper function to check if user owns the document
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // Users collection rules
+    }    // Users collection rules
     match /users/{userId} {
-      allow read: if isOwner(userId);
+      allow read: if true;  // Allow public read access to user profiles
       allow write: if isOwner(userId);
+      // Allow updating Google Drive auth status and storing file URLs
+      allow update: if isOwner(userId) && (
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['googleDriveAuth']) ||
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['portfolio', 'media_urls'])
+      );
       
       // Nested collections under users
       match /{allChildren=**} {
-        allow read: if isOwner(userId);
+        allow read: if true;  // Allow public read access to nested collections
         allow write: if isOwner(userId);
       }
     }

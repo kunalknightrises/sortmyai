@@ -7,6 +7,8 @@ import app from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GoogleDriveStorage } from '@/components/storage/GoogleDriveStorage';
 
 const portfolioSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -28,6 +30,7 @@ interface PortfolioFormProps {
 export function PortfolioForm({ user, initialData, onSubmit, isLoading }: PortfolioFormProps) {
   const { toast } = useToast();
   const [previewUrl, setPreviewUrl] = useState<string>();
+  const [storageType, setStorageType] = useState<'firebase' | 'gdrive'>('firebase');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<PortfolioFormData>({
@@ -50,11 +53,11 @@ export function PortfolioForm({ user, initialData, onSubmit, isLoading }: Portfo
     }
   }, [watchFile]);
 
-  const handleFormSubmit = async (data: PortfolioFormData) => {
+  const handleSubmitForm = async (data: PortfolioFormData) => {
     try {
       let mediaUrl = initialData?.media_url || undefined;
 
-       if (data.media_file) {
+      if (data.media_file) {
         const file = data.media_file;
         const fileRef = ref(getStorage(app), `portfolio/${user.id}/${Date.now()}_${file.name}`);
         await uploadBytes(fileRef, file);
@@ -71,8 +74,19 @@ export function PortfolioForm({ user, initialData, onSubmit, isLoading }: Portfo
     }
   };
 
+  const handleGoogleDriveUpload = async (fileUrl: string) => {
+    if (fileUrl) {
+      setPreviewUrl(fileUrl);
+      const formData = watch();
+      await onSubmit({
+        ...formData,
+        media_url: fileUrl
+      });
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-white mb-2">
           Project Title
@@ -104,40 +118,6 @@ export function PortfolioForm({ user, initialData, onSubmit, isLoading }: Portfo
 
       <div>
         <label className="block text-sm font-medium text-white mb-2">
-          Media
-        </label>
-        <input
-          type="file"
-          accept="image/*,video/*"
-          {...register('media_file')}
-          ref={fileInputRef}
-          className="hidden"
-          onChange={(e) => {
-            if (e.target.files?.[0]) {
-              register('media_file').onChange(e);
-            }
-          }}
-        />
-        <div 
-          onClick={() => fileInputRef.current?.click()}
-          className="relative aspect-video w-full border-2 border-dashed border-sortmy-gray rounded-lg overflow-hidden cursor-pointer hover:border-sortmy-blue transition-colors"
-        >
-          {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt="Preview"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-slate-400">Click to upload media</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-white mb-2">
           Tools Used
         </label>
         <select
@@ -165,6 +145,47 @@ export function PortfolioForm({ user, initialData, onSubmit, isLoading }: Portfo
         <label className="ml-2 text-sm text-white">
           Make this project public
         </label>
+      </div>
+
+      <div className="space-y-4">
+        <label className="block text-sm font-medium text-white mb-2">
+          Storage Option
+        </label>
+        <Tabs value={storageType} onValueChange={(val: string) => setStorageType(val as 'firebase' | 'gdrive')}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="firebase">Firebase Storage</TabsTrigger>
+            <TabsTrigger value="gdrive">Google Drive</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="firebase">
+            <div className="mt-4">
+              <div className="border-2 border-dashed border-sortmy-gray/30 rounded-lg p-8 text-center cursor-pointer hover:border-sortmy-blue/50 transition-colors"
+                onClick={() => fileInputRef.current?.click()}>
+                {previewUrl ? (
+                  <img src={previewUrl} alt="Preview" className="max-h-64 mx-auto" />
+                ) : (
+                  <div>
+                    <input
+                      type="file"
+                      {...register('media_file')}
+                      className="hidden"
+                      ref={fileInputRef}
+                      accept="image/*,video/*"
+                    />
+                    <p className="text-slate-400">Click to upload media</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="gdrive">
+            <GoogleDriveStorage 
+              userId={user.uid} 
+              onFileUpload={handleGoogleDriveUpload}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <div className="flex justify-end gap-4">
