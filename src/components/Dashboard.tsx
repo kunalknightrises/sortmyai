@@ -51,7 +51,7 @@ const Dashboard = () => {
     
     return {
       ...user,
-      id: user.uid,
+      email: user.email || undefined,
       xp: user.xp || 250,
       level: user.level || 3,
       streak_days: user.streak_days || 5,

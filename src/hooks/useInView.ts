@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, RefObject } from 'react';
 
 interface InViewOptions {
   threshold?: number;
@@ -11,7 +11,7 @@ export function useInView<T extends HTMLElement = HTMLDivElement>({
   threshold = 0,
   rootMargin = '0px',
   once = false,
-}: InViewOptions = {}) {
+}: InViewOptions = {}): { ref: RefObject<T>; isInView: boolean } {
   const ref = useRef<T>(null);
   const [isInView, setIsInView] = useState(false);
 

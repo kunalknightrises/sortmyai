@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Award, Zap, Medal, Target, Trophy, Users } from 'lucide-react';
 import XPProgress from '@/components/gamification/XPProgress';
-import StreakCounter from '@/components/gamification/StreakCounter';
 import ChallengeCard from '@/components/gamification/ChallengeCard';
 import Leaderboard from '@/components/gamification/Leaderboard';
 import { Badge as BadgeType, Challenge, LeaderboardUser } from '@/types/gamification';
@@ -183,7 +182,7 @@ const Achievements = () => {
     
     return {
       ...user,
-      id: user.uid,
+      email: user.email || undefined,
       xp: user.xp || 250,
       level: user.level || 3,
       streak_days: user.streak_days || 5,

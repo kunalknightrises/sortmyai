@@ -17,13 +17,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User, Briefcase, LayoutGrid, Award, Clock, Settings, Zap } from 'lucide-react';
+import { User, Award, Zap } from 'lucide-react';
 import XPProgress from '@/components/gamification/XPProgress';
 import StreakCounter from '@/components/gamification/StreakCounter';
 import BadgeDisplay from '@/components/gamification/BadgeDisplay';
 import { Badge as BadgeType } from '@/types/gamification';
 
-// Mock data for development - would come from backend in production
 const mockBadges: BadgeType[] = [
   {
     id: 'badge1',
@@ -61,13 +60,12 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   
-  // Mock gamification data if not present in user
   const enhancedUser = React.useMemo(() => {
     if (!user) return null;
     
     return {
       ...user,
-      id: user.uid, // Add id property based on uid to match User type
+      email: user.email || undefined,
       xp: user.xp || 250,
       level: user.level || 3,
       streak_days: user.streak_days || 5,
@@ -97,7 +95,6 @@ const Profile = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Profile Summary Card */}
         <div className="md:col-span-1 space-y-6">
           <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
             <CardContent className="pt-6 flex flex-col items-center text-center">
@@ -135,7 +132,6 @@ const Profile = () => {
             </CardContent>
           </Card>
           
-          {/* Account Management Section */}
           <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
             <CardHeader>
               <CardTitle>Account Management</CardTitle>
@@ -149,7 +145,6 @@ const Profile = () => {
           </Card>
         </div>
         
-        {/* Profile Details and Achievements */}
         <div className="md:col-span-2">
           <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="grid grid-cols-2">
