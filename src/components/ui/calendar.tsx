@@ -14,13 +14,13 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  // Define custom components with correct property names and explicit types
-  const customComponents: Partial<CustomComponents> = {
-    // In react-day-picker, the correct props are IconLeft and IconRight (capitalization matters)
-    iconLeft: (props: React.ComponentProps<typeof ChevronLeft>) => (
+  // Explicitly type the custom components using the library's type
+  const customComponents: CustomComponents = {
+    // Use lowercase 'iconleft' and 'iconright' as per react-day-picker's type definition
+    iconleft: (props: React.ComponentProps<typeof ChevronLeft>) => (
       <ChevronLeft className="h-4 w-4" {...props} />
     ),
-    iconRight: (props: React.ComponentProps<typeof ChevronRight>) => (
+    iconright: (props: React.ComponentProps<typeof ChevronRight>) => (
       <ChevronRight className="h-4 w-4" {...props} />
     ),
   };
