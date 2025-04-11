@@ -1,15 +1,16 @@
+
 import { useLocation } from 'react-router-dom';
 import SidebarNavItem from './sidebar-nav-item';
 import { 
   LayoutDashboard, 
   MessageSquare, 
   BookOpen, 
+  PenTool, 
   User,
   PlusCircle,
   ClipboardList,
   Settings,
-  Users,
-  Trophy
+  Users
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -28,22 +29,22 @@ const SidebarNav = ({ isCollapsed }: SidebarNavProps) => {
       label: 'Dashboard'
     },
     {
-      href: '/dashboard/tools',
+      href: '/chat',
       icon: <MessageSquare className="h-5 w-5" />,
-      label: 'Tools'
+      label: 'Chat'
     },
     {
-      href: '/dashboard/portfolio',
+      href: '/courses',
       icon: <BookOpen className="h-5 w-5" />,
-      label: 'Portfolio'
+      label: 'Courses'
     },
     {
-      href: '/dashboard/achievements',
-      icon: <Trophy className="h-5 w-5" />,
-      label: 'Achievements'
+      href: '/blogs',
+      icon: <PenTool className="h-5 w-5" />,
+      label: 'Blogs'
     },
     {
-      href: '/dashboard/profile',
+      href: '/profile',
       icon: <User className="h-5 w-5" />,
       label: 'Profile'
     }

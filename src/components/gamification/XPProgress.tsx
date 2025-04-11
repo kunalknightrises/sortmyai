@@ -28,8 +28,8 @@ const XPProgress = ({ user, className, variant = 'default' }: XPProgressProps) =
   if (variant === 'compact') {
     return (
       <div className={`flex items-center space-x-2 ${className}`}>
-        <div className="bg-blue-500/20 p-1 rounded-full">
-          <Zap className="w-3 h-3 text-blue-500" />
+        <div className="bg-sortmy-blue/20 p-1 rounded-full">
+          <Zap className="w-3 h-3 text-sortmy-blue" />
         </div>
         <span className="text-xs font-medium">{currentXP} XP</span>
         <span className="text-xs text-gray-400">Lvl {currentLevel}</span>
@@ -41,8 +41,8 @@ const XPProgress = ({ user, className, variant = 'default' }: XPProgressProps) =
     <div className={`space-y-2 ${className}`}>
       <div className="flex justify-between items-center">
         <div className="flex items-center">
-          <div className="bg-blue-500/20 p-2 rounded-full mr-2">
-            <Zap className="w-4 h-4 text-blue-500" />
+          <div className="bg-sortmy-blue/20 p-2 rounded-full mr-2">
+            <Zap className="w-4 h-4 text-sortmy-blue" />
           </div>
           <div>
             <p className="text-sm font-medium">Level {currentLevel}</p>
@@ -53,7 +53,7 @@ const XPProgress = ({ user, className, variant = 'default' }: XPProgressProps) =
       </div>
       <Progress
         value={levelProgress}
-        className="h-2 bg-gray-700/30"
+        className="h-2 bg-sortmy-gray/30"
       />
     </div>
   );

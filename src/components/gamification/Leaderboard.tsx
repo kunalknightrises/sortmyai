@@ -24,10 +24,10 @@ const Leaderboard = ({ users, currentUserId, className }: LeaderboardProps) => {
         </h3>
       </div>
       
-      <div className="rounded-lg border border-gray-700/30 overflow-hidden">
+      <div className="rounded-lg border border-sortmy-gray/30 overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-gray-800/10 hover:bg-gray-800/10">
+            <TableRow className="bg-sortmy-gray/10 hover:bg-sortmy-gray/10">
               <TableHead className="w-12 text-center">Rank</TableHead>
               <TableHead>User</TableHead>
               <TableHead className="text-right">Level</TableHead>
@@ -43,7 +43,7 @@ const Leaderboard = ({ users, currentUserId, className }: LeaderboardProps) => {
                 <TableRow 
                   key={user.userId}
                   className={`
-                    ${isCurrentUser ? 'bg-blue-500/10 hover:bg-blue-500/10' : ''}
+                    ${isCurrentUser ? 'bg-sortmy-blue/10 hover:bg-sortmy-blue/10' : ''}
                     ${index < 3 ? 'font-medium' : ''}
                   `}
                 >
@@ -57,7 +57,7 @@ const Leaderboard = ({ users, currentUserId, className }: LeaderboardProps) => {
                     <div className="flex items-center space-x-2">
                       <Avatar className="w-8 h-8">
                         <AvatarImage src={user.avatarUrl} />
-                        <AvatarFallback className="bg-gray-700/20 text-xs">
+                        <AvatarFallback className="bg-sortmy-gray/20 text-xs">
                           {user.username.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -70,7 +70,7 @@ const Leaderboard = ({ users, currentUserId, className }: LeaderboardProps) => {
                             </Badge>
                           )}
                           {isCurrentUser && (
-                            <Badge variant="outline" className="ml-2 text-xs border-blue-500/30 text-blue-500">
+                            <Badge variant="outline" className="ml-2 text-xs border-sortmy-blue/30 text-sortmy-blue">
                               YOU
                             </Badge>
                           )}

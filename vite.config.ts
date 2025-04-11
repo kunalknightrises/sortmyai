@@ -17,13 +17,10 @@ const config: UserConfig = {
     alias: {
       '@': path.resolve(__dirname, './src')
     }
-  },  server: {
+  },
+  server: {
     port: 8080,
-    host: '::',
-    allowedHosts: [
-      'localhost',
-      '*.lovableproject.com'
-    ]
+    host: '::'
   }
 }
 

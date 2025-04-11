@@ -1,31 +1,6 @@
-
 {
   "rules": {
     ".read": "auth != null",
-    ".write": "auth != null",
-    "users": {
-      "$uid": {
-        ".read": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin'",
-        ".write": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin'"
-      }
-    },
-    "leaderboard": {
-      ".read": "auth != null",
-      ".write": "auth != null && root.child('users').child(auth.uid).exists()"
-    },
-    "challenges": {
-      ".read": "auth != null",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
-    },
-    "user_challenges": {
-      "$uid": {
-        ".read": "$uid === auth.uid",
-        ".write": "$uid === auth.uid"
-      }
-    },
-    "badges": {
-      ".read": "auth != null",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
-    }
+    ".write": "auth != null"
   }
 }

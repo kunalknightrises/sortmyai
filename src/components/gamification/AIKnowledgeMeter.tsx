@@ -40,7 +40,7 @@ const AIKnowledgeMeter = ({ user, className }: AIKnowledgeMeterProps) => {
       
       <Progress
         value={overall}
-        className="h-2.5 bg-gray-700/30"
+        className="h-2.5 bg-sortmy-gray/30"
       />
       
       <p className="text-xs text-gray-400 italic">
@@ -60,7 +60,7 @@ const AIKnowledgeMeter = ({ user, className }: AIKnowledgeMeterProps) => {
             </div>
             <Progress
               value={value}
-              className="h-1.5 bg-gray-700/30"
+              className="h-1.5 bg-sortmy-gray/30"
             />
           </div>
         ))}
