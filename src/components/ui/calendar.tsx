@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, CustomComponents } from "react-day-picker";
+import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,14 +14,14 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  // Explicitly type the custom components using the library's type
-  const customComponents: CustomComponents = {
-    // According to react-day-picker's API, the correct properties are IconLeft and IconRight (with capital I)
-    IconLeft: (props: React.ComponentProps<typeof ChevronLeft>) => (
-      <ChevronLeft className="h-4 w-4" {...props} />
+  // Update the custom components to match react-day-picker's type
+  const customComponents = {
+    // Use lowercase 'iconleft' and 'iconright' as per react-day-picker's type definition
+    iconleft: ({ ...iconProps }) => (
+      <ChevronLeft className="h-4 w-4" {...iconProps} />
     ),
-    IconRight: (props: React.ComponentProps<typeof ChevronRight>) => (
-      <ChevronRight className="h-4 w-4" {...props} />
+    iconright: ({ ...iconProps }) => (
+      <ChevronRight className="h-4 w-4" {...iconProps} />
     ),
   };
 
