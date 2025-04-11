@@ -1,11 +1,25 @@
+
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Github } from 'lucide-react';
+import { Github, Mail, Twitter } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
 
 const Signup = () => {
   const { signInWithProvider } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleProviderSignIn = async (providerName: 'google' | 'github' | 'twitter') => {
+    setIsLoading(true);
+    try {
+      await signInWithProvider(providerName);
+    } catch (error) {
+      console.error('Sign-in error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-sortmy-dark px-4">
@@ -19,29 +33,32 @@ const Signup = () => {
             <Button 
               variant="outline" 
               type="button" 
-              className="w-full" 
-              onClick={() => signInWithProvider('google')}
+              className="w-full"
+              disabled={isLoading}
+              onClick={() => handleProviderSignIn('google')}
             >
-              <Github className="mr-2 h-4 w-4" />
-              Sign up with Google
+              <Mail className="mr-2 h-4 w-4" />
+              {isLoading ? 'Connecting...' : 'Sign up with Google'}
             </Button>
             <Button 
               variant="outline" 
               type="button" 
               className="w-full"
-              onClick={() => signInWithProvider('github')}
+              disabled={isLoading}
+              onClick={() => handleProviderSignIn('github')}
             >
               <Github className="mr-2 h-4 w-4" />
-              Sign up with GitHub
+              {isLoading ? 'Connecting...' : 'Sign up with GitHub'}
             </Button>
             <Button 
               variant="outline" 
               type="button" 
               className="w-full"
-              onClick={() => signInWithProvider('twitter')}
+              disabled={isLoading}
+              onClick={() => handleProviderSignIn('twitter')}
             >
-              <Github className="mr-2 h-4 w-4" />
-              Sign up with Twitter
+              <Twitter className="mr-2 h-4 w-4" />
+              {isLoading ? 'Connecting...' : 'Sign up with Twitter'}
             </Button>
           </div>
         </CardContent>
@@ -59,4 +76,3 @@ const Signup = () => {
 };
 
 export default Signup;
-

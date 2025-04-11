@@ -1,11 +1,14 @@
+
 import { initializeApp } from "firebase/app";
-import { initializeFirestore} from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported } from "firebase/analytics";
 import { validateEnv } from "./env";
 
+// Get environment variables
 const env = validateEnv();
 
+// Set up Firebase config based on environment
 const firebaseConfig = {
   apiKey: env.VITE_FIREBASE_API_KEY,
   authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -19,10 +22,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-export const db = initializeFirestore(app,{});
-
-
+// Initialize services
+export const db = initializeFirestore(app, {});
 export const auth = getAuth(app);
-export const analytics = getAnalytics(app);
+
+// Initialize analytics conditionally
+export const analytics = isSupported().then(yes => yes ? getAnalytics(app) : null);
 
 export default app;
