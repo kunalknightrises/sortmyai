@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button} from '@/components/ui/button';
-import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Crown, Activity, Award, Target, Zap as LightningBolt } from 'lucide-react';
+import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Crown, Activity, Award, Target, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import XPProgress from './gamification/XPProgress';
@@ -12,7 +11,6 @@ import BadgeDisplay from './gamification/BadgeDisplay';
 import AIKnowledgeMeter from './gamification/AIKnowledgeMeter';
 import { Badge as BadgeType } from '@/types/gamification';
 
-// Mock data for development - would come from backend in production
 const mockBadges: BadgeType[] = [
   {
     id: 'badge1',
@@ -48,12 +46,12 @@ const mockBadges: BadgeType[] = [
 const Dashboard = () => {
   const { user } = useAuth();
   
-  // Enhance user with mock gamification data if not present
   const enhancedUser = React.useMemo(() => {
     if (!user) return null;
     
     return {
       ...user,
+      id: user.uid,
       xp: user.xp || 250,
       level: user.level || 3,
       streak_days: user.streak_days || 5,
@@ -74,7 +72,6 @@ const Dashboard = () => {
   
   return (
     <div className="flex h-screen bg-sortmy-dark text-white overflow-hidden">
-        {/* Main Content */}
         <div className="flex-1 p-4 overflow-y-auto">
             <div className="space-y-8">
               <div className="flex justify-between items-center">
@@ -92,7 +89,6 @@ const Dashboard = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
                   <h2 className="text-xl font-semibold">Welcome back, {user?.username || 'Creator'}</h2>
                   
-                  {/* Add XP display in header */}
                   <div className="mt-2 md:mt-0 flex items-center gap-4">
                     <XPProgress user={enhancedUser} variant="compact" />
                     <StreakCounter user={enhancedUser} />
@@ -152,7 +148,6 @@ const Dashboard = () => {
                 </div>
               </div>
               
-              {/* XP Progress, Level, and Badges Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <Card className="col-span-2 bg-sortmy-gray/10 border-sortmy-gray/30">
                   <CardHeader className="pb-2">
@@ -162,10 +157,8 @@ const Dashboard = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Full XP Progress Bar */}
                     <XPProgress user={enhancedUser} />
                     
-                    {/* Badges Section */}
                     <BadgeDisplay badges={mockBadges} className="pt-2" />
                     
                     <div className="pt-2">
@@ -191,7 +184,7 @@ const Dashboard = () => {
                       <h3 className="font-medium mb-2">Add Your First Tool</h3>
                       <p className="text-sm text-gray-400 mb-4">Track an AI tool you use regularly and earn 50 XP!</p>
                       <div className="flex items-center text-sm mb-3">
-                        <LightningBolt className="w-4 h-4 mr-1 text-sortmy-blue" />
+                        <Zap className="w-4 h-4 mr-1 text-sortmy-blue" />
                         <span>50 XP Reward</span>
                       </div>
                       <Button size="sm" asChild>
@@ -199,7 +192,6 @@ const Dashboard = () => {
                       </Button>
                     </div>
                     
-                    {/* AI Knowledge Meter */}
                     <AIKnowledgeMeter user={enhancedUser} />
                   </CardContent>
                 </Card>

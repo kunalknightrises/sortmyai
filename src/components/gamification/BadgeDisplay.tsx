@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Badge as UIBadge } from "@/components/ui/badge";
-import { Award, ExternalLink, Info } from "lucide-react";
+import { Award, ExternalLink } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,

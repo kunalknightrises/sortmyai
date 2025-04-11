@@ -1,7 +1,7 @@
 
 import { Progress } from "@/components/ui/progress";
 import { User } from "@/types";
-import { LightningBolt } from "lucide-react";
+import { Zap } from "lucide-react";
 
 interface XPProgressProps {
   user: User | null;
@@ -29,7 +29,7 @@ const XPProgress = ({ user, className, variant = 'default' }: XPProgressProps) =
     return (
       <div className={`flex items-center space-x-2 ${className}`}>
         <div className="bg-sortmy-blue/20 p-1 rounded-full">
-          <LightningBolt className="w-3 h-3 text-sortmy-blue" />
+          <Zap className="w-3 h-3 text-sortmy-blue" />
         </div>
         <span className="text-xs font-medium">{currentXP} XP</span>
         <span className="text-xs text-gray-400">Lvl {currentLevel}</span>
@@ -42,7 +42,7 @@ const XPProgress = ({ user, className, variant = 'default' }: XPProgressProps) =
       <div className="flex justify-between items-center">
         <div className="flex items-center">
           <div className="bg-sortmy-blue/20 p-2 rounded-full mr-2">
-            <LightningBolt className="w-4 h-4 text-sortmy-blue" />
+            <Zap className="w-4 h-4 text-sortmy-blue" />
           </div>
           <div>
             <p className="text-sm font-medium">Level {currentLevel}</p>

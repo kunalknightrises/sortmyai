@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { LightningBolt, Trophy } from "lucide-react";
+import { Zap, Trophy } from "lucide-react";
 import { Challenge } from "@/types/gamification";
 
 interface ChallengeCardProps {
@@ -49,7 +49,7 @@ const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) =>
       <CardContent className="space-y-4">
         <div className="flex justify-between items-center text-sm">
           <div className="flex items-center">
-            <LightningBolt className="w-4 h-4 mr-1 text-sortmy-blue" />
+            <Zap className="w-4 h-4 mr-1 text-sortmy-blue" />
             <span>{challenge.xpReward} XP</span>
           </div>
           {challenge.badgeReward && (

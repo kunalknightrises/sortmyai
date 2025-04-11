@@ -1,4 +1,5 @@
-import { toast as sonnerToast, type ToastT } from "sonner";
+
+import { toast as sonnerToast } from "sonner";
 
 interface ToastProps {
   title?: string;

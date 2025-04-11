@@ -1,17 +1,15 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, LightningBolt, Medal, Target, Trophy, Users } from 'lucide-react';
+import { Award, Zap, Medal, Target, Trophy, Users } from 'lucide-react';
 import XPProgress from '@/components/gamification/XPProgress';
 import StreakCounter from '@/components/gamification/StreakCounter';
 import ChallengeCard from '@/components/gamification/ChallengeCard';
 import Leaderboard from '@/components/gamification/Leaderboard';
 import { Badge as BadgeType, Challenge, LeaderboardUser } from '@/types/gamification';
 
-// Mock data for development - would come from backend in production
 const mockBadges: BadgeType[] = [
   {
     id: 'badge1',
@@ -180,12 +178,12 @@ const Achievements = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('badges');
   
-  // Enhance user with mock gamification data if not present
   const enhancedUser = React.useMemo(() => {
     if (!user) return null;
     
     return {
       ...user,
+      id: user.uid,
       xp: user.xp || 250,
       level: user.level || 3,
       streak_days: user.streak_days || 5,
@@ -204,7 +202,6 @@ const Achievements = () => {
     };
   }, [user]);
   
-  // Filter badges by earned status
   const earnedBadges = mockBadges.filter(badge => badge.isEarned);
   const unlockedBadges = mockBadges.filter(badge => !badge.isEarned);
   
@@ -212,13 +209,12 @@ const Achievements = () => {
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Achievements</h1>
       
-      {/* Progress Summary Card */}
       <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-4">
               <h3 className="text-lg font-medium flex items-center">
-                <LightningBolt className="w-5 h-5 mr-2 text-sortmy-blue" />
+                <Zap className="w-5 h-5 mr-2 text-sortmy-blue" />
                 Experience
               </h3>
               <XPProgress user={enhancedUser} />
@@ -265,7 +261,6 @@ const Achievements = () => {
         </CardContent>
       </Card>
       
-      {/* Tabs for different achievement sections */}
       <Tabs defaultValue="badges" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid grid-cols-3 w-full md:w-auto">
           <TabsTrigger value="badges" className="flex items-center">
@@ -282,7 +277,6 @@ const Achievements = () => {
           </TabsTrigger>
         </TabsList>
         
-        {/* Badges Tab */}
         <TabsContent value="badges" className="space-y-6">
           <div>
             <h2 className="text-xl font-semibold mb-4 flex items-center">
@@ -321,7 +315,6 @@ const Achievements = () => {
           </div>
         </TabsContent>
         
-        {/* Challenges Tab */}
         <TabsContent value="challenges" className="space-y-6">
           <div>
             <h2 className="text-xl font-semibold mb-4 flex items-center">
@@ -365,7 +358,6 @@ const Achievements = () => {
           )}
         </TabsContent>
         
-        {/* Leaderboard Tab */}
         <TabsContent value="leaderboard">
           <Leaderboard 
             users={mockLeaderboard} 
@@ -377,7 +369,6 @@ const Achievements = () => {
   );
 };
 
-// Badge Card Component
 const BadgeCard = ({ badge }: { badge: BadgeType }) => {
   const getBadgeTierClass = (tier: BadgeType['tier']) => {
     switch (tier) {

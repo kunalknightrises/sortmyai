@@ -1,32 +1,27 @@
-
-import { useState } from 'react';
-import type { AuthUser } from '@/contexts/AuthContext';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { auth, db } from '@/lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
-import { updateProfile } from 'firebase/auth';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Award, Crown, Flame, LightningBolt } from 'lucide-react';
-import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { User, Briefcase, LayoutGrid, Award, Clock, Settings, Zap } from 'lucide-react';
 import XPProgress from '@/components/gamification/XPProgress';
 import StreakCounter from '@/components/gamification/StreakCounter';
 import BadgeDisplay from '@/components/gamification/BadgeDisplay';
 import { Badge as BadgeType } from '@/types/gamification';
-
-interface UserProfileUpdate extends Partial<AuthUser> {}
-
-const formSchema = z.object({
-  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
-  email: z.string().email({ message: "Please enter a valid email" }).optional(),
-});
 
 // Mock data for development - would come from backend in production
 const mockBadges: BadgeType[] = [
@@ -52,283 +47,225 @@ const mockBadges: BadgeType[] = [
   },
   {
     id: 'badge3',
-    name: 'Getting Started',
-    description: 'Completed your first challenge',
-    icon: 'star',
+    name: 'AI Explorer',
+    description: 'Reached level 5',
+    icon: 'explore',
     category: 'milestone',
-    tier: 'bronze',
-    isEarned: true,
-    earnedDate: new Date().toISOString()
+    tier: 'gold',
+    isEarned: false
   }
 ];
 
 const Profile = () => {
-  const { user, updateUserData } = useAuth();
-  const { toast } = useToast();
-  const [isUpdating, setIsUpdating] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('profile');
   
-  // Enhance user with mock gamification data if not present
-  const enhancedUser = user ? {
-    ...user,
-    xp: user.xp || 250,
-    level: user.level || 3,
-    streak_days: user.streak_days || 5,
-    last_login: user.last_login || new Date().toISOString(),
-    badges: user.badges || ['badge1', 'badge2', 'badge3']
-  } : null;
+  // Mock gamification data if not present in user
+  const enhancedUser = React.useMemo(() => {
+    if (!user) return null;
+    
+    return {
+      ...user,
+      id: user.uid, // Add id property based on uid to match User type
+      xp: user.xp || 250,
+      level: user.level || 3,
+      streak_days: user.streak_days || 5,
+      last_login: user.last_login || new Date().toISOString(),
+      badges: user.badges || ['badge1', 'badge2'],
+    };
+  }, [user]);
   
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: user?.username || "",
-      email: user?.email || "",
-    },
-  });
-  
-  const getInitials = () => {
-    if (!user || !user.username) return 'U';
-    return user.username.substring(0, 2).toUpperCase();
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
   };
   
-  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      setIsUpdating(true);
-
-      // Update Firebase Auth profile
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, {
-          displayName: values.username
-        });
-      }
-
-      // Update Firestore user data
-      await updateUserData({
-        username: values.username,
-      } as UserProfileUpdate);
-
-      toast({
-        title: "Success",
-        description: "Your profile has been updated.",
-      });
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpdating(false);
-    }
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
   };
-  
-  if (!user) {
-    return <div>Loading profile...</div>;
-  }
   
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Profile</h1>
+    <div className="container mx-auto p-4 max-w-5xl">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Your Profile</h1>
+        <p className="text-gray-400">Manage your personal information and preferences</p>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <Card className="col-span-2 bg-sortmy-gray/10 border-sortmy-gray/30">
-          <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
-            <CardDescription>
-              Update your personal information
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-                <div className="flex flex-col md:flex-row gap-8 items-center">
-                  <div className="relative">
-                    <Avatar className="w-24 h-24">
-                      <AvatarImage src={undefined} />
-                      <AvatarFallback className="text-2xl bg-sortmy-blue/20 text-sortmy-blue">
-                        {getInitials()}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    {/* XP Level Badge */}
-                    <div className="absolute -top-2 -right-2 bg-sortmy-blue text-white text-xs font-bold rounded-full w-7 h-7 flex items-center justify-center border-2 border-sortmy-dark">
-                      {enhancedUser?.level || 1}
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Username</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input {...field} disabled />
-                          </FormControl>
-                          <FormDescription>
-                            Email cannot be changed directly. Please contact support.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                
-                {/* XP and Streak */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-                  <div className="space-y-2">
-                    <XPProgress user={enhancedUser} />
-                  </div>
-                  <div className="flex items-center justify-center p-4 bg-sortmy-gray/20 rounded-lg">
-                    <StreakCounter user={enhancedUser} />
-                  </div>
-                </div>
-                
-                {/* Badges */}
-                <BadgeDisplay badges={mockBadges} showAll={true} />
-                
-                <div className="flex justify-between pt-4">
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    asChild
-                  >
-                    <a href="/dashboard/achievements">
-                      <Award className="w-4 h-4 mr-2" />
-                      View All Achievements
-                    </a>
-                  </Button>
-                  
-                  <Button 
-                    type="submit" 
-                    disabled={isUpdating}
-                  >
-                    {isUpdating ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-        
-        {/* Account Details Card */}
-        <div className="col-span-1 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Profile Summary Card */}
+        <div className="md:col-span-1 space-y-6">
           <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
-            <CardHeader>
-              <CardTitle>Account Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-400">Account Status</p>
-                <p>{user.is_premium ? 'Premium' : 'Free'}</p>
+            <CardContent className="pt-6 flex flex-col items-center text-center">
+              <Avatar className="w-24 h-24 mb-4">
+                {user?.avatar_url ? (
+                  <AvatarImage src={user.avatar_url} />
+                ) : (
+                  <AvatarFallback className="bg-sortmy-blue/20 text-sortmy-blue text-2xl">
+                    {user?.username ? getInitials(user.username) : 'U'}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              
+              <h2 className="text-xl font-bold mb-1">{user?.username || 'Username'}</h2>
+              <p className="text-gray-400 mb-3">{user?.email || 'email@example.com'}</p>
+              
+              {user?.is_premium && (
+                <Badge className="bg-gradient-to-r from-yellow-400/20 to-yellow-600/20 text-yellow-400 border-yellow-400/30 mb-3">
+                  Premium User
+                </Badge>
+              )}
+              
+              <div className="flex justify-center space-x-4 w-full">
+                <XPProgress user={enhancedUser} variant="compact" />
+                <StreakCounter user={enhancedUser} />
               </div>
-              <div>
-                <p className="text-sm text-gray-400">Joined</p>
-                <p>{new Date(user.created_at || '').toLocaleDateString()}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Experience</p>
-                <div className="flex items-center">
-                  <LightningBolt className="w-4 h-4 mr-1 text-sortmy-blue" />
-                  <span>{enhancedUser?.xp || 0} XP (Level {enhancedUser?.level || 1})</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Current Streak</p>
-                <div className="flex items-center">
-                  <Flame className="w-4 h-4 mr-1 text-orange-400" />
-                  <span>{enhancedUser?.streak_days || 0} days</span>
-                </div>
+              
+              <div className="w-full pt-4">
+                <Button variant="outline" className="w-full" asChild>
+                  <a href={`/portfolio/${user?.username || ''}`}>
+                    View Public Profile
+                  </a>
+                </Button>
               </div>
             </CardContent>
           </Card>
           
-          {/* Premium Status Card */}
-          {user.is_premium ? (
-            <Card className="bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 border-purple-500/30">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Crown className="w-5 h-5 text-yellow-400" />
-                  <span>SortMyAI+</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h4 className="font-medium mb-2">Premium Features</h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <label className="text-sm font-medium">Claude 3.5 Sonnet</label>
-                        <p className="text-xs text-gray-400">Enable advanced AI capabilities</p>
-                      </div>
-                      <Switch 
-                        checked={user.claude_enabled}
-                        onCheckedChange={async (checked) => {
-                          try {
-                            const userRef = doc(db, 'users', user.uid);
-                            await updateDoc(userRef, { claude_enabled: checked });
-                            
-                            toast({
-                              title: "Settings updated",
-                              description: `Claude 3.5 Sonnet has been ${checked ? 'enabled' : 'disabled'}.`,
-                            });
-                          } catch (error: any) {
-                            console.error('Error updating Claude settings:', error);
-                            toast({
-                              title: "Error",
-                              description: "Failed to update settings. Please try again.",
-                              variant: "destructive",
-                            });
-                          }
-                        }}
+          {/* Account Management Section */}
+          <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
+            <CardHeader>
+              <CardTitle>Account Management</CardTitle>
+              <CardDescription>Manage your account settings</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button variant="destructive" className="w-full" onClick={handleLogout}>
+                Logout
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Profile Details and Achievements */}
+        <div className="md:col-span-2">
+          <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList className="grid grid-cols-2">
+              <TabsTrigger value="profile" className="text-sm">
+                <User className="w-4 h-4 mr-2" />
+                Profile Details
+              </TabsTrigger>
+              <TabsTrigger value="achievements" className="text-sm">
+                <Award className="w-4 h-4 mr-2" />
+                Achievements
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="profile" className="space-y-4">
+              <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
+                <CardHeader>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>Update your personal details</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300">Username</label>
+                      <input
+                        type="text"
+                        value={user?.username || ''}
+                        className="mt-1 block w-full rounded-md border-gray-600 shadow-sm focus:border-sortmy-blue focus:ring-sortmy-blue bg-sortmy-dark text-white"
+                        disabled
                       />
                     </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <label className="text-sm font-medium">Advanced Analytics</label>
-                        <p className="text-xs text-gray-400">Track usage and insights</p>
-                      </div>
-                      <Switch checked={true} />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300">Email</label>
+                      <input
+                        type="email"
+                        value={user?.email || ''}
+                        className="mt-1 block w-full rounded-md border-gray-600 shadow-sm focus:border-sortmy-blue focus:ring-sortmy-blue bg-sortmy-dark text-white"
+                        disabled
+                      />
                     </div>
                   </div>
-                </div>
-                <Button variant="outline" className="w-full">
-                  Manage Subscription
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
-              <CardHeader>
-                <CardTitle>Upgrade to Premium</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm mb-4">
-                  Get access to advanced features, AI assistant, analytics, and more.
-                </p>
-                <Button className="w-full">
-                  Upgrade Now
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300">Avatar URL</label>
+                    <input
+                      type="text"
+                      value={user?.avatar_url || ''}
+                      className="mt-1 block w-full rounded-md border-gray-600 shadow-sm focus:border-sortmy-blue focus:ring-sortmy-blue bg-sortmy-dark text-white"
+                      disabled
+                    />
+                  </div>
+                  
+                  <Button variant="secondary" disabled>
+                    Update Profile (Coming Soon)
+                  </Button>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
+                <CardHeader>
+                  <CardTitle>Portfolio Stats</CardTitle>
+                  <CardDescription>Your portfolio performance</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card className="bg-sortmy-gray/20 border-sortmy-gray/30">
+                      <CardContent className="p-4">
+                        <div className="text-2xl font-bold">0</div>
+                        <p className="text-sm text-gray-400">Total Items</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-sortmy-gray/20 border-sortmy-gray/30">
+                      <CardContent className="p-4">
+                        <div className="text-2xl font-bold">0</div>
+                        <p className="text-sm text-gray-400">Total Views</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="achievements" className="space-y-4">
+              <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
+                <CardHeader>
+                  <CardTitle>Your Achievements</CardTitle>
+                  <CardDescription>Track your progress and badges</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card className="bg-sortmy-gray/20 border-sortmy-gray/30">
+                      <CardContent className="p-4">
+                        <div className="flex items-center text-2xl font-bold">
+                          <Award className="w-6 h-6 mr-2 text-yellow-400" />
+                          {mockBadges.filter(badge => badge.isEarned).length}
+                        </div>
+                        <p className="text-sm text-gray-400">Badges Earned</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-sortmy-gray/20 border-sortmy-gray/30">
+                      <CardContent className="p-4">
+                        <div className="flex items-center text-2xl font-bold">
+                          <Zap className="w-6 h-6 mr-2 text-sortmy-blue" />
+                          {enhancedUser?.xp || 0}
+                        </div>
+                        <p className="text-sm text-gray-400">Total XP</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <BadgeDisplay badges={mockBadges} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
