@@ -21,16 +21,25 @@ export const validateEnv = () => {
     'VITE_FIREBASE_MESSAGING_SENDER_ID',
     'VITE_FIREBASE_APP_ID',
     'VITE_FIREBASE_MEASUREMENT_ID',
-  ];
+  ];  // First check if environment variables are available directly
+  const hasEnvVars = requiredEnvVars.every(
+    (envVar) => import.meta.env[envVar as keyof ImportMetaEnv]
+  );
 
-  // Check if we're in a Lovable environment or if we're running in a development environment
-  const isLovableEnvironment = 
-    window.location.hostname.includes('lovableproject.com') || 
-    window.location.hostname === 'localhost' || 
-    window.location.hostname === '127.0.0.1';
+  // If we have all env vars, use them
+  if (hasEnvVars) {
+    return import.meta.env as ImportMetaEnv;
+  }
 
-  // Use dummy values for Lovable environment or dev environment
-  if (isLovableEnvironment) {
+  // Otherwise, check if we're in a development or known environment
+  const isKnownEnvironment = typeof window !== 'undefined' && (
+    window.location.hostname.includes('lovableproject.com') ||
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.includes('netlify.app')
+  );
+  // Use default values for known environments when env vars aren't available
+  if (isKnownEnvironment && !hasEnvVars) {
     console.log('Running in Lovable or development environment, using default Firebase config');
     return {
       VITE_FIREBASE_API_KEY: "AIzaSyCSSBKFkrnBoK0b1Y3RmA97WdwcY9YLKcA",

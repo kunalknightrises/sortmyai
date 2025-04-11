@@ -9,6 +9,9 @@ const config: UserConfig = {
     react(),
     componentTagger()
   ],
+  define: {
+    'process.env': process.env
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
