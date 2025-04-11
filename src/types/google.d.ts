@@ -4,14 +4,14 @@ declare namespace google {
       interface TokenResponse {
         access_token: string;
         error?: string;
-      }
-
-      interface TokenClientConfig {
+      }      interface TokenClientConfig {
         client_id: string;
         scope: string;
         callback: string;
         error_callback?: (error: any) => void;
         prompt?: string;
+        include_granted_scopes?: boolean;
+        enable_serial_consent?: boolean;
       }
 
       interface TokenRequestOptions {

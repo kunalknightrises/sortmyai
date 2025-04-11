@@ -1,8 +1,10 @@
 /// <reference path="../types/google.d.ts" />
 
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
-const GOOGLE_CLIENT_ID = '50349625267-dnm78o1jp29usa4c8ud0gg0n9dhpepgj.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const API_SCOPE = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly';
+
+let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 
 const loadScript = (src: string): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -22,17 +24,15 @@ const loadScript = (src: string): Promise<void> => {
   });
 };
 
-let tokenClient: google.accounts.oauth2.TokenClient;
-
 export const initializeGoogleDrive = async (): Promise<boolean> => {
   try {
     await loadScript('https://accounts.google.com/gsi/client');
     
     tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID,
+      client_id: GOOGLE_CLIENT_ID || '',
       scope: API_SCOPE,
-      callback: '', // Will be set dynamically
-      error_callback: function(error: Error) {
+      callback: '',
+      error_callback: (error: Error) => {
         console.error('Google OAuth Error:', error);
         throw error;
       },
@@ -42,9 +42,8 @@ export const initializeGoogleDrive = async (): Promise<boolean> => {
     await loadGapiClient();
     return true;
   } catch (error: unknown) {
-    const err = error instanceof Error ? error : new Error('Unknown error');
-    console.error('Failed to initialize Google Drive:', err);
-    throw err;
+    console.error('Failed to initialize Google Drive:', error);
+    throw error;
   }
 };
 
@@ -58,23 +57,27 @@ const loadGapiClient = async (): Promise<void> => {
       callback: async () => {
         try {
           await gapi.client.init({
-            apiKey: GOOGLE_API_KEY,
-            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+            apiKey: GOOGLE_API_KEY || '',
+            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
           });
           resolve();
-        } catch (err: unknown) {
-          reject(err instanceof Error ? err : new Error('GAPI client init failed'));
+        } catch (err) {
+          reject(err);
         }
       },
-      onerror: (error: Error) => reject(error)
+      onerror: reject
     });
   });
 };
 
 export const getAccessToken = (): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
+    if (!tokenClient) {
+      reject(new Error('Token client not initialized'));
+      return;
+    }
+
     try {
-      // Set the callback before requesting the token
       tokenClient.callback = (response: google.accounts.oauth2.TokenResponse) => {
         if (response.error !== undefined) {
           reject(new Error(response.error));
@@ -83,10 +86,11 @@ export const getAccessToken = (): Promise<string> => {
         resolve(response.access_token);
       };
 
-      // Request the token with proper configuration
-      tokenClient.requestAccessToken({ prompt: 'consent' });
+      tokenClient.requestAccessToken({
+        prompt: 'consent'
+      });
     } catch (error: unknown) {
-      reject(error instanceof Error ? error : new Error('Failed to get access token'));
+      reject(error);
     }
   });
 };
@@ -167,10 +171,9 @@ export const uploadToGoogleDrive = async (file: File, folderName: string): Promi
     }
     
     return result.webViewLink || `https://drive.google.com/file/d/${result.id}/view`;
-  } catch (error: unknown) {
-    const err = error instanceof Error ? error : new Error('Upload failed');
-    console.error('Upload error:', err);
-    throw err;
+  } catch (error) {
+    console.error('Upload error:', error);
+    throw error;
   }
 };
 
@@ -179,7 +182,6 @@ interface FolderSearchResponse {
     id: string;
     name: string;
   }>;
-
   error?: {
     message: string;
   };
@@ -226,8 +228,8 @@ const findOrCreateFolder = async (folderName: string): Promise<string> => {
   });
 
   if (!createResponse.ok) {
-    const errorData = await createResponse.json() as FolderSearchResponse;
-    throw new Error(`Failed to create folder: ${errorData.error?.message || 'Unknown error'}`);
+    const errorData = await createResponse.json() as FolderResponse;
+    throw new Error(`Failed to create folder: ${(errorData as any).error?.message || 'Unknown error'}`);
   }
 
   const folder = await createResponse.json() as FolderResponse;
@@ -244,9 +246,8 @@ export const disconnectGoogleDrive = async (): Promise<void> => {
     if (accessToken) {
       google.accounts.oauth2.revoke(accessToken, () => {});
     }
-  } catch (error: unknown) {
-    const err = error instanceof Error ? error : new Error('Disconnect failed');
-    console.error('Error disconnecting from Google Drive:', err);
-    throw err;
+  } catch (error) {
+    console.error('Error disconnecting from Google Drive:', error);
+    throw error;
   }
 };
