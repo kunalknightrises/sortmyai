@@ -1,17 +1,14 @@
-
 import { useLocation } from 'react-router-dom';
 import SidebarNavItem from './sidebar-nav-item';
 import { 
   LayoutDashboard, 
   MessageSquare, 
   BookOpen, 
-  PenTool, 
   User,
   PlusCircle,
   ClipboardList,
   Settings,
   Users,
-  Award,
   Trophy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';

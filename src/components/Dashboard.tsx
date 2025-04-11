@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Tool, Image, Zap } from 'lucide-react';
+import { PlusCircle, Wrench, Image, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
@@ -16,7 +16,6 @@ import XPProgress from './gamification/XPProgress';
 import StreakCounter from './gamification/StreakCounter';
 
 const Dashboard = () => {
-  // Add useAuth to get the user information
   const { user } = useAuth();
   const [recentTools, setRecentTools] = useState<ToolType[]>([]);
   const [recentPortfolio, setRecentPortfolio] = useState<PortfolioItem[]>([]);
@@ -72,7 +71,6 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Add XP and Streak display at the top */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h1 className="text-3xl font-bold mb-4 sm:mb-0">Dashboard</h1>
         <div className="flex flex-col sm:flex-row gap-4">
@@ -95,7 +93,7 @@ const Dashboard = () => {
                 <CardTitle className="text-sm font-medium">
                   Recent AI Tools
                 </CardTitle>
-                <Tool className="h-4 w-4 text-muted-foreground" />
+                <Wrench className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 {isLoading ? (
@@ -172,7 +170,7 @@ const Dashboard = () => {
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Tools Added</CardTitle>
-                      <Tool className="h-4 w-4 text-muted-foreground" />
+                      <Wrench className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{recentTools.length}</div>
