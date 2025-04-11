@@ -1,14 +1,14 @@
 
-import { defineConfig } from 'vite'
+import { defineConfig, UserConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { componentTagger } from 'lovable-tagger'
 
-export default defineConfig(({ mode }) => ({
+const config: UserConfig = {
   plugins: [
     react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
+    componentTagger()
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
@@ -18,4 +18,12 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     host: '::'
   }
-}))
+}
+
+export default defineConfig(({ mode }) => {
+  if (mode !== 'development') {
+    // Remove the componentTagger plugin in non-development modes
+    config.plugins = config.plugins?.filter(p => p !== componentTagger())
+  }
+  return config
+})
