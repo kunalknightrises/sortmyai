@@ -5,7 +5,6 @@ import {
   LayoutDashboard, 
   MessageSquare, 
   BookOpen, 
-  PenTool, 
   User,
   PlusCircle,
   ClipboardList,
@@ -39,14 +38,14 @@ const SidebarNav = ({ isCollapsed }: SidebarNavProps) => {
       label: 'Courses'
     },
     {
-      href: '/blogs',
-      icon: <PenTool className="h-5 w-5" />,
-      label: 'Blogs'
-    },
-    {
       href: '/profile',
       icon: <User className="h-5 w-5" />,
       label: 'Profile'
+    },
+    {
+      href: '/settings',
+      icon: <Settings className="h-5 w-5" />,
+      label: 'Settings'
     }
   ];
 
@@ -65,11 +64,6 @@ const SidebarNav = ({ isCollapsed }: SidebarNavProps) => {
       href: '/users',
       icon: <Users className="h-5 w-5" />,
       label: 'Manage Users'
-    },
-    {
-      href: '/settings',
-      icon: <Settings className="h-5 w-5" />,
-      label: 'Settings'
     }
   ];
 

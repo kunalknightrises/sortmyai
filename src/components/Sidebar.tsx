@@ -6,7 +6,8 @@ import {
   LayoutGrid,
   Briefcase,
   Award,
-  User
+  User,
+  Settings
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -35,6 +36,11 @@ const Sidebar = () => {
       icon: <User size={20} />,
       label: "Profile",
       path: "/dashboard/profile", 
+    },
+    {
+      icon: <Settings size={20} />,
+      label: "Settings",
+      path: "/dashboard/settings", 
     }
   ];
 

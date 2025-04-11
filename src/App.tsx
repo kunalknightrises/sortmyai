@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -7,6 +8,7 @@ import DashboardLayout from './components/DashboardLayout';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 import Profile from '@/pages/Profile';
+import Settings from '@/pages/Settings';
 import ToolTracker from '@/components/dashboard/ToolTracker';
 import AddTool from '@/components/dashboard/AddTool';
 import Portfolio from '@/components/dashboard/Portfolio';
@@ -40,10 +42,20 @@ function App() {
               <Dashboard />
             </DashboardLayout>
           </ProtectedRoute>
-        } />        <Route path="/dashboard/profile" element={
+        } />        
+        
+        <Route path="/dashboard/profile" element={
           <ProtectedRoute>
             <DashboardLayout>
               <Profile />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/settings" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Settings />
             </DashboardLayout>
           </ProtectedRoute>
         } />

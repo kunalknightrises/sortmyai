@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +8,6 @@ import {
   LayoutGrid, 
   User, 
   Settings,
-  Instagram,
   Brain
 } from 'lucide-react';
 
@@ -23,7 +23,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { icon: <LayoutDashboard size={20} />, label: "Dashboard", path: "/dashboard" },
     { icon: <Briefcase size={20} />, label: "Tool Tracker", path: "/dashboard/tools" },
     { icon: <LayoutGrid size={20} />, label: "Portfolio", path: "/dashboard/portfolio" },
-    { icon: <Instagram size={20} />, label: "Creator Profile", path: `/creator/${user?.username || ''}` },
     { icon: <User size={20} />, label: "Profile", path: "/dashboard/profile" },
     { icon: <Settings size={20} />, label: "Settings", path: "/dashboard/settings" },
   ];
