@@ -17,7 +17,7 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user } = useAuth(); 
+  const { user: _user } = useAuth(); 
 
   const sidebarItems = [
     { icon: <LayoutDashboard size={20} />, label: "Dashboard", path: "/dashboard" },
