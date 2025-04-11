@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button} from '@/components/ui/button';
-import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Crown, Activity, Award, Target } from 'lucide-react';
+import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Crown, Activity, Award, Target, Zap as LightningBolt } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import XPProgress from './gamification/XPProgress';
