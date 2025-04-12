@@ -16,6 +16,9 @@ import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
 import Index from '@/pages/Index';
 import Dashboard from '@/components/Dashboard';
 import Achievements from '@/pages/Achievements';
+import { Sidebar } from '@/components/ui/sidebar';
+import { useEffect } from 'react';
+import { initializeCapacitor } from '@/lib/capacitor';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +30,11 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  // Initialize Capacitor when the app starts
+  useEffect(() => {
+    initializeCapacitor().catch(console.error);
+  }, []);
+  
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
