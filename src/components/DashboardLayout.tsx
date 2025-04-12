@@ -10,9 +10,10 @@ import {
   Settings,
   Brain,
   Menu,
-  X
+  X,
+  GraduationCap
 } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -22,7 +23,7 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { isNativePlatform } = useAuth();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
@@ -30,6 +31,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { icon: <LayoutDashboard size={20} />, label: "Dashboard", path: "/dashboard" },
     { icon: <Briefcase size={20} />, label: "Tool Tracker", path: "/dashboard/tools" },
     { icon: <LayoutGrid size={20} />, label: "Portfolio", path: "/dashboard/portfolio" },
+    { icon: <GraduationCap size={20} />, label: "Academy", path: "/dashboard/academy" },
     { icon: <User size={20} />, label: "Profile", path: "/dashboard/profile" },
     { icon: <Settings size={20} />, label: "Settings", path: "/dashboard/settings" },
   ];

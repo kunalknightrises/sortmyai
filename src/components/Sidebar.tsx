@@ -7,7 +7,8 @@ import {
   Briefcase,
   Award,
   User,
-  Settings
+  Settings,
+  GraduationCap
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -21,6 +22,11 @@ const Sidebar = () => {
       icon: <LayoutGrid size={20} />,
       label: "Portfolio",
       path: "/dashboard/portfolio",
+    },
+    {
+      icon: <GraduationCap size={20} />,
+      label: "Academy",
+      path: "/dashboard/academy",
     },
     {
       icon: <Briefcase size={20} />,
