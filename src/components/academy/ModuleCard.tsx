@@ -8,10 +8,11 @@ import { Module } from "@/types/academy";
 
 interface ModuleCardProps {
   module: Module;
-  onStartModule: (moduleId: string) => void;
+  onStartModule: (tierId: string, moduleId: string) => void;
+  tierId: string;
 }
 
-const ModuleCard = ({ module, onStartModule }: ModuleCardProps) => {
+const ModuleCard = ({ module, onStartModule, tierId }: ModuleCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -48,7 +49,7 @@ const ModuleCard = ({ module, onStartModule }: ModuleCardProps) => {
         <CardFooter>
           <Button
             className="w-full gap-2"
-            onClick={() => onStartModule(module.id)}
+            onClick={() => onStartModule(tierId, module.id)}
             variant={module.isCompleted ? "secondary" : "default"}
           >
             {module.isCompleted ? (
