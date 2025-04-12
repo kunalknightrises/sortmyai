@@ -161,10 +161,9 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
       setUploadProgress(0);
       const folderName = `sortmyai_${userId}`;
       const fileId = await uploadToGoogleDrive(file, folderName);
-      setUploadProgress(100);
-
-      if (onFileUpload) {
-        const fileUrl = `https://drive.google.com/file/d/${fileId}/view`;
+      setUploadProgress(100);      if (onFileUpload) {
+        // Use a direct image URL that works better for display
+        const fileUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
         onFileUpload(fileUrl);
       }
 

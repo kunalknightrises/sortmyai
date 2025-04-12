@@ -24,11 +24,41 @@ export function PortfolioItemCard({ item, onEdit, onDelete, isOwner = false }: P
     <div className="group bg-sortmy-darker rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-sortmy-blue/20">
       <div className="relative aspect-square">
         {item.media_type === 'image' && (
-          <img
-            src={item.media_url}
-            alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          <>
+            {item.media_url.includes('drive.google.com') ? (
+              <div className="w-full h-full overflow-hidden">
+                {(() => {
+                  // Extract file ID from Google Drive URL
+                  const fileId = item.media_url.match(/id=([^&]+)/) ||
+                                 item.media_url.match(/\/d\/([^\/]+)/);
+                  if (fileId && fileId[1]) {
+                    // Use Google Drive's preview iframe which avoids COEP issues
+                    return (
+                      <iframe
+                        src={`https://drive.google.com/file/d/${fileId[1]}/preview`}
+                        className="w-full h-full border-0"
+                        allow="autoplay"
+                        loading="lazy"
+                      ></iframe>
+                    );
+                  } else {
+                    // Fallback to a placeholder if we can't extract the ID
+                    return (
+                      <div className="w-full h-full flex items-center justify-center bg-sortmy-gray/20">
+                        <p className="text-sm text-gray-400">Preview not available</p>
+                      </div>
+                    );
+                  }
+                })()}
+              </div>
+            ) : (
+              <img
+                src={item.media_url}
+                alt={item.title}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            )}
+          </>
         )}
         {item.media_type === 'video' && (
           <video
@@ -83,7 +113,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, isOwner = false }: P
         </p>        <div className="flex flex-wrap gap-2 mb-4">
           {item.tools_used?.map((tool: string, index: number) => (
             <span
-              key={index}
+              key={`${item.id}-tool-${index}`}
               className="px-2 py-1 text-xs bg-sortmy-gray/30 text-slate-300 rounded-full"
             >
               {tool}

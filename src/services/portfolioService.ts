@@ -12,7 +12,7 @@ export const fetchUserProfile = async (username: string): Promise<User> => {
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('username', '==', username));
     const querySnapshot = await getDocs(q);
-    
+
     // If not found by username, try by uid
     if (querySnapshot.empty) {
       const userDoc = await getDoc(doc(usersRef, username));
@@ -35,7 +35,7 @@ export const fetchUserProfile = async (username: string): Promise<User> => {
     if (querySnapshot.docs.length === 0) {
       throw new Error('User not found');
     }
-    
+
     const userData = querySnapshot.docs[0].data();
     return {
       ...userData,
@@ -59,7 +59,7 @@ export const fetchPortfolioItems = async (userId: string): Promise<PortfolioItem
     const portfolioRef = collection(db, 'portfolio');
     const q = query(portfolioRef, where('user_id', '==', userId));
     const querySnapshot = await getDocs(q);
-    
+
     const items = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -70,16 +70,48 @@ export const fetchPortfolioItems = async (userId: string): Promise<PortfolioItem
       const userRef = doc(db, 'users', userId);
       const userDoc = await getDoc(userRef);
       const userData = userDoc.data();
-      
-      if (userData?.gdrive_portfolio_items) {
-        const gdriveItems = userData.gdrive_portfolio_items as PortfolioItem[];
+
+      if (userData?.gdrive_portfolio_items && Array.isArray(userData.gdrive_portfolio_items)) {
+        // Process Google Drive items and add required fields
+        const gdriveItems = userData.gdrive_portfolio_items.map((item, index) => {
+          // Generate a unique ID for each Google Drive item
+          const uniqueId = `gdrive-${userId}-${index}-${Date.now()}`;
+
+          // Determine media type from URL or default to image
+          let mediaType = 'image';
+          if (item.media_url) {
+            if (item.media_url.includes('video')) {
+              mediaType = 'video';
+            } else if (item.media_url.includes('audio')) {
+              mediaType = 'audio';
+            }
+          }
+
+          // Return a properly formatted PortfolioItem
+          return {
+            id: item.id || uniqueId,
+            userId: userId,
+            title: item.title || 'Untitled',
+            description: item.description || '',
+            media_url: item.media_url || '',
+            media_type: mediaType as 'image' | 'video' | 'audio',
+            tools_used: item.tools_used || [],
+            categories: item.categories || [],
+            likes: item.likes || 0,
+            views: item.views || 0,
+            is_public: item.is_public !== undefined ? item.is_public : true,
+            created_at: item.created_at || new Date().toISOString(),
+            updated_at: item.updated_at || item.created_at || new Date().toISOString()
+          } as PortfolioItem;
+        });
+
         items.push(...gdriveItems);
       }
     } catch (error) {
       console.warn('Could not fetch Google Drive items:', error);
     }
 
-    return items.sort((a, b) => 
+    return items.sort((a, b) =>
       new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
     );
   } catch (error) {

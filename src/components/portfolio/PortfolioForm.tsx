@@ -65,13 +65,35 @@ export function PortfolioForm({ user, initialData, onSubmit, isLoading }: Portfo
         return;
       }
 
+      // Determine media type from URL or default to image
+      let mediaType = 'image';
+      if (formData.media_url) {
+        if (formData.media_url.includes('video')) {
+          mediaType = 'video';
+        } else if (formData.media_url.includes('audio')) {
+          mediaType = 'audio';
+        }
+      }
+
+      // Generate a unique ID for the item
+      const itemId = `gdrive-${user.id}-${Date.now()}`;
+
       // Update user's Google Drive portfolio items
       const userRef = doc(db, 'users', user.id);
       const gdriveItem = {
+        id: itemId,
+        userId: user.id,
         title: formData.title,
         description: formData.description,
         media_url: formData.media_url,
-        created_at: new Date().toISOString()
+        media_type: mediaType,
+        tools_used: formData.tools_used || [],
+        categories: [],
+        likes: 0,
+        views: 0,
+        is_public: formData.is_public,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
       await updateDoc(userRef, {
@@ -120,8 +142,24 @@ export function PortfolioForm({ user, initialData, onSubmit, isLoading }: Portfo
           onFileUpload={handleGoogleDriveUpload}
         />
         {previewUrl && (
-          <div className="mt-4">
-            <img src={previewUrl} alt="Preview" className="max-h-64 mx-auto rounded-lg" />
+          <div className="mt-4 max-h-64 mx-auto rounded-lg overflow-hidden">            {previewUrl.includes('drive.google.com') ? (
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="w-full h-64 object-contain bg-sortmy-gray/10"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.onerror = null; // Prevent infinite loop
+                  target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptMSAxNWgtMnYtMmgydjJ6bTAtNGgtMlY3aDJ2NnoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
+                }}
+              />
+            ) : (
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="max-h-64 mx-auto"
+              />
+            )}
           </div>
         )}
         {errors.media_url && (
