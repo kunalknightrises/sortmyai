@@ -1,4 +1,3 @@
-
 import { defineConfig, UserConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -20,7 +19,8 @@ const config: UserConfig = {
   },
   server: {
     port: 8080,
-    host: '::'
+    host: '::',
+    allowedHosts: ['.lovableproject.com']
   }
 }
 
