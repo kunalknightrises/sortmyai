@@ -16,7 +16,7 @@ import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
 import Index from '@/pages/Index';
 import Dashboard from '@/components/Dashboard';
 import Achievements from '@/pages/Achievements';
-import { Sidebar } from '@/components/ui/sidebar';
+import Academy from '@/pages/Academy';
 import { useEffect } from 'react';
 import { initializeCapacitor } from '@/lib/capacitor';
 
@@ -96,6 +96,15 @@ function App() {
           <ProtectedRoute>
             <DashboardLayout>
               <Achievements />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* New Academy route */}
+        <Route path="/dashboard/academy" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Academy />
             </DashboardLayout>
           </ProtectedRoute>
         } />
