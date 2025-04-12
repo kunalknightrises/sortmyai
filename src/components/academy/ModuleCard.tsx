@@ -1,5 +1,5 @@
 
-import { Book, Lock, PlayCircle, Zap, FileText } from "lucide-react";
+import { PlayCircle, Zap, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -9,10 +9,9 @@ import { Module } from "@/types/academy";
 interface ModuleCardProps {
   module: Module;
   onStartModule: (moduleId: string) => void;
-  tierId: string;
 }
 
-const ModuleCard = ({ module, onStartModule, tierId }: ModuleCardProps) => {
+const ModuleCard = ({ module, onStartModule }: ModuleCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
