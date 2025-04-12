@@ -1,12 +1,13 @@
 
 import { useState } from "react";
-import { Book, Lock, PlayCircle, Zap } from "lucide-react";
+import { Book, Lock, PlayCircle, Zap, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
+import YoutubeShortEmbed from "@/components/academy/YoutubeShortEmbed";
 
 // Define module interfaces
 interface Module {
@@ -15,6 +16,8 @@ interface Module {
   description: string;
   xpReward: number;
   isCompleted: boolean;
+  videoId?: string;
+  resourceUrl?: string;
 }
 
 interface Tier {
@@ -25,7 +28,6 @@ interface Tier {
 }
 
 const Academy = () => {
-
   // Academy tiers and modules
   const [tiers] = useState<Tier[]>([
     {
@@ -38,35 +40,41 @@ const Academy = () => {
           title: "Introduction to Prompting",
           description: "Learn the fundamentals of effective prompting in ChatGPT.",
           xpReward: 50,
-          isCompleted: false
+          isCompleted: false,
+          videoId: "jC4v5AS4RIM"
         },
         {
           id: "module2",
           title: "Clarity and Specificity",
           description: "Master techniques for writing clear and specific prompts.",
           xpReward: 75,
-          isCompleted: false
+          isCompleted: false,
+          videoId: "K3z9IAg1RkY"
         },
         {
           id: "module3",
           title: "Contextual Prompting",
           description: "Provide better context to get more accurate responses.",
           xpReward: 100,
-          isCompleted: false
+          isCompleted: false,
+          videoId: "FQo9A0cBK6I"
         },
         {
           id: "module4",
           title: "Iterative Refinement",
           description: "Learn how to refine your prompts through iterative feedback.",
           xpReward: 125,
-          isCompleted: false
+          isCompleted: false,
+          videoId: "wBgHMuLBNm0"
         },
         {
           id: "module5",
           title: "Role-based Prompting",
           description: "Use role assignments to enhance AI responses.",
           xpReward: 150,
-          isCompleted: false
+          isCompleted: false,
+          videoId: "W8cLZMeISVY",
+          resourceUrl: "#" // Placeholder for resource URL
         },
       ]
     },
@@ -80,14 +88,16 @@ const Academy = () => {
           title: "Chain of Thought Prompting",
           description: "Guide AI through complex reasoning processes.",
           xpReward: 200,
-          isCompleted: false
+          isCompleted: false,
+          videoId: "iOWGwb3AP0I"
         },
         {
           id: "module7",
           title: "Multi-stage AI Systems",
           description: "Build sophisticated multi-step AI workflows.",
           xpReward: 225,
-          isCompleted: false
+          isCompleted: false,
+          videoId: "xBGGxC0mPVY"
         },
       ]
     },
@@ -101,7 +111,8 @@ const Academy = () => {
           title: "API Integration",
           description: "Integrate AI capabilities into your applications.",
           xpReward: 300,
-          isCompleted: false
+          isCompleted: false,
+          videoId: "vuksiAHXNIQ"
         },
       ]
     }
@@ -154,15 +165,30 @@ const Academy = () => {
                           className="flex flex-col h-full"
                         >
                           <Card className="border-sortmy-gray/30 bg-sortmy-gray/10 h-full card-glow">
+                            {module.videoId && (
+                              <div className="px-6 pt-6 pb-0">
+                                <YoutubeShortEmbed videoId={module.videoId} title={module.title} />
+                              </div>
+                            )}
                             <CardHeader className="pb-2">
                               <CardTitle className="text-lg">{module.title}</CardTitle>
                               <CardDescription>{module.description}</CardDescription>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="space-y-4">
                               <div className="flex items-center">
                                 <Zap className="h-4 w-4 text-sortmy-blue mr-1" />
                                 <span className="text-sm text-sortmy-blue">+{module.xpReward} XP</span>
                               </div>
+                              
+                              {module.resourceUrl && (
+                                <a 
+                                  href={module.resourceUrl}
+                                  className="inline-flex items-center text-xs text-sortmy-blue hover:underline"
+                                >
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  Download Prompt Template
+                                </a>
+                              )}
                             </CardContent>
                             <CardFooter>
                               <Button
