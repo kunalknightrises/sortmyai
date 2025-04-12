@@ -9,8 +9,7 @@ let gapiInited = false;
 
 const loadScript = (src: string): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const existingScript = document.querySelector(`script[src="${src}"]`);
-    if (existingScript) {
+    if (document.querySelector(`script[src="${src}"]`)) {
       resolve();
       return;
     }
@@ -27,7 +26,7 @@ const loadScript = (src: string): Promise<void> => {
 
 const loadGapiClient = async () => {
   if (gapiInited) return;
-  
+
   // Wait for gapi to be available
   if (typeof gapi === 'undefined') {
     await new Promise<void>((resolve) => {
@@ -42,13 +41,12 @@ const loadGapiClient = async () => {
     });
   }
 
-  await new Promise<void>((resolve, reject) => {
-    gapi.load('client', {
-      callback: resolve,
-      onerror: reject
-    });
+  // Load the client library
+  await new Promise<void>((resolve) => {
+    gapi.load('client', resolve);
   });
 
+  // Initialize the client
   await gapi.client.init({
     apiKey: GOOGLE_API_KEY,
     discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
@@ -61,16 +59,11 @@ export const initializeGoogleDrive = async () => {
   try {
     // First load the API script
     await loadScript('https://apis.google.com/js/api.js');
-    
-    // Wait a moment to ensure script is initialized
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Then initialize GAPI
     await loadGapiClient();
-    
+
     // After GAPI is ready, load the Identity Services library
     await loadScript('https://accounts.google.com/gsi/client');
-    
+
     // Wait for google.accounts to be available
     await new Promise<void>((resolve) => {
       const checkGoogle = () => {
@@ -81,12 +74,19 @@ export const initializeGoogleDrive = async () => {
         }
       };
       checkGoogle();
-    });    // Initialize token client with proper configuration    // Initialize token client
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID,
-      scope: API_SCOPE,
-      callback: '' // Will be set dynamically in getAccessToken
     });
+
+    // Initialize token client if not already initialized
+    if (!tokenClient) {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: API_SCOPE,
+        callback: () => {},
+        error_callback: (err) => {
+          console.error('Google OAuth Error:', err);
+        },
+      });
+    }
 
     return true;
   } catch (error) {
@@ -95,32 +95,38 @@ export const initializeGoogleDrive = async () => {
   }
 };
 
+// Keep track of the current token
+let currentAccessToken: string | null = null;
+
 export const getAccessToken = (): Promise<string> => {
   return new Promise((resolve, reject) => {
     try {
+      // If we already have a token, return it
+      if (currentAccessToken) {
+        resolve(currentAccessToken);
+        return;
+      }
+
       if (!tokenClient) {
         reject(new Error('Token client not initialized'));
         return;
       }
 
-      // Set up the token client callback before requesting the token
-      tokenClient.callback = (resp) => {
+      // Set the callback right before requesting the token
+      tokenClient.callback = async (resp) => {
         if (resp.error !== undefined) {
           reject(new Error(resp.error));
           return;
         }
+        // Store the token for future use
+        currentAccessToken = resp.access_token;
         resolve(resp.access_token);
       };
 
-      // Set the callback dynamically right before requesting the token
-      tokenClient.callback = (resp) => {
-        if (resp.error !== undefined) {
-          reject(new Error(resp.error));
-          return;
-        }
-        resolve(resp.access_token);
-      };      // Request token with minimal configuration to avoid popup issues
-      tokenClient.requestAccessToken();
+      // Request access token with specific settings to help with COOP issues
+      tokenClient.requestAccessToken({
+        prompt: 'consent',
+      });
     } catch (err) {
       reject(err);
     }
@@ -251,28 +257,32 @@ export async function createFolder(name: string, parentFolderId?: string): Promi
 
 export const disconnectGoogleDrive = async () => {
   try {
-    if (tokenClient) {
-      const token = await getAccessToken();
-      if (token) {
-        // Revoke the token
-        await fetch(`https://oauth2.googleapis.com/revoke?token=${token}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        });
-      }
-      
+    if (tokenClient && currentAccessToken) {
+      // Revoke the token
+      await fetch(`https://oauth2.googleapis.com/revoke?token=${currentAccessToken}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+
+      // Clear the cached token
+      currentAccessToken = null;
+
       // Clear the token client
       tokenClient = null;
     }
-    
+
     // Reset initialization state
     gapiInited = false;
-    
+
     return true;
   } catch (error) {
     console.error('Error disconnecting from Google Drive:', error);
+    // Clear token even if revocation fails
+    currentAccessToken = null;
+    tokenClient = null;
+    gapiInited = false;
     throw error;
   }
 };

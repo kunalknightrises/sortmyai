@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -12,11 +11,11 @@ import Settings from '@/pages/Settings';
 import ToolTracker from '@/components/dashboard/ToolTracker';
 import AddTool from '@/components/dashboard/AddTool';
 import Portfolio from '@/components/dashboard/Portfolio';
+import AddPortfolio from '@/components/dashboard/AddPortfolio';
 import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
 import Index from '@/pages/Index';
 import Dashboard from '@/components/Dashboard';
 import Achievements from '@/pages/Achievements';
-import { Sidebar } from '@/components/ui/sidebar';
 import { useEffect } from 'react';
 import { initializeCapacitor } from '@/lib/capacitor';
 
@@ -88,6 +87,14 @@ function App() {
           <ProtectedRoute>
             <DashboardLayout>
               <Portfolio />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/portfolio/add" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <AddPortfolio />
             </DashboardLayout>
           </ProtectedRoute>
         } />

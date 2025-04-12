@@ -20,7 +20,12 @@ const config: UserConfig = {
   server: {
     port: 8080,
     host: '::',
-    allowedHosts: ['.lovableproject.com']
+    allowedHosts: ['.lovableproject.com'],
+    cors: true,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+      'Cross-Origin-Embedder-Policy': 'require-corp'
+    }
   }
 }
 

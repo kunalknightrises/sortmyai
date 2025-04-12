@@ -4,14 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Cloud, Upload, FolderOpen, Check, AlertCircle, LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getAuth } from 'firebase/auth';
-import { 
-  initializeGoogleDrive, 
-  uploadToGoogleDrive, 
-  createFolder, 
-  disconnectGoogleDrive 
+import {
+  initializeGoogleDrive,
+  uploadToGoogleDrive,
+  createFolder,
+  disconnectGoogleDrive,
+  getAccessToken
 } from '@/lib/googleDrive';
 
 interface GoogleDriveStorageProps {
@@ -21,7 +22,9 @@ interface GoogleDriveStorageProps {
 
 export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, onFileUpload }) => {
   const [isConnected, setIsConnected] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const { toast } = useToast();
   const auth = getAuth();
@@ -32,17 +35,49 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
     // Subscribe to user document to watch for Google Drive connection changes
     const unsubscribe = onSnapshot(doc(db, 'users', auth.currentUser.uid), (doc) => {
       const userData = doc.data();
-      setIsConnected(!!userData?.googleDriveAuth?.accessToken);
+      const hasGDriveAccess = !!userData?.googleDriveAuth?.accessToken;
+      setIsConnected(hasGDriveAccess);
     });
 
     return () => unsubscribe();
   }, [auth.currentUser]);
 
-  const connectToGoogleDrive = async () => {
-    setIsConnecting(true);
+  const initializeGDrive = async () => {
+    if (isInitialized) return;
     try {
       await initializeGoogleDrive();
-      
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('Failed to initialize Google Drive:', error);
+      throw error;
+    }
+  };
+
+
+
+  const connectToGoogleDrive = async () => {
+    setIsConnecting(true);
+    setIsAuthenticating(true);
+    try {
+      // First make sure Google Drive API is initialized
+      if (!isInitialized) {
+        await initializeGDrive();
+      }
+
+      // Get access token - this will trigger the OAuth popup
+      const token = await getAccessToken();
+      if (!token) {
+        throw new Error('Failed to authenticate with Google Drive');
+      }
+
+      // Update user document with Google Drive auth status
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          'googleDriveAuth.accessToken': true,
+          'googleDriveAuth.connectedAt': new Date().toISOString()
+        });
+      }
+
       // Create user folder after successful authentication
       try {
         const folderName = `sortmyai_${userId}`;
@@ -67,12 +102,20 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
       setIsConnected(false);
     } finally {
       setIsConnecting(false);
+      setIsAuthenticating(false);
     }
   };
 
   const handleDisconnect = async () => {
     try {
       await disconnectGoogleDrive();
+      if (auth.currentUser) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          'googleDriveAuth.accessToken': false,
+          'googleDriveAuth.connectedAt': null
+        });
+      }
+      setIsInitialized(false);
       toast({
         title: "Disconnected",
         description: "Successfully disconnected from Google Drive",
@@ -93,11 +136,33 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
     if (!file) return;
 
     try {
+      // First initialize Google Drive if not already done
+      if (!isInitialized) {
+        await initializeGDrive();
+      }
+
+      // Check if we're connected before attempting upload
+      if (!isConnected) {
+        // Try to connect first
+        await connectToGoogleDrive();
+
+        // If still not connected after attempt, show error and return
+        if (!isConnected) {
+          toast({
+            title: "Authentication Required",
+            description: "Please connect to Google Drive before uploading files.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      // Now we should be authenticated, proceed with upload
       setUploadProgress(0);
       const folderName = `sortmyai_${userId}`;
       const fileId = await uploadToGoogleDrive(file, folderName);
       setUploadProgress(100);
-      
+
       if (onFileUpload) {
         const fileUrl = `https://drive.google.com/file/d/${fileId}/view`;
         onFileUpload(fileUrl);
@@ -130,7 +195,7 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge 
+          <Badge
             variant={isConnected ? "default" : "outline"}
             className={isConnected ? "bg-green-500/20 text-green-400" : ""}
           >
@@ -160,12 +225,12 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
       </div>
 
       {!isConnected ? (
-        <Button 
-          onClick={connectToGoogleDrive} 
+        <Button
+          onClick={connectToGoogleDrive}
           className="w-full"
-          disabled={isConnecting}
+          disabled={isConnecting || isAuthenticating}
         >
-          {isConnecting ? 'Connecting...' : 'Connect to Google Drive'}
+          {isConnecting ? 'Connecting...' : isAuthenticating ? 'Authenticating...' : 'Connect to Google Drive'}
         </Button>
       ) : (
         <div className="space-y-4">
@@ -173,11 +238,15 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
             <Button
               onClick={() => document.getElementById('file-upload')?.click()}
               className="flex-1"
+              disabled={isAuthenticating}
             >
               <Upload className="w-4 h-4 mr-2" />
               Upload File
             </Button>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              disabled={isAuthenticating}
+            >
               <FolderOpen className="w-4 h-4 mr-2" />
               Browse Files
             </Button>
@@ -187,6 +256,7 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
             type="file"
             className="hidden"
             onChange={handleFileUpload}
+            accept="image/*,video/*"
           />
           {uploadProgress !== null && (
             <div className="w-full bg-gray-700 rounded-full h-2 mt-4">

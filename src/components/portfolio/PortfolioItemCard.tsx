@@ -80,10 +80,8 @@ export function PortfolioItemCard({ item, onEdit, onDelete, isOwner = false }: P
 
         <p className="text-slate-400 text-sm line-clamp-2 mb-4">
           {item.description}
-        </p>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          {item.tools_used.map((tool: string, index: number) => (
+        </p>        <div className="flex flex-wrap gap-2 mb-4">
+          {item.tools_used?.map((tool: string, index: number) => (
             <span
               key={index}
               className="px-2 py-1 text-xs bg-sortmy-gray/30 text-slate-300 rounded-full"
