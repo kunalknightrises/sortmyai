@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SortMyAI</string>
+    <string name="title_activity_main">SortMyAI</string>
+    <string name="package_name">io.sortmyai.app</string>
+    <string name="custom_url_scheme">io.sortmyai.app</string>
+</resources>

@@ -1,0 +1,27 @@
+{
+    "folders": [
+        {
+            "name": "✨ SortMyAI",
+            "path": "."
+        },
+        {
+            "name": "📱 Android",
+            "path": "android"
+        },
+        {
+            "name": "🍎 iOS",
+            "path": "ios"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "android/app/build": true,
+            "ios/App/build": true,
+            "android/capacitor-cordova-android-plugins": true,
+            "ios/capacitor-cordova-ios-plugins": true
+        },
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.compile.nullAnalysis.mode": "automatic",
+        "emulate.androidPackageName": "io.sortmyai.app"
+    }
+}
