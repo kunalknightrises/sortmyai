@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
-import { useAuth } from "@/contexts/AuthContext";
 
 // Define module interfaces
 interface Module {
@@ -26,8 +25,7 @@ interface Tier {
 }
 
 const Academy = () => {
-  const { user } = useAuth();
-  
+
   // Academy tiers and modules
   const [tiers] = useState<Tier[]>([
     {
@@ -167,8 +165,8 @@ const Academy = () => {
                               </div>
                             </CardContent>
                             <CardFooter>
-                              <Button 
-                                className="w-full gap-2" 
+                              <Button
+                                className="w-full gap-2"
                                 onClick={() => handleStartModule(tier.id, module.id)}
                                 variant={module.isCompleted ? "secondary" : "default"}
                               >

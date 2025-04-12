@@ -15,9 +15,8 @@ const CreatorProfileHeader = ({ user, portfolio }: CreatorProfileHeaderProps) =>
     if (!user || !user.username) return 'U';
     return user.username.substring(0, 2).toUpperCase();
   };
-  
-  const postCount = portfolio.length;
-  const totalLikes = portfolio.reduce((acc, item) => acc + item.likes, 0);
+    const postCount = portfolio?.length || 0;
+  const totalLikes = portfolio?.reduce((acc, item) => acc + (item.likes || 0), 0) || 0;
   
   return (
     <div className="py-8 border-b border-sortmy-gray/30">

@@ -16,8 +16,8 @@ import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
 import Index from '@/pages/Index';
 import Dashboard from '@/components/Dashboard';
 import Achievements from '@/pages/Achievements';
-import { Sidebar } from '@/components/ui/sidebar';
 import { useEffect } from 'react';
+import Academy from '@/pages/Academy';
 import { initializeCapacitor } from '@/lib/capacitor';
 
 const queryClient = new QueryClient({

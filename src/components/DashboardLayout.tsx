@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -23,7 +22,6 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user } = useAuth();
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
