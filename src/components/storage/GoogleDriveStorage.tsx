@@ -16,11 +16,18 @@ import {
 } from '@/lib/googleDrive';
 
 interface GoogleDriveStorageProps {
-  userId: string;
+  userId?: string;
   onFileUpload?: (fileUrl: string, fileType: 'image' | 'video') => void;
+  buttonText?: string;
+  acceptedFileTypes?: string;
 }
 
-export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, onFileUpload }) => {
+export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({
+  userId,
+  onFileUpload,
+  buttonText = "Upload File",
+  acceptedFileTypes = "image/*,video/*"
+}) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -268,7 +275,7 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
               disabled={isAuthenticating}
             >
               <Upload className="w-4 h-4 mr-2" />
-              Upload File
+              {buttonText}
             </Button>
             <Button
               variant="outline"
@@ -283,7 +290,7 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
             type="file"
             className="hidden"
             onChange={handleFileUpload}
-            accept="image/*,video/*"
+            accept={acceptedFileTypes}
           />
           <div className="flex justify-center gap-4 mt-2">
             <Badge variant="outline" className="flex items-center gap-1">

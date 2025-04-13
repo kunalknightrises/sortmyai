@@ -92,11 +92,13 @@ export const ImageItem: React.FC<ImageItemProps> = ({ src, alt, className }) => 
             onError={(e) => {
               // If this fails, try a different URL format
               const target = e.target as HTMLImageElement;
-              target.onerror = (e2) => {
+              target.onerror = (e2: any) => {
                 // If this also fails, show a fallback
-                const target2 = e2.target as HTMLImageElement;
-                target2.onerror = null;
-                target2.src = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptMSAxNWgtMnYtMmgydjJ6bTAtNGgtMlY3aDJ2NnoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=`;
+                if (e2.target) {
+                  const target2 = e2.target as HTMLImageElement;
+                  target2.onerror = null;
+                  target2.src = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptMSAxNWgtMnYtMmgydjJ6bTAtNGgtMlY3aDJ2NnoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=`;
+                }
               };
               target.src = `https://drive.usercontent.google.com/download?id=${fileId}&export=view`;
             }}

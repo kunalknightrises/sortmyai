@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/types';
 import { GoogleDriveStorage } from '@/components/storage/GoogleDriveStorage';
-import { Loader2, Play, Video } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { ImageItem } from '../ui/ImageItem';
 
 // Define the schema first without type annotation

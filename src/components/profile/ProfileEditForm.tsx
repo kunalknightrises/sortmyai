@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { User } from '@/types';
 import { GoogleDriveStorage } from '@/components/storage/GoogleDriveStorage';
-import { Loader2, Image as ImageIcon, X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 
