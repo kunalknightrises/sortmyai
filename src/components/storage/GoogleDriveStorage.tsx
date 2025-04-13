@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Cloud, Upload, FolderOpen, Check, AlertCircle, LogOut } from 'lucide-react';
+import { Cloud, Upload, FolderOpen, Check, AlertCircle, LogOut, Video, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -17,7 +17,7 @@ import {
 
 interface GoogleDriveStorageProps {
   userId: string;
-  onFileUpload?: (fileUrl: string) => void;
+  onFileUpload?: (fileUrl: string, fileType: 'image' | 'video') => void;
 }
 
 export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, onFileUpload }) => {
@@ -131,9 +131,26 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
     }
   };
 
+  // Helper function to determine if a file is a video
+  const isVideoFile = (file: File): boolean => {
+    const videoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo'];
+    return videoTypes.includes(file.type);
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Check if it's a video file
+    const isVideo = isVideoFile(file);
+
+    // Show a toast for video uploads with additional information
+    if (isVideo) {
+      toast({
+        title: "Uploading Video",
+        description: "Videos will be embedded using Google Drive player. Make sure to make the file public after upload.",
+      });
+    }
 
     try {
       // First initialize Google Drive if not already done
@@ -161,15 +178,26 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
       setUploadProgress(0);
       const folderName = `sortmyai_${userId}`;
       const fileId = await uploadToGoogleDrive(file, folderName);
-      setUploadProgress(100);      if (onFileUpload) {
-        // Use a direct image URL that works better for display
-        const fileUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-        onFileUpload(fileUrl);
+      setUploadProgress(100);
+
+      // We'll show more detailed instructions after upload completes
+
+      if (onFileUpload) {
+        // Use a direct file URL format that works better for display
+        const fileUrl = `https://drive.google.com/file/d/${fileId}/view`;
+        onFileUpload(fileUrl, isVideo ? 'video' : 'image');
       }
 
       toast({
-        title: "File Uploaded",
-        description: "Your file has been uploaded to Google Drive successfully.",
+        title: "File Uploaded Successfully",
+        description: "Your file has been uploaded to Google Drive.",
+      });
+
+      // Show instructions for making the file public immediately
+      toast({
+        title: "Important: Make Your File Public",
+        description: "For best results, please make your file public in Google Drive: Right-click the file → Share → General access → Anyone with the link → Done",
+        variant: "default",
       });
     } catch (error: any) {
       console.error('Error uploading file:', error);
@@ -257,6 +285,16 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({ userId, 
             onChange={handleFileUpload}
             accept="image/*,video/*"
           />
+          <div className="flex justify-center gap-4 mt-2">
+            <Badge variant="outline" className="flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" />
+              <span>Images</span>
+            </Badge>
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Video className="w-3 h-3" />
+              <span>Videos</span>
+            </Badge>
+          </div>
           {uploadProgress !== null && (
             <div className="w-full bg-gray-700 rounded-full h-2 mt-4">
               <div

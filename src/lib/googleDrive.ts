@@ -2,6 +2,7 @@
 
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+// Use a limited scope to avoid verification requirements
 const API_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
 let tokenClient: google.accounts.oauth2.TokenClient | null = null;
@@ -193,7 +194,17 @@ export async function uploadToGoogleDrive(file: File, folderName?: string): Prom
     }
 
     const data = await response.json();
-    return data.id;
+    const fileId = data.id;
+
+    // Automatically make the file public
+    try {
+      await makeFilePublic(fileId);
+    } catch (shareError) {
+      console.warn('Failed to make file public automatically:', shareError);
+      // Continue even if sharing fails - the file was uploaded successfully
+    }
+
+    return fileId;
   } catch (error) {
     console.error('Error in uploadToGoogleDrive:', error);
     throw error;
@@ -222,6 +233,41 @@ export async function shareFile(fileId: string, email: string, role: 'reader' | 
   } catch (error) {
     console.error('Error sharing file:', error);
     throw error;
+  }
+}
+
+/**
+ * Attempt to make a file publicly accessible to anyone with the link
+ * Note: This may not work with the limited scope, but we'll try anyway
+ */
+export async function makeFilePublic(fileId: string): Promise<void> {
+  try {
+    const token = await getAccessToken();
+
+    // Try to update the file to be publicly accessible
+    // This might work with drive.file scope for files the app created
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        role: 'reader',
+        type: 'anyone',
+      }),
+    });
+
+    if (!response.ok) {
+      // This might fail with the limited scope, but that's expected
+      console.warn('Could not automatically set file permissions. User may need to do this manually.');
+      return;
+    }
+
+    console.log('Successfully set file permissions to public');
+  } catch (error) {
+    console.warn('Error making file public (expected with limited scope):', error);
+    // Don't throw the error - just log it and continue
   }
 }
 

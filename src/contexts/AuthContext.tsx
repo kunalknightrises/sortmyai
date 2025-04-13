@@ -1,12 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  GithubAuthProvider, 
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  GithubAuthProvider,
   TwitterAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User as FirebaseUser 
+  User as FirebaseUser
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -32,6 +32,7 @@ interface AuthContextValue {
   isIntern?: boolean;
   signInWithProvider: (provider: Provider) => Promise<void>;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 // Create auth context
@@ -48,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Check if user exists in Firestore
       const userRef = doc(db, 'users', firebaseUser.uid);
       const userDoc = await getDoc(userRef);
-      
+
       // Default user data for new users
       const defaultUserData = {
         uid: firebaseUser.uid,
@@ -66,27 +67,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         last_login: new Date().toISOString(),
         badges: []
       };
-      
+
       // If user not found, create new user
       if (!userDoc.exists()) {
         await setDoc(userRef, {
           ...defaultUserData,
           created_at: serverTimestamp()
         });
-        
+
         return {
           ...defaultUserData,
           created_at: new Date().toISOString()
         } as AuthUser;
       }
-      
+
       // If user exists, update last login
       const userData = userDoc.data();
       await setDoc(userRef, {
         ...userData,
         last_login: serverTimestamp()
       }, { merge: true });
-      
+
       // Return user data with AuthUser type
       return {
         ...userData,
@@ -142,28 +143,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         default:
           throw new Error(`Unsupported provider: ${providerName}`);
       }
-      
+
       // Sign in with popup
       const result = await signInWithPopup(auth, provider);
       const userData = await getUserData(result.user);
       setUser(userData);
-      
+
       // Show success toast
-      toast({ 
+      toast({
         title: 'Signed in successfully',
         variant: 'success'
       });
-      
+
     } catch (error: any) {
       console.error('Auth error:', error);
-      
+
       // Show error toast
-      toast({ 
+      toast({
         title: 'Sign-in failed',
         description: error.message || 'An error occurred during sign-in',
         variant: 'destructive'
       });
-      
+
     } finally {
       setIsLoading(false);
     }
@@ -174,17 +175,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await firebaseSignOut(auth);
       setUser(null);
-      toast({ 
+      toast({
         title: 'Signed out successfully',
         variant: 'success'
       });
     } catch (error: any) {
       console.error('Sign out error:', error);
-      toast({ 
+      toast({
         title: 'Sign-out failed',
         description: error.message,
         variant: 'destructive'
       });
+    }
+  };
+
+  // Function to refresh user data
+  const refreshUser = async () => {
+    if (!auth.currentUser) return;
+
+    setIsLoading(true);
+    try {
+      const userData = await getUserData(auth.currentUser);
+      setUser(userData);
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -196,23 +212,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setIsLoading(true);
-      
+
       if (firebaseUser) {
         const userData = await getUserData(firebaseUser);
         setUser(userData);
       } else {
         setUser(null);
       }
-      
+
       setIsLoading(false);
     });
-    
+
     // Clean up subscription
     return () => unsubscribe();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAdmin, isIntern, signInWithProvider, signOut }}>
+    <AuthContext.Provider value={{ user, isLoading, isAdmin, isIntern, signInWithProvider, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

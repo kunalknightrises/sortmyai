@@ -7,7 +7,11 @@ export interface User {
   is_premium?: boolean;
   claude_enabled?: boolean;
   created_at?: string;
+  updated_at?: string;
   avatar_url?: string;
+  bio?: string;
+  profession?: string;
+  website?: string;
   role?: 'admin' | 'intern' | 'basic';
   // Gamification related properties
   xp: number;
@@ -27,14 +31,22 @@ export interface PortfolioItem {
   title: string;
   description: string;
   media_url: string;
+  media_urls?: string[];
   media_type: 'image' | 'video' | 'audio';
+  content_type: 'post' | 'reel' | 'both'; // Type of content (post, reel, or both)
+  thumbnail_url?: string; // URL for video thumbnail
   tools_used: string[];
   categories: string[];
   likes: number;
   views: number;
+  project_url?: string;
   is_public: boolean;
+  status: 'published' | 'draft' | 'archived' | 'deleted';
   created_at: string;
   updated_at: string;
+  deleted_at?: string;
+  archived_at?: string;
+  onClick?: () => void; // For handling click events in components
 }
 
 export interface Tool {
