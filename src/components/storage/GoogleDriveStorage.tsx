@@ -15,6 +15,9 @@ import {
   getAccessToken
 } from '@/lib/googleDrive';
 
+// Import fallback implementation
+import * as fallback from '@/lib/googleDriveFallback';
+
 interface GoogleDriveStorageProps {
   userId?: string;
   onFileUpload?: (fileUrl: string, fileType: 'image' | 'video') => void;
@@ -30,6 +33,7 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({
 }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -52,10 +56,40 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({
   const initializeGDrive = async () => {
     if (isInitialized) return;
     try {
-      await initializeGoogleDrive();
-      setIsInitialized(true);
+      console.log('Initializing Google Drive integration...');
+
+      // Try the primary implementation first
+      if (!useFallback) {
+        try {
+          await initializeGoogleDrive();
+          console.log('Google Drive initialization successful');
+          setIsInitialized(true);
+          return;
+        } catch (primaryError) {
+          console.error('Primary Google Drive initialization failed, trying fallback:', primaryError);
+          setUseFallback(true);
+        }
+      }
+
+      // If primary fails or we're already using fallback, try the fallback
+      if (useFallback) {
+        try {
+          await fallback.loadGoogleApi();
+          console.log('Fallback Google Drive initialization successful');
+          setIsInitialized(true);
+          return;
+        } catch (fallbackError) {
+          console.error('Fallback Google Drive initialization also failed:', fallbackError);
+          throw fallbackError;
+        }
+      }
     } catch (error) {
       console.error('Failed to initialize Google Drive:', error);
+      toast({
+        title: "Google Drive Error",
+        description: "Failed to initialize Google Drive. Please try again or contact support.",
+        variant: "destructive",
+      });
       throw error;
     }
   };
@@ -66,13 +100,39 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({
     setIsConnecting(true);
     setIsAuthenticating(true);
     try {
+      console.log('Connecting to Google Drive...');
       // First make sure Google Drive API is initialized
       if (!isInitialized) {
+        console.log('Google Drive not initialized, initializing now...');
         await initializeGDrive();
       }
 
       // Get access token - this will trigger the OAuth popup
-      const token = await getAccessToken();
+      console.log('Requesting access token...');
+      let token;
+
+      if (useFallback) {
+        // Use fallback authentication
+        try {
+          token = await fallback.authenticate();
+          console.log('Fallback authentication successful');
+        } catch (fallbackError) {
+          console.error('Fallback authentication failed:', fallbackError);
+          throw fallbackError;
+        }
+      } else {
+        // Use primary authentication
+        try {
+          token = await getAccessToken();
+          console.log('Access token received:', token ? 'Yes' : 'No');
+        } catch (primaryError) {
+          console.error('Primary authentication failed, trying fallback:', primaryError);
+          setUseFallback(true);
+          token = await fallback.authenticate();
+          console.log('Fallback authentication successful after primary failed');
+        }
+      }
+
       if (!token) {
         throw new Error('Failed to authenticate with Google Drive');
       }
@@ -115,7 +175,12 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({
 
   const handleDisconnect = async () => {
     try {
-      await disconnectGoogleDrive();
+      if (useFallback) {
+        await fallback.disconnect();
+      } else {
+        await disconnectGoogleDrive();
+      }
+
       if (auth.currentUser) {
         await updateDoc(doc(db, 'users', auth.currentUser.uid), {
           'googleDriveAuth.accessToken': false,
@@ -184,7 +249,22 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({
       // Now we should be authenticated, proceed with upload
       setUploadProgress(0);
       const folderName = `sortmyai_${userId}`;
-      const fileId = await uploadToGoogleDrive(file, folderName);
+      let fileId;
+
+      if (useFallback) {
+        // Use fallback upload
+        fileId = await fallback.uploadFile(file, folderName);
+      } else {
+        // Use primary upload
+        try {
+          fileId = await uploadToGoogleDrive(file, folderName);
+        } catch (primaryError) {
+          console.error('Primary upload failed, trying fallback:', primaryError);
+          setUseFallback(true);
+          fileId = await fallback.uploadFile(file, folderName);
+        }
+      }
+
       setUploadProgress(100);
 
       // We'll show more detailed instructions after upload completes

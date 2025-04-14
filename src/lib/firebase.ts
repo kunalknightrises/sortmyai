@@ -1,7 +1,7 @@
 
 import { initializeApp } from "firebase/app";
 import { initializeFirestore } from "firebase/firestore";
-import { getAuth, connectAuthEmulator, browserSessionPersistence, setPersistence } from "firebase/auth";
+import { getAuth, browserSessionPersistence, setPersistence } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { validateEnv } from "./env";
 

@@ -1,7 +1,8 @@
 /// <reference path="../types/google.d.ts" />
 
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+// Get API key and client ID from environment variables or use hardcoded values as fallback
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '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';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '220186510992-5oa2tojm2o51qh4324ao7fe0mmfkh021.apps.googleusercontent.com';
 // Use a limited scope to avoid verification requirements
 const API_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
@@ -79,6 +80,13 @@ export const initializeGoogleDrive = async () => {
 
     // Initialize token client if not already initialized
     if (!tokenClient) {
+      console.log('Initializing token client with client ID:', GOOGLE_CLIENT_ID);
+
+      // Make sure we have a valid client ID
+      if (!GOOGLE_CLIENT_ID) {
+        throw new Error('Google Client ID is missing. Please check your environment variables.');
+      }
+
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
         scope: API_SCOPE,
@@ -125,8 +133,10 @@ export const getAccessToken = (): Promise<string> => {
       };
 
       // Request access token with specific settings to help with COOP issues
+      console.log('Requesting access token with client ID:', GOOGLE_CLIENT_ID);
       tokenClient.requestAccessToken({
         prompt: 'consent',
+        client_id: GOOGLE_CLIENT_ID, // Explicitly provide client_id again
       });
     } catch (err) {
       reject(err);

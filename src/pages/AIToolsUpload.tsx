@@ -5,14 +5,14 @@ import { bulkAddAITools } from '@/services/aiToolsService';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, Check, AlertCircle, FileText } from 'lucide-react';
+import { Loader2, Upload, Check, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const AIToolsUpload: React.FC = () => {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const { toast } = useToast();
   const [jsonInput, setJsonInput] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -55,12 +55,12 @@ const AIToolsUpload: React.FC = () => {
 
     try {
       setIsUploading(true);
-      
+
       // Parse JSON input
       let tools: AITool[] = [];
       try {
         const parsed = JSON.parse(jsonInput);
-        
+
         // Handle both array and object formats
         if (Array.isArray(parsed)) {
           tools = parsed.map(tool => ({
@@ -96,7 +96,7 @@ const AIToolsUpload: React.FC = () => {
         setIsUploading(false);
         return;
       }
-      
+
       if (tools.length === 0) {
         toast({
           title: 'No Tools Found',
@@ -106,17 +106,17 @@ const AIToolsUpload: React.FC = () => {
         setIsUploading(false);
         return;
       }
-      
+
       // Upload tools to Firebase
       const ids = await bulkAddAITools(tools);
       setUploadedCount(ids.length);
-      
+
       toast({
         title: 'Upload Successful',
         description: `Successfully uploaded ${ids.length} AI tools to the database.`,
         variant: 'default'
       });
-      
+
       // Clear the input
       setJsonInput('');
     } catch (error) {
@@ -154,17 +154,17 @@ const AIToolsUpload: React.FC = () => {
 
     try {
       setIsUploading(true);
-      
+
       // Upload single tool to Firebase
       await bulkAddAITools([singleTool]);
       setUploadedCount(prev => prev + 1);
-      
+
       toast({
         title: 'Upload Successful',
         description: `Successfully added "${singleTool.name}" to the database.`,
         variant: 'default'
       });
-      
+
       // Clear the form
       setSingleTool({
         name: '',
@@ -232,7 +232,7 @@ const AIToolsUpload: React.FC = () => {
               <TabsTrigger value="bulk">Bulk Upload (JSON)</TabsTrigger>
               <TabsTrigger value="single">Single Tool Upload</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="bulk" className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="jsonInput">JSON Input</Label>
@@ -247,7 +247,7 @@ const AIToolsUpload: React.FC = () => {
                   Paste JSON data containing AI tools. Each tool should have the properties shown in the example below.
                 </p>
               </div>
-              
+
               <div className="bg-gray-800/30 p-4 rounded-md">
                 <div className="flex items-center gap-2 mb-2">
                   <FileText className="w-4 h-4 text-blue-400" />
@@ -257,7 +257,7 @@ const AIToolsUpload: React.FC = () => {
                   {sampleJson}
                 </pre>
               </div>
-              
+
               <Button
                 onClick={handleBulkUpload}
                 disabled={isUploading || !jsonInput.trim()}
@@ -276,7 +276,7 @@ const AIToolsUpload: React.FC = () => {
                 )}
               </Button>
             </TabsContent>
-            
+
             <TabsContent value="single" className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -290,7 +290,7 @@ const AIToolsUpload: React.FC = () => {
                     onChange={handleSingleToolChange}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="useCase">Use Case</Label>
                   <Input
@@ -302,7 +302,7 @@ const AIToolsUpload: React.FC = () => {
                     onChange={handleSingleToolChange}
                   />
                 </div>
-                
+
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="description">Description <span className="text-red-500">*</span></Label>
                   <Textarea
@@ -314,7 +314,7 @@ const AIToolsUpload: React.FC = () => {
                     onChange={handleSingleToolChange}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="tags">Tags</Label>
                   <Input
@@ -327,7 +327,7 @@ const AIToolsUpload: React.FC = () => {
                   />
                   <p className="text-xs text-gray-400">Separate tags with commas</p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="pricing">Pricing</Label>
                   <Input
@@ -339,7 +339,7 @@ const AIToolsUpload: React.FC = () => {
                     onChange={handleSingleToolChange}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="excelsAt">Excels At</Label>
                   <Input
@@ -351,7 +351,7 @@ const AIToolsUpload: React.FC = () => {
                     onChange={handleSingleToolChange}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="websiteLink">Website Link</Label>
                   <Input
@@ -363,7 +363,7 @@ const AIToolsUpload: React.FC = () => {
                     onChange={handleSingleToolChange}
                   />
                 </div>
-                
+
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="logoLink">Logo URL</Label>
                   <Input
@@ -376,7 +376,7 @@ const AIToolsUpload: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <Button
                 onClick={handleSingleToolUpload}
                 disabled={isUploading || !singleTool.name || !singleTool.description}

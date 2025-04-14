@@ -2,7 +2,6 @@ import {
   GoogleAuthProvider,
   GithubAuthProvider,
   TwitterAuthProvider,
-  signInWithEmailAndPassword,
   signInWithRedirect,
   getRedirectResult,
   browserPopupRedirectResolver,

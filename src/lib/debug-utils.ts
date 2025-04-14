@@ -1,8 +1,9 @@
 // Debug utility functions
 
+import { auth } from './firebase';
+
 // Check if the user is authenticated in Firebase
 export const checkAuthState = () => {
-  const auth = window.firebase?.auth?.();
   if (auth) {
     const user = auth.currentUser;
     console.log('Current auth state:', user ? 'Authenticated' : 'Not authenticated');
@@ -25,12 +26,12 @@ export const checkLocalStorage = () => {
     const keys = Object.keys(localStorage);
     const firebaseKeys = keys.filter(key => key.includes('firebase'));
     console.log('Firebase-related localStorage keys:', firebaseKeys);
-    
+
     // Check for session storage
     const sessionKeys = Object.keys(sessionStorage);
     const firebaseSessionKeys = sessionKeys.filter(key => key.includes('firebase'));
     console.log('Firebase-related sessionStorage keys:', firebaseSessionKeys);
-    
+
     return { firebaseKeys, firebaseSessionKeys };
   } catch (error) {
     console.error('Error checking storage:', error);

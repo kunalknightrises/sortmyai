@@ -5,8 +5,8 @@ import { Github, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirebaseConnection } from '@/contexts/FirebaseConnectionContext';
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
-import { signInWithProviderRedirect, getAuthRedirectResult, createOrUpdateUserProfile, ProviderType } from '@/lib/auth-utils';
+// Import the simpler auth utilities
+import { directSignIn, getAuthRedirectResult, ProviderType } from '@/lib/simple-auth';
 import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
@@ -27,9 +27,7 @@ const Login = () => {
         console.log('Redirect result:', result);
 
         if (result && result.user) {
-          console.log('User authenticated:', result.user);
-          // Create or update user profile
-          await createOrUpdateUserProfile(result.user);
+          console.log('User authenticated via redirect:', result.user);
 
           toast({
             title: "Welcome!",
@@ -69,11 +67,21 @@ const Login = () => {
   const signInWithProvider = async (providerName: ProviderType) => {
     try {
       console.log('Starting sign in with provider:', providerName);
-      // Use redirect method only - no popups
-      await signInWithProviderRedirect(providerName);
-      console.log('Redirect initiated');
-      // The redirect will navigate away from the page
-      // Result will be handled in the useEffect above
+      // Use the direct sign-in method that tries popup first, then falls back to redirect
+      const user = await directSignIn(providerName);
+
+      if (user) {
+        console.log('User signed in successfully:', user);
+        toast({
+          title: "Welcome!",
+          description: "You've successfully signed in.",
+        });
+
+        // Navigate to dashboard
+        window.location.href = '/dashboard';
+      }
+      // If no user is returned, it means a redirect was initiated
+      // The result will be handled in the useEffect above
     } catch (error) {
       console.error('Authentication error:', error);
       toast({
@@ -84,6 +92,7 @@ const Login = () => {
             : 'An unknown error occurred',
         variant: 'destructive',
       });
+      setIsLoading(false);
     }
   };
 
@@ -97,11 +106,17 @@ const Login = () => {
             description: "Could not reconnect to the network.",
             variant: "destructive",
           });
+          setIsLoading(false);
           return;
         });
       }
-       await signInWithProvider(providerName);
-    } finally {
+
+      // Direct sign-in handles both popup and redirect
+      await signInWithProvider(providerName);
+      // If we get here with redirect, loading state will be reset in the redirect handler
+      // If we get here with popup success, we've already navigated away
+    } catch (error) {
+      console.error('Provider sign-in error:', error);
       setIsLoading(false);
     }
   };

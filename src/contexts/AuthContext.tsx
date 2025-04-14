@@ -1,22 +1,17 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
-  signInWithRedirect,
-  getRedirectResult,
-  GoogleAuthProvider,
-  GithubAuthProvider,
-  TwitterAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  browserPopupRedirectResolver,
   User as FirebaseUser
 } from 'firebase/auth';
+import { directSignIn, ProviderType, getAuthRedirectResult } from '@/lib/simple-auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { User } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
-// Define provider types
-type Provider = 'google' | 'github' | 'twitter';
+// Use the ProviderType from simple-auth
+type Provider = ProviderType;
 
 // Define auth user type with extra fields
 export interface AuthUser extends User {
@@ -126,35 +121,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Sign in with provider function
+  // Sign in with provider function - uses our simplified auth approach
   const signInWithProvider = async (providerName: Provider) => {
     setIsLoading(true);
     try {
-      // Set up authentication provider
-      let provider;
-      switch (providerName) {
-        case 'google':
-          provider = new GoogleAuthProvider();
-          break;
-        case 'github':
-          provider = new GithubAuthProvider();
-          break;
-        case 'twitter':
-          provider = new TwitterAuthProvider();
-          break;
-        default:
-          throw new Error(`Unsupported provider: ${providerName}`);
+      console.log('AuthContext: Starting sign in with provider:', providerName);
+
+      // Use our direct sign-in method that handles both popup and redirect
+      const user = await directSignIn(providerName);
+
+      if (user) {
+        console.log('AuthContext: User signed in successfully:', user.uid);
+        const userData = await getUserData(user);
+        setUser(userData);
+
+        toast({
+          title: 'Signed in successfully',
+          variant: 'success'
+        });
+
+        // Force navigation to dashboard for consistency
+        window.location.href = '/dashboard';
       }
-
-      // Sign in with redirect instead of popup to avoid COOP issues
-      // Use browserPopupRedirectResolver for better compatibility
-      await signInWithRedirect(auth, provider, browserPopupRedirectResolver);
-
-      // Note: The redirect will navigate away from the page
+      // If no user is returned, it means a redirect was initiated
       // The result will be handled in the useEffect below
 
     } catch (error: any) {
-      console.error('Auth error:', error);
+      console.error('AuthContext: Auth error:', error);
 
       // Show error toast
       toast({
@@ -210,13 +203,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     console.log('AuthContext: Setting up auth listeners');
     let unsubscribe: () => void;
+    let isHandlingRedirect = false;
 
     const handleRedirectResult = async () => {
       try {
+        isHandlingRedirect = true;
         console.log('AuthContext: Checking for redirect result');
-        // Check if there's a redirect result
-        // Use browserPopupRedirectResolver for better compatibility
-        const result = await getRedirectResult(auth, browserPopupRedirectResolver);
+        // Check if there's a redirect result using our simplified auth
+        const result = await getAuthRedirectResult();
         console.log('AuthContext: Redirect result:', result ? 'Success' : 'No result');
 
         if (result && result.user) {
@@ -233,7 +227,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
           // Force navigation to dashboard
           window.location.href = '/dashboard';
+          return true;
         }
+        return false;
       } catch (error: any) {
         console.error('AuthContext: Redirect sign-in error:', error);
         toast({
@@ -241,27 +237,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           description: error.message || 'An error occurred during sign-in',
           variant: 'destructive'
         });
+        return false;
+      } finally {
+        isHandlingRedirect = false;
       }
     };
 
     // Handle redirect result first
-    handleRedirectResult().then(() => {
-      console.log('AuthContext: Setting up auth state listener');
-      // Then set up the auth state listener
-      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        setIsLoading(true);
-        console.log('AuthContext: Auth state changed:', firebaseUser ? 'User logged in' : 'No user');
+    handleRedirectResult().then((redirectHandled) => {
+      if (!redirectHandled) {
+        console.log('AuthContext: Setting up auth state listener');
+        // Then set up the auth state listener
+        unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+          if (isHandlingRedirect) {
+            console.log('AuthContext: Skipping auth state change during redirect handling');
+            return;
+          }
 
-        if (firebaseUser) {
-          const userData = await getUserData(firebaseUser);
-          console.log('AuthContext: User data retrieved from Firestore');
-          setUser(userData);
-        } else {
-          setUser(null);
-        }
+          setIsLoading(true);
+          console.log('AuthContext: Auth state changed:', firebaseUser ? 'User logged in' : 'No user');
 
-        setIsLoading(false);
-      });
+          if (firebaseUser) {
+            const userData = await getUserData(firebaseUser);
+            console.log('AuthContext: User data retrieved from Firestore');
+            setUser(userData);
+          } else {
+            setUser(null);
+          }
+
+          setIsLoading(false);
+        });
+      }
     });
 
     // Clean up subscription

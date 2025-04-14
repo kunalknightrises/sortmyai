@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { AITool } from '@/types';
 
@@ -12,7 +12,7 @@ export const addAITool = async (tool: AITool): Promise<string> => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    
+
     const docRef = await addDoc(collection(db, COLLECTION_NAME), toolWithTimestamp);
     return docRef.id;
   } catch (error) {
@@ -25,7 +25,7 @@ export const addAITool = async (tool: AITool): Promise<string> => {
 export const bulkAddAITools = async (tools: AITool[]): Promise<string[]> => {
   try {
     const ids: string[] = [];
-    
+
     // Use a batch or transaction for better performance with large datasets
     for (const tool of tools) {
       const toolWithTimestamp = {
@@ -33,11 +33,11 @@ export const bulkAddAITools = async (tools: AITool[]): Promise<string[]> => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
-      
+
       const docRef = await addDoc(collection(db, COLLECTION_NAME), toolWithTimestamp);
       ids.push(docRef.id);
     }
-    
+
     return ids;
   } catch (error) {
     console.error('Error bulk adding AI tools:', error);
@@ -49,7 +49,7 @@ export const bulkAddAITools = async (tools: AITool[]): Promise<string[]> => {
 export const getAllAITools = async (): Promise<AITool[]> => {
   try {
     const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-    
+
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -66,7 +66,7 @@ export const getAIToolsByTag = async (tag: string): Promise<AITool[]> => {
     // Note: This is a simple implementation that checks if the tag string contains the search tag
     // For more complex filtering, you might want to use an array of tags and array-contains query
     const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-    
+
     return querySnapshot.docs
       .map(doc => ({
         id: doc.id,
@@ -83,7 +83,7 @@ export const getAIToolsByTag = async (tag: string): Promise<AITool[]> => {
 export const updateAITool = async (id: string, tool: Partial<AITool>): Promise<void> => {
   try {
     const toolRef = doc(db, COLLECTION_NAME, id);
-    
+
     await updateDoc(toolRef, {
       ...tool,
       updatedAt: new Date().toISOString()

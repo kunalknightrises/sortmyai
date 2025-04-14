@@ -5,6 +5,8 @@ import DashboardLayout from './components/DashboardLayout';
 
 // Pages
 import Login from '@/pages/Login';
+import SimpleLogin from '@/pages/SimpleLogin';
+import EmailLogin from '@/pages/EmailLogin';
 import Signup from '@/pages/Signup';
 import Profile from '@/pages/Profile';
 import Settings from '@/pages/Settings';
@@ -41,7 +43,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<EmailLogin />} />
+        <Route path="/popup-login" element={<SimpleLogin />} />
+        <Route path="/old-login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/portfolio/:username" element={<InstagramStylePortfolio />} />
 
