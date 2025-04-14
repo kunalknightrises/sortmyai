@@ -87,14 +87,17 @@ export const initializeGoogleDrive = async () => {
         throw new Error('Google Client ID is missing. Please check your environment variables.');
       }
 
+      // Use type assertion to add redirect_uri
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
         scope: API_SCOPE,
         callback: () => {},
-        error_callback: (err) => {
+        error_callback: (err: any) => {
           console.error('Google OAuth Error:', err);
         },
-      });
+        // @ts-ignore - redirect_uri is valid but not in the type definition
+        redirect_uri: window.location.origin,
+      } as any);
     }
 
     return true;
@@ -134,10 +137,14 @@ export const getAccessToken = (): Promise<string> => {
 
       // Request access token with specific settings to help with COOP issues
       console.log('Requesting access token with client ID:', GOOGLE_CLIENT_ID);
+      console.log('Using redirect URI:', window.location.origin);
+      // Use type assertion to add redirect_uri
       tokenClient.requestAccessToken({
         prompt: 'consent',
         client_id: GOOGLE_CLIENT_ID, // Explicitly provide client_id again
-      });
+        // @ts-ignore - redirect_uri is valid but not in the type definition
+        redirect_uri: window.location.origin, // Explicitly provide redirect_uri
+      } as any);
     } catch (err) {
       reject(err);
     }

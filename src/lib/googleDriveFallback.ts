@@ -34,7 +34,9 @@ export const loadGoogleApi = (): Promise<void> => {
           // @ts-ignore - clientId is valid but not in the type definition
           clientId: CLIENT_ID,
           scope: SCOPES,
-          discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+          discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+          // @ts-ignore - redirect_uri is valid but not in the type definition
+          redirect_uri: window.location.origin
         }).then(() => {
           console.log('Google API initialized successfully');
           resolve();
