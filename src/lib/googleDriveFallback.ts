@@ -9,6 +9,25 @@ const CLIENT_ID = '220186510992-5oa2tojm2o51qh4324ao7fe0mmfkh021.apps.googleuser
 const API_KEY = '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';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
+// Define authorized redirect URIs
+const AUTHORIZED_URIS = [
+  'https://www.sortmyai.com',
+  'https://sortmyai.com',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost'
+];
+
+// Get the appropriate redirect URI based on the current origin
+const getRedirectUri = (): string => {
+  const origin = window.location.origin;
+  if (AUTHORIZED_URIS.includes(origin)) {
+    return origin;
+  }
+  // Default to the first authorized URI if the current origin is not in the list
+  return AUTHORIZED_URIS[0];
+};
+
 let accessToken: string | null = null;
 
 // Define gapi with proper types
@@ -36,7 +55,7 @@ export const loadGoogleApi = (): Promise<void> => {
           scope: SCOPES,
           discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
           // @ts-ignore - redirect_uri is valid but not in the type definition
-          redirect_uri: window.location.origin
+          redirect_uri: getRedirectUri()
         }).then(() => {
           console.log('Google API initialized successfully');
           resolve();

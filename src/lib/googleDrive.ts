@@ -3,6 +3,25 @@
 // Get API key and client ID from environment variables or use hardcoded values as fallback
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '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';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '220186510992-5oa2tojm2o51qh4324ao7fe0mmfkh021.apps.googleusercontent.com';
+
+// Define authorized redirect URIs
+const AUTHORIZED_URIS = [
+  'https://www.sortmyai.com',
+  'https://sortmyai.com',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost'
+];
+
+// Get the appropriate redirect URI based on the current origin
+const getRedirectUri = (): string => {
+  const origin = window.location.origin;
+  if (AUTHORIZED_URIS.includes(origin)) {
+    return origin;
+  }
+  // Default to the first authorized URI if the current origin is not in the list
+  return AUTHORIZED_URIS[0];
+};
 // Use a limited scope to avoid verification requirements
 const API_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
@@ -96,7 +115,7 @@ export const initializeGoogleDrive = async () => {
           console.error('Google OAuth Error:', err);
         },
         // @ts-ignore - redirect_uri is valid but not in the type definition
-        redirect_uri: window.location.origin,
+        redirect_uri: getRedirectUri(),
       } as any);
     }
 
@@ -137,13 +156,13 @@ export const getAccessToken = (): Promise<string> => {
 
       // Request access token with specific settings to help with COOP issues
       console.log('Requesting access token with client ID:', GOOGLE_CLIENT_ID);
-      console.log('Using redirect URI:', window.location.origin);
+      console.log('Using redirect URI:', getRedirectUri());
       // Use type assertion to add redirect_uri
       tokenClient.requestAccessToken({
         prompt: 'consent',
         client_id: GOOGLE_CLIENT_ID, // Explicitly provide client_id again
         // @ts-ignore - redirect_uri is valid but not in the type definition
-        redirect_uri: window.location.origin, // Explicitly provide redirect_uri
+        redirect_uri: getRedirectUri(), // Explicitly provide redirect_uri
       } as any);
     } catch (err) {
       reject(err);
