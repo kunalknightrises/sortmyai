@@ -51,22 +51,36 @@ export interface PortfolioItem {
 
 export interface Tool {
   id: string;
-  userId: string;
   name: string;
   description: string;
-  logo_url: string;
-  website: string;  // Changed from website_url to match what's being used
-  category: string;
+  logo_url?: string;
+  website_url?: string;
+  website?: string;  // For backward compatibility
   tags: string[];
-  is_favorite: boolean;
-  usage_frequency: 'daily' | 'weekly' | 'monthly' | 'rarely';
-  rating: number;
-  price_tier: 'free' | 'freemium' | 'paid' | 'subscription';
-  notes: string;
   created_at: string;
-  updated_at: string;
-  // Fields used in the codebase but not defined in the interface
-  user_id?: string;
+  user_id: string;
+  // Optional fields
+  category?: string;
+  is_favorite?: boolean;
+  usage_frequency?: 'daily' | 'weekly' | 'monthly' | 'rarely';
+  rating?: number;
+  price_tier?: 'free' | 'freemium' | 'paid' | 'subscription';
+  notes?: string;
+  updated_at?: string;
+}
+
+export interface AITool {
+  id?: string;
+  name: string;
+  useCase: string;
+  description: string;
+  tags: string;
+  pricing: string;
+  excelsAt: string;
+  websiteLink: string;
+  logoLink: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export * from './gamification';

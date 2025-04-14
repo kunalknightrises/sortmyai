@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   GithubAuthProvider,
   TwitterAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  browserPopupRedirectResolver,
   User as FirebaseUser
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -144,16 +146,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           throw new Error(`Unsupported provider: ${providerName}`);
       }
 
-      // Sign in with popup
-      const result = await signInWithPopup(auth, provider);
-      const userData = await getUserData(result.user);
-      setUser(userData);
+      // Sign in with redirect instead of popup to avoid COOP issues
+      // Use browserPopupRedirectResolver for better compatibility
+      await signInWithRedirect(auth, provider, browserPopupRedirectResolver);
 
-      // Show success toast
-      toast({
-        title: 'Signed in successfully',
-        variant: 'success'
-      });
+      // Note: The redirect will navigate away from the page
+      // The result will be handled in the useEffect below
 
     } catch (error: any) {
       console.error('Auth error:', error);
@@ -208,24 +206,72 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAdmin = user?.role === 'admin';
   const isIntern = user?.role === 'intern';
 
-  // Listen for auth state changes
+  // Listen for auth state changes and handle redirect result
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setIsLoading(true);
+    console.log('AuthContext: Setting up auth listeners');
+    let unsubscribe: () => void;
 
-      if (firebaseUser) {
-        const userData = await getUserData(firebaseUser);
-        setUser(userData);
-      } else {
-        setUser(null);
+    const handleRedirectResult = async () => {
+      try {
+        console.log('AuthContext: Checking for redirect result');
+        // Check if there's a redirect result
+        // Use browserPopupRedirectResolver for better compatibility
+        const result = await getRedirectResult(auth, browserPopupRedirectResolver);
+        console.log('AuthContext: Redirect result:', result ? 'Success' : 'No result');
+
+        if (result && result.user) {
+          console.log('AuthContext: User authenticated via redirect:', result.user.uid);
+          // User just signed in with redirect
+          const userData = await getUserData(result.user);
+          setUser(userData);
+
+          // Show success toast
+          toast({
+            title: 'Signed in successfully',
+            variant: 'success'
+          });
+
+          // Force navigation to dashboard
+          window.location.href = '/dashboard';
+        }
+      } catch (error: any) {
+        console.error('AuthContext: Redirect sign-in error:', error);
+        toast({
+          title: 'Sign-in failed',
+          description: error.message || 'An error occurred during sign-in',
+          variant: 'destructive'
+        });
       }
+    };
 
-      setIsLoading(false);
+    // Handle redirect result first
+    handleRedirectResult().then(() => {
+      console.log('AuthContext: Setting up auth state listener');
+      // Then set up the auth state listener
+      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        setIsLoading(true);
+        console.log('AuthContext: Auth state changed:', firebaseUser ? 'User logged in' : 'No user');
+
+        if (firebaseUser) {
+          const userData = await getUserData(firebaseUser);
+          console.log('AuthContext: User data retrieved from Firestore');
+          setUser(userData);
+        } else {
+          setUser(null);
+        }
+
+        setIsLoading(false);
+      });
     });
 
     // Clean up subscription
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      if (unsubscribe) {
+        console.log('AuthContext: Cleaning up auth listener');
+        unsubscribe();
+      }
+    };
+  }, [toast]);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, isAdmin, isIntern, signInWithProvider, signOut, refreshUser }}>
@@ -235,10 +281,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 };
 
 // Create hook to use auth context
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
+}

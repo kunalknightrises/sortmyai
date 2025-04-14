@@ -1,7 +1,7 @@
 
 import { initializeApp } from "firebase/app";
 import { initializeFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getAuth, connectAuthEmulator, browserSessionPersistence, setPersistence } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { validateEnv } from "./env";
 
@@ -25,6 +25,17 @@ const app = initializeApp(firebaseConfig);
 // Initialize services
 export const db = initializeFirestore(app, {});
 export const auth = getAuth(app);
+
+// Set auth persistence to session to avoid issues with redirects
+// This ensures auth state is maintained during redirects
+console.log('Setting up Firebase auth persistence');
+setPersistence(auth, browserSessionPersistence)
+  .then(() => {
+    console.log('Firebase auth persistence set to browserSessionPersistence');
+  })
+  .catch(error => {
+    console.error("Error setting auth persistence:", error);
+  });
 
 // Initialize analytics conditionally
 export const analytics = isSupported().then(yes => yes ? getAnalytics(app) : null);

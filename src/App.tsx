@@ -18,7 +18,9 @@ import Dashboard from '@/components/Dashboard';
 import Achievements from '@/pages/Achievements';
 import { useEffect } from 'react';
 import Academy from '@/pages/Academy';
+import AIToolsUpload from '@/pages/AIToolsUpload';
 import { initializeCapacitor } from '@/lib/capacitor';
+import '@/lib/debug-utils'; // Import debug utilities
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,7 +36,7 @@ function App() {
   useEffect(() => {
     initializeCapacitor().catch(console.error);
   }, []);
-  
+
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
@@ -42,7 +44,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/portfolio/:username" element={<InstagramStylePortfolio />} />
-        
+
         {/* Dashboard and related routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
@@ -50,8 +52,8 @@ function App() {
               <Dashboard />
             </DashboardLayout>
           </ProtectedRoute>
-        } />        
-        
+        } />
+
         <Route path="/dashboard/profile" element={
           <ProtectedRoute>
             <DashboardLayout>
@@ -113,6 +115,15 @@ function App() {
           <ProtectedRoute>
             <DashboardLayout>
               <Academy />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* AI Tools Upload route - Admin only */}
+        <Route path="/dashboard/ai-tools-upload" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <AIToolsUpload />
             </DashboardLayout>
           </ProtectedRoute>
         } />

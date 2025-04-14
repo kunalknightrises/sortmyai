@@ -5,12 +5,12 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     // Helper function to check if user owns the document
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-    
+
     // Users collection rules
     match /users/{userId} {
       allow read: if true;  // Allow public read access to user profiles
@@ -22,10 +22,10 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys()
           .hasAny(['portfolio', 'media_urls'])
       );
-      
+
       // Allow querying users by username
       allow list: if true;
-      
+
       // Nested collections under users
       match /{allChildren=**} {
         allow read: if true;  // Allow public read access to nested collections
@@ -36,15 +36,27 @@ service cloud.firestore {
     // Portfolio items collection
     match /portfolio/{itemId} {
       allow read: if true; // Public read access
-      allow write: if isAuthenticated() && 
+      allow write: if isAuthenticated() &&
         (resource == null || resource.data.user_id == request.auth.uid);
     }
 
     // Tools collection
     match /tools/{toolId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && 
+      allow write: if isAuthenticated() &&
         (resource == null || resource.data.user_id == request.auth.uid);
+    }
+
+    // AI Tools collection
+    match /aiTools/{toolId} {
+      // Allow anyone to read AI tools
+      allow read: if true;
+
+      // Only allow admins to write to AI tools collection
+      // This requires a custom claim 'admin' to be set for admin users
+      allow write: if isAuthenticated() &&
+        (request.auth.token.admin == true ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
   }
 }

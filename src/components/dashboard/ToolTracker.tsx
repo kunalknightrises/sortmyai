@@ -52,11 +52,16 @@ const ToolTracker = () => {
     }
   };
 
-  const filteredTools = tools?.filter(tool => 
-    tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    tool.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredTools = tools?.filter(tool => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      tool.name.toLowerCase().includes(searchLower) ||
+      tool.description.toLowerCase().includes(searchLower) ||
+      (tool.tags && Array.isArray(tool.tags) && tool.tags.some(tag =>
+        typeof tag === 'string' && tag.toLowerCase().includes(searchLower)
+      ))
+    );
+  });
 
   return (
     <div className="space-y-8">
@@ -150,7 +155,7 @@ const ToolTracker = () => {
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex space-x-2">
                     <Button variant="outline" size="sm" asChild>
-                      <a href={tool.website} target="_blank" rel="noopener noreferrer">
+                      <a href={tool.website || tool.website_url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="w-4 h-4 mr-1" />
                         Visit
                       </a>

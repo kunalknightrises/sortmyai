@@ -28,7 +28,7 @@ const AddTool = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newTag, setNewTag] = useState('');
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,7 +39,7 @@ const AddTool = () => {
       tags: [],
     },
   });
-  
+
   const addTag = () => {
     if (newTag.trim() && !form.getValues().tags.includes(newTag.trim())) {
       form.setValue('tags', [...form.getValues().tags, newTag.trim()]);
@@ -47,35 +47,40 @@ const AddTool = () => {
       form.clearErrors('tags');
     }
   };
-  
+
   const removeTag = (tagToRemove: string) => {
     const updatedTags = form.getValues().tags.filter(tag => tag !== tagToRemove);
     form.setValue('tags', updatedTags);
   };
-  
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user) return;
-    
+
     try {
       setIsSubmitting(true);
-      
+
       // Add tool record to Firestore
       const toolsRef = collection(db, 'tools');
       await addDoc(toolsRef, {
         name: values.name,
         description: values.description,
         website_url: values.website_url,
-        logo_url: values.logo_url,
+        website: values.website_url, // Add website field for compatibility
+        logo_url: values.logo_url || '',
         tags: values.tags,
         user_id: user.uid,
         created_at: new Date().toISOString(),
+        is_favorite: false,
+        rating: 0,
+        price_tier: 'freemium',
+        notes: ''
       });
-      
+
       toast({
         title: "Tool added",
         description: "Your tool has been added successfully.",
       });
-      
+
       navigate('/dashboard/tools');
     } catch (error: any) {
       console.error('Error adding tool:', error);
@@ -88,14 +93,14 @@ const AddTool = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <div className="space-y-8">
       <Button variant="ghost" className="mb-4" onClick={() => navigate('/dashboard/tools')}>
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Tools
       </Button>
-      
+
       <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
         <CardHeader>
           <CardTitle>Add a New Tool</CardTitle>
@@ -121,7 +126,7 @@ const AddTool = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="website_url"
@@ -135,7 +140,7 @@ const AddTool = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="logo_url"
@@ -152,7 +157,7 @@ const AddTool = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="tags"
@@ -162,13 +167,13 @@ const AddTool = () => {
                         <div className="space-y-4">
                           <div className="flex flex-wrap gap-2">
                             {form.getValues().tags.map((tag, i) => (
-                              <div 
-                                key={i} 
+                              <div
+                                key={i}
                                 className="bg-sortmy-gray/20 text-white px-3 py-1 rounded-full flex items-center gap-1"
                               >
                                 {tag}
-                                <button 
-                                  type="button" 
+                                <button
+                                  type="button"
                                   onClick={() => removeTag(tag)}
                                   className="w-4 h-4 rounded-full bg-sortmy-gray/50 flex items-center justify-center hover:bg-sortmy-gray/80"
                                 >
@@ -177,7 +182,7 @@ const AddTool = () => {
                               </div>
                             ))}
                           </div>
-                          
+
                           <div className="flex gap-2">
                             <Input
                               placeholder="Add a tag..."
@@ -190,9 +195,9 @@ const AddTool = () => {
                                 }
                               }}
                             />
-                            <Button 
-                              type="button" 
-                              variant="outline" 
+                            <Button
+                              type="button"
+                              variant="outline"
                               onClick={addTag}
                             >
                               <Plus className="w-4 h-4 mr-1" /> Add
@@ -207,7 +212,7 @@ const AddTool = () => {
                     )}
                   />
                 </div>
-                
+
                 <div className="space-y-6">
                   <FormField
                     control={form.control}
@@ -216,10 +221,10 @@ const AddTool = () => {
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Describe what this tool does and how you use it..." 
+                          <Textarea
+                            placeholder="Describe what this tool does and how you use it..."
                             className="min-h-32 resize-none"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -228,10 +233,10 @@ const AddTool = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="flex justify-end">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isSubmitting}
                   className="w-full md:w-auto"
                 >
