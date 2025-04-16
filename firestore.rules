@@ -36,24 +36,32 @@ service cloud.firestore {
     // Portfolio items collection
     match /portfolio/{itemId} {
       allow read: if true; // Public read access
-      allow write: if isAuthenticated() &&
-        (resource == null || resource.data.user_id == request.auth.uid);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
     }
 
     // Tools collection
     match /tools/{toolId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() &&
-        (resource == null || resource.data.user_id == request.auth.uid);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
     }
 
     // AI Tools collection
-    match /aiTools/{toolId} {
+    match /ai-tools/{toolId} {
       // Allow anyone to read AI tools
       allow read: if true;
 
       // Only allow admins to write to AI tools collection
       // This requires a custom claim 'admin' to be set for admin users
+      allow write: if isAuthenticated() &&
+        (request.auth.token.admin == true ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    // For backward compatibility
+    match /aiTools/{toolId} {
+      allow read: if true;
       allow write: if isAuthenticated() &&
         (request.auth.token.admin == true ||
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');

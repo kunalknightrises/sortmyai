@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Link } from 'react-router-dom';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,7 +25,11 @@ const ToolTracker = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [toolToDelete, setToolToDelete] = useState<Tool | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: tools, isLoading, error } = useQuery({
     queryKey: ['tools', user?.uid],
@@ -40,15 +45,25 @@ const ToolTracker = () => {
     enabled: !!user?.uid
   });
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this tool?")) return;
+  const handleDeleteClick = (tool: Tool) => {
+    setToolToDelete(tool);
+    setShowDeleteDialog(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!toolToDelete) return;
+
+    setIsDeleting(true);
     try {
-      await deleteDoc(doc(db, 'tools', id));
+      await deleteDoc(doc(db, 'tools', toolToDelete.id));
+      // Invalidate and refetch the tools query
+      await queryClient.invalidateQueries({ queryKey: ['tools', user?.uid] });
       toast({
         title: "Tool deleted",
         description: "Your tool has been removed successfully.",
       });
+      setShowDeleteDialog(false);
+      setToolToDelete(null);
     } catch (error: any) {
       console.error('Error deleting tool:', error);
       toast({
@@ -56,6 +71,8 @@ const ToolTracker = () => {
         description: "Failed to delete the tool. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -71,154 +88,184 @@ const ToolTracker = () => {
   });
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center">
-            <Briefcase className="w-8 h-8 mr-2 text-sortmy-blue" />
-            Tool Tracker
-          </h1>
-          <p className="text-gray-400 mt-1">
-            Manage and organize your AI tools in one place
-          </p>
-        </div>
+    <>
+      <div className="space-y-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center">
+              <Briefcase className="w-8 h-8 mr-2 text-sortmy-blue" />
+              Tool Tracker
+            </h1>
+            <p className="text-gray-400 mt-1">
+              Manage and organize your AI tools in one place
+            </p>
+          </div>
 
-        <div className="flex gap-3">
-          <ClickEffect effect="ripple" color="blue">
-            <Link to="/dashboard/tools/library">
-              <NeonButton variant="cyan">
-                <Library className="w-4 h-4 mr-2" />
-                AI Tools Library
-              </NeonButton>
-            </Link>
-          </ClickEffect>
+          <div className="flex gap-3">
+            <ClickEffect effect="ripple" color="blue">
+              <Link to="/dashboard/tools/library">
+                <NeonButton variant="cyan">
+                  <Library className="w-4 h-4 mr-2" />
+                  AI Tools Library
+                </NeonButton>
+              </Link>
+            </ClickEffect>
 
-          <ClickEffect effect="ripple" color="blue">
-            <Link to="/dashboard/tools/add">
-              <NeonButton variant="gradient">
-                <PlusCircle className="w-4 h-4 mr-2" />
-                Add a Tool
-              </NeonButton>
-            </Link>
-          </ClickEffect>
-        </div>
-      </div>
-
-      <AISuggestion
-        suggestion="Explore our AI Tools Library to discover new tools for your workflow."
-        actionText="Explore Library"
-        onAction={() => navigate('/dashboard/tools/library')}
-        autoHide={true}
-      />
-
-      <GlassCard variant="bordered" className="border-sortmy-blue/20">
-        <div className="p-4">
-          <div className="w-full relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sortmy-blue" size={18} />
-            <Input
-              placeholder="Search tools by name, description or tags..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-sortmy-gray/10 border-sortmy-blue/20 focus:border-sortmy-blue/50 transition-colors"
-            />
+            <ClickEffect effect="ripple" color="blue">
+              <Link to="/dashboard/tools/add">
+                <NeonButton variant="gradient">
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  Add a Tool
+                </NeonButton>
+              </Link>
+            </ClickEffect>
           </div>
         </div>
-      </GlassCard>
 
-      {isLoading ? (
-        <div className="text-center py-12">Loading your tools...</div>
-      ) : error ? (
-        <div className="text-center py-12">
-          <p className="text-lg mb-2">Failed to load your tools</p>
-          <p className="text-gray-400">Please try again later</p>
-        </div>
-      ) : filteredTools?.length === 0 ? (
-        <div className="text-center py-12">
-          {searchQuery ? (
-            <div>
-              <p className="text-lg mb-2">No tools match your search</p>
-              <p className="text-gray-400">Try a different search term</p>
+        <AISuggestion
+          suggestion="Explore our AI Tools Library to discover new tools for your workflow."
+          actionText="Explore Library"
+          onAction={() => navigate('/dashboard/tools/library')}
+          autoHide={true}
+        />
+
+        <GlassCard variant="bordered" className="border-sortmy-blue/20">
+          <div className="p-4">
+            <div className="w-full relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sortmy-blue" size={18} />
+              <Input
+                placeholder="Search tools by name, description or tags..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-sortmy-gray/10 border-sortmy-blue/20 focus:border-sortmy-blue/50 transition-colors"
+              />
             </div>
-          ) : (
-            <div>
-              <p className="text-lg mb-2">You haven't added any tools yet</p>
-              <ClickEffect effect="bounce" color="blue">
-                <Link to="/dashboard/tools/add">
-                  <NeonButton variant="gradient" className="mt-4">
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Add Your First Tool
-                  </NeonButton>
-                </Link>
-              </ClickEffect>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTools?.map(tool => (
-            <HoverEffect effect="lift" key={tool.id} className="h-full">
-              <GlassCard variant="bordered" className="border-sortmy-blue/20 h-full">
-              <CardHeader className="pb-2">
-                <div className="flex justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-xl bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{tool.name}</CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {tool.description}
-                    </CardDescription>
-                  </div>
-                  {tool.logo_url && (
-                    <div className="w-10 h-10 rounded-md overflow-hidden bg-white p-1">
-                      <img
-                        src={tool.logo_url}
-                        alt={`${tool.name} logo`}
-                        className="w-full h-full object-contain"
-                      />
+          </div>
+        </GlassCard>
+
+        {isLoading ? (
+          <div className="text-center py-12">Loading your tools...</div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-lg mb-2">Failed to load your tools</p>
+            <p className="text-gray-400">Please try again later</p>
+          </div>
+        ) : filteredTools?.length === 0 ? (
+          <div className="text-center py-12">
+            {searchQuery ? (
+              <div>
+                <p className="text-lg mb-2">No tools match your search</p>
+                <p className="text-gray-400">Try a different search term</p>
+              </div>
+            ) : (
+              <div>
+                <p className="text-lg mb-2">You haven't added any tools yet</p>
+                <ClickEffect effect="bounce" color="blue">
+                  <Link to="/dashboard/tools/add">
+                    <NeonButton variant="gradient" className="mt-4">
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Add Your First Tool
+                    </NeonButton>
+                  </Link>
+                </ClickEffect>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredTools?.map(tool => (
+              <HoverEffect effect="lift" key={tool.id} className="h-full">
+                <GlassCard variant="bordered" className="border-sortmy-blue/20 h-full">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between">
+                    <div className="space-y-1">
+                      <CardTitle className="text-xl bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{tool.name}</CardTitle>
+                      <CardDescription className="line-clamp-2">
+                        {tool.description}
+                      </CardDescription>
                     </div>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2 mt-3 mb-4">
-                  {tool.tags.map((tag, i) => (
-                    <span
-                      key={i}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sortmy-blue/20 text-sortmy-blue hover:bg-sortmy-blue/30 transition-colors cursor-pointer"
-                    >
-                      <Tag className="w-3 h-3 mr-1" />
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex space-x-2">
-                    <AnimatedTooltip content="Visit website" position="top">
-                      <a href={tool.website || tool.website_url} target="_blank" rel="noopener noreferrer">
-                        <NeonButton variant="cyan" size="sm">
-                          <ExternalLink className="w-4 h-4 mr-1" />
-                          Visit
+                    {tool.logo_url && (
+                      <div className="w-10 h-10 rounded-md overflow-hidden bg-white p-1">
+                        <img
+                          src={tool.logo_url}
+                          alt={`${tool.name} logo`}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2 mt-3 mb-4">
+                    {tool.tags.map((tag, i) => (
+                      <span
+                        key={i}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sortmy-blue/20 text-sortmy-blue hover:bg-sortmy-blue/30 transition-colors cursor-pointer"
+                      >
+                        <Tag className="w-3 h-3 mr-1" />
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex space-x-2">
+                      <AnimatedTooltip content="Visit website" position="top">
+                        <a href={tool.website || tool.website_url} target="_blank" rel="noopener noreferrer">
+                          <NeonButton variant="cyan" size="sm">
+                            <ExternalLink className="w-4 h-4 mr-1" />
+                            Visit
+                          </NeonButton>
+                        </a>
+                      </AnimatedTooltip>
+                      <AnimatedTooltip content="Edit tool" position="top">
+                        <NeonButton variant="magenta" size="sm" onClick={() => navigate(`/dashboard/tools/edit/${tool.id}`)}>
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
                         </NeonButton>
-                      </a>
-                    </AnimatedTooltip>
-                    <AnimatedTooltip content="Edit tool" position="top">
-                      <NeonButton variant="magenta" size="sm" onClick={() => navigate(`/dashboard/tools/edit/${tool.id}`)}>
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
+                      </AnimatedTooltip>
+                    </div>
+                    <AnimatedTooltip content="Delete tool" position="top">
+                      <NeonButton variant="magenta" size="sm" onClick={() => handleDeleteClick(tool)}>
+                        <Trash2 className="w-4 h-4 text-red-500" />
                       </NeonButton>
                     </AnimatedTooltip>
                   </div>
-                  <AnimatedTooltip content="Delete tool" position="top">
-                    <NeonButton variant="magenta" size="sm" onClick={() => handleDelete(tool.id)}>
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </NeonButton>
-                  </AnimatedTooltip>
-                </div>
-              </CardContent>
-              </GlassCard>
-            </HoverEffect>
-          ))}
-        </div>
-      )}
-    </div>
+                </CardContent>
+                </GlassCard>
+              </HoverEffect>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="bg-sortmy-dark border-sortmy-blue/20 backdrop-blur-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Tool?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{toolToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <ClickEffect effect="ripple" color="blue">
+              <NeonButton variant="cyan" disabled={isDeleting} onClick={() => setShowDeleteDialog(false)}>
+                Cancel
+              </NeonButton>
+            </ClickEffect>
+            <ClickEffect effect="ripple" color="blue">
+              <NeonButton
+                variant="magenta"
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="bg-red-500 hover:bg-red-600 border-red-500/50"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </NeonButton>
+            </ClickEffect>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
