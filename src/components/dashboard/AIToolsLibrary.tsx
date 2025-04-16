@@ -3,7 +3,7 @@ import { collection, getDocs, doc, updateDoc, arrayUnion } from 'firebase/firest
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Filter, Tag, Zap, ExternalLink, Sparkles } from 'lucide-react';
+import { Search, Plus, Filter, Zap, ExternalLink, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 import NeonButton from '@/components/ui/NeonButton';
 import ClickEffect from '@/components/ui/ClickEffect';
@@ -24,6 +24,7 @@ const AIToolsLibrary = () => {
   const [savingToolIds, setSavingToolIds] = useState<string[]>([]);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState('all');
+  const [filtersExpanded, setFiltersExpanded] = useState(true);
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -205,12 +206,26 @@ const AIToolsLibrary = () => {
           <Sparkles className="w-6 h-6 mr-2 text-sortmy-blue" />
           AI Tools Library
         </h2>
+
+        {/* Mobile filter toggle */}
+        <div className="md:hidden">
+          <NeonButton
+            variant="cyan"
+            size="sm"
+            onClick={() => setFiltersExpanded(!filtersExpanded)}
+            className="flex items-center gap-1"
+          >
+            <Filter className="w-4 h-4" />
+            {filtersExpanded ? 'Hide Filters' : 'Show Filters'}
+          </NeonButton>
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
-        {/* Search and filters */}
-        <div className="w-full md:w-1/4 space-y-4">
-          <GlassCard variant="bordered" className="border-sortmy-blue/20 p-4">
+      {/* Filters section - above the cards */}
+      <GlassCard variant="bordered" className="border-sortmy-blue/20 p-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Search input */}
+          <div className="w-full md:w-1/3">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-sortmy-blue" />
               <Input
@@ -220,19 +235,32 @@ const AIToolsLibrary = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
+          </div>
 
-            <div className="mt-4">
-              <div className="flex items-center mb-2">
+          {/* Tags filter */}
+          <div className="w-full md:w-2/3">
+            <div className="flex items-center justify-between mb-2 cursor-pointer" onClick={() => setFiltersExpanded(!filtersExpanded)}>
+              <div className="flex items-center">
                 <Filter className="w-4 h-4 mr-2 text-sortmy-blue" />
                 <h3 className="font-medium">Filters</h3>
+                {selectedTags.length > 0 && (
+                  <Badge className="ml-2 bg-sortmy-blue/20 text-sortmy-blue border-sortmy-blue/30">
+                    {selectedTags.length}
+                  </Badge>
+                )}
               </div>
+              <div className="p-1 rounded-full hover:bg-sortmy-blue/10 transition-colors">
+                {filtersExpanded ? (
+                  <ChevronUp className="w-4 h-4 text-sortmy-blue" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-sortmy-blue" />
+                )}
+              </div>
+            </div>
 
-              <div className="mt-2">
-                <div className="flex items-center mb-2">
-                  <Tag className="w-4 h-4 mr-2 text-sortmy-blue" />
-                  <h4 className="text-sm font-medium">Tags</h4>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
+            {filtersExpanded && (
+              <div className="mt-2 animate-in fade-in duration-300">
+                <div className="flex flex-wrap gap-2">
                   {allTags.map(tag => (
                     <Badge
                       key={tag}
@@ -249,35 +277,38 @@ const AIToolsLibrary = () => {
                   ))}
                 </div>
               </div>
-
-              {(searchQuery || selectedTags.length > 0 || activeTab !== 'all') && (
-                <ClickEffect effect="ripple" color="blue">
-                  <NeonButton
-                    variant="cyan"
-                    size="sm"
-                    className="mt-4 w-full"
-                    onClick={clearFilters}
-                  >
-                    Clear Filters
-                  </NeonButton>
-                </ClickEffect>
-              )}
-            </div>
-          </GlassCard>
+            )}
+          </div>
         </div>
 
-        {/* Tools grid */}
-        <div className="w-full md:w-3/4">
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-sortmy-darker border border-sortmy-blue/20 mb-4">
-              <TabsTrigger value="all">All Tools</TabsTrigger>
-              <TabsTrigger value="free">Free</TabsTrigger>
-              <TabsTrigger value="freemium">Freemium</TabsTrigger>
-              <TabsTrigger value="paid">Paid</TabsTrigger>
-            </TabsList>
+        {/* Clear filters button - only shown when filters are applied */}
+        {(searchQuery || selectedTags.length > 0 || activeTab !== 'all') && (
+          <div className="mt-4 flex justify-end">
+            <ClickEffect effect="ripple" color="blue">
+              <NeonButton
+                variant="cyan"
+                size="sm"
+                onClick={clearFilters}
+              >
+                Clear Filters
+              </NeonButton>
+            </ClickEffect>
+          </div>
+        )}
+      </GlassCard>
 
-            <TabsContent value="all" className="m-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Tools grid - full width */}
+      <div className="w-full">
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-sortmy-darker border border-sortmy-blue/20 mb-4">
+            <TabsTrigger value="all">All Tools</TabsTrigger>
+            <TabsTrigger value="free">Free</TabsTrigger>
+            <TabsTrigger value="freemium">Freemium</TabsTrigger>
+            <TabsTrigger value="paid">Paid</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="m-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {loading ? (
                   // Loading skeletons
                   Array.from({ length: 6 }).map((_, index) => (
@@ -441,10 +472,10 @@ const AIToolsLibrary = () => {
                   </div>
                 )}
               </div>
-            </TabsContent>
+          </TabsContent>
 
-            <TabsContent value="free" className="m-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <TabsContent value="free" className="m-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {loading ? (
                   // Loading skeletons
                   Array.from({ length: 6 }).map((_, index) => (
@@ -600,10 +631,10 @@ const AIToolsLibrary = () => {
                   </div>
                 )}
               </div>
-            </TabsContent>
+          </TabsContent>
 
-            <TabsContent value="freemium" className="m-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <TabsContent value="freemium" className="m-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {loading ? (
                   // Loading skeletons
                   Array.from({ length: 6 }).map((_, index) => (
@@ -759,10 +790,10 @@ const AIToolsLibrary = () => {
                   </div>
                 )}
               </div>
-            </TabsContent>
+          </TabsContent>
 
-            <TabsContent value="paid" className="m-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <TabsContent value="paid" className="m-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {loading ? (
                   // Loading skeletons
                   Array.from({ length: 6 }).map((_, index) => (
@@ -918,9 +949,8 @@ const AIToolsLibrary = () => {
                   </div>
                 )}
               </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
