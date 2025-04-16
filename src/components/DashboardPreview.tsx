@@ -1,17 +1,18 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Lock, Star, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Lock, Star, TrendingUp, Sparkles } from "lucide-react";
+import GlassCard from "@/components/ui/GlassCard";
+import NeonButton from "@/components/ui/NeonButton";
 
 const LogoIcon = ({ className }: { className?: string }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     className={className}
   >
     <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
@@ -28,13 +29,18 @@ const LogoIcon = ({ className }: { className?: string }) => (
 
 const DashboardPreview = () => {
   return (
-    <div className="relative rounded-xl overflow-hidden border border-sortmy-gray/30">
+    <div className="relative rounded-xl overflow-hidden border border-sortmy-blue/20 shadow-[0_0_20px_rgba(0,102,255,0.15)] backdrop-blur-sm">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-sortmy-dark pointer-events-none z-10" />
-      
-      <div className="bg-sortmy-gray/10 p-4 border-b border-sortmy-gray/30 flex justify-between items-center">
+      {/* Subtle scanline effect */}
+      <div className="absolute inset-0 pointer-events-none z-[1] bg-scanline opacity-10"></div>
+
+      <div className="bg-sortmy-darker/70 p-4 border-b border-sortmy-blue/20 flex justify-between items-center backdrop-blur-md">
         <div className="flex items-center space-x-3">
-          <LogoIcon className="w-5 h-5 text-sortmy-blue" />
-          <h3 className="text-sm font-medium">My AI Command Center</h3>
+          <div className="relative">
+            <LogoIcon className="w-5 h-5 text-sortmy-blue" />
+            <Sparkles className="w-2 h-2 absolute -top-1 -right-1 text-sortmy-blue animate-pulse" />
+          </div>
+          <h3 className="text-sm font-medium bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">My AI Command Center</h3>
         </div>
         <div className="flex space-x-2">
           <div className="w-3 h-3 rounded-full bg-sortmy-gray/50"></div>
@@ -42,38 +48,38 @@ const DashboardPreview = () => {
           <div className="w-3 h-3 rounded-full bg-sortmy-gray/50"></div>
         </div>
       </div>
-      
-      <div className="p-6 max-h-[400px] overflow-hidden">
-        <Card className="border-sortmy-gray/30 bg-sortmy-gray/10 mb-6">
+
+      <div className="p-6 max-h-[400px] overflow-hidden bg-sortmy-darker/50 backdrop-blur-sm">
+        <GlassCard variant="bordered" className="border-sortmy-blue/20 mb-6">
           <CardContent className="p-4">
             <h4 className="text-sm font-medium mb-3 flex items-center">
               <TrendingUp className="w-4 h-4 mr-2 text-sortmy-blue" />
-              AI Tool Performance
+              <span className="bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">AI Tool Performance</span>
             </h4>
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-sortmy-gray/20 p-3 rounded-lg">
+              <div className="bg-sortmy-blue/5 p-3 rounded-lg border border-sortmy-blue/10 hover:border-sortmy-blue/30 transition-all duration-300 hover:bg-sortmy-blue/10">
                 <div className="text-xs text-gray-400">Tools Tracked</div>
-                <div className="text-xl font-bold">24</div>
+                <div className="text-xl font-bold bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">24</div>
               </div>
-              <div className="bg-sortmy-gray/20 p-3 rounded-lg">
+              <div className="bg-sortmy-blue/5 p-3 rounded-lg border border-sortmy-blue/10 hover:border-sortmy-blue/30 transition-all duration-300 hover:bg-sortmy-blue/10">
                 <div className="text-xs text-gray-400">Use Cases</div>
-                <div className="text-xl font-bold">86</div>
+                <div className="text-xl font-bold bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">86</div>
               </div>
-              <div className="bg-sortmy-gray/20 p-3 rounded-lg">
+              <div className="bg-sortmy-blue/5 p-3 rounded-lg border border-sortmy-blue/10 hover:border-sortmy-blue/30 transition-all duration-300 hover:bg-sortmy-blue/10">
                 <div className="text-xs text-gray-400">Better Options</div>
-                <div className="text-xl font-bold">
+                <div className="text-xl font-bold bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">
                   12
-                  <span className="text-xs ml-1 text-sortmy-blue">+3</span>
+                  <span className="text-xs ml-1 text-[#00ffff]">+3</span>
                 </div>
               </div>
             </div>
           </CardContent>
-        </Card>
-        
-        <h4 className="text-sm font-medium mb-3">Tool Tracker</h4>
-        <Table>
+        </GlassCard>
+
+        <h4 className="text-sm font-medium mb-3 bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text inline-block">Tool Tracker</h4>
+        <Table className="backdrop-blur-sm">
           <TableHeader>
-            <TableRow className="border-sortmy-gray/30">
+            <TableRow className="border-sortmy-blue/20">
               <TableHead className="text-xs">Tool</TableHead>
               <TableHead className="text-xs">Use Case</TableHead>
               <TableHead className="text-xs">
@@ -85,10 +91,10 @@ const DashboardPreview = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow className="border-sortmy-gray/30">
+            <TableRow className="border-sortmy-blue/20 hover:bg-sortmy-blue/5 transition-colors duration-300">
               <TableCell className="py-2">
                 <div className="flex items-center">
-                  <div className="w-6 h-6 rounded bg-sortmy-gray/50 mr-2"></div>
+                  <div className="w-6 h-6 rounded bg-sortmy-blue/20 mr-2 border border-sortmy-blue/30"></div>
                   <span>ChatGPT</span>
                 </div>
               </TableCell>
@@ -96,16 +102,16 @@ const DashboardPreview = () => {
               <TableCell className="py-2 relative">
                 <div className="filter blur-sm">Claude Opus</div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Button size="sm" variant="outline" className="text-xs border-sortmy-blue text-sortmy-blue h-7 px-2">
+                  <NeonButton size="sm" variant="cyan" className="text-xs h-7 px-2">
                     <Star className="w-3 h-3 mr-1" /> Unlock with Plus
-                  </Button>
+                  </NeonButton>
                 </div>
               </TableCell>
             </TableRow>
-            <TableRow className="border-sortmy-gray/30">
+            <TableRow className="border-sortmy-blue/20 hover:bg-sortmy-blue/5 transition-colors duration-300">
               <TableCell className="py-2">
                 <div className="flex items-center">
-                  <div className="w-6 h-6 rounded bg-sortmy-gray/50 mr-2"></div>
+                  <div className="w-6 h-6 rounded bg-sortmy-blue/20 mr-2 border border-sortmy-blue/30"></div>
                   <span>Midjourney</span>
                 </div>
               </TableCell>
