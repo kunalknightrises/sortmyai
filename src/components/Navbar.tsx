@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Menu, User, Sparkles } from "lucide-react";
+import { Menu, User, Sparkles, Users } from "lucide-react";
 import NeonButton from "@/components/ui/NeonButton";
 import ClickEffect from "@/components/ui/ClickEffect";
+import { useAuth } from '@/contexts/AuthContext';
 
 const LogoIcon = ({ className }: { className?: string }) => (
   <svg
@@ -30,6 +31,7 @@ const LogoIcon = ({ className }: { className?: string }) => (
 );
 
 const Navbar = () => {
+  const { user } = useAuth();
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-4 md:px-8 backdrop-blur-md bg-sortmy-darker/70 border-b border-sortmy-blue/20 shadow-[0_0_15px_rgba(0,102,255,0.1)]">
       {/* Subtle scanline effect */}
@@ -48,24 +50,40 @@ const Navbar = () => {
 
         <div className="flex items-center space-x-3">
           <Link to="/explore">
-            <Button variant="ghost" className="hidden md:flex hover:bg-sortmy-blue/10 text-sm border border-transparent hover:border-sortmy-blue/20 transition-all duration-300">
-              <span className="bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">Explore Creators</span>
-            </Button>
-          </Link>
-
-          <Link to="/login">
-            <Button variant="ghost" className="hidden md:flex hover:bg-sortmy-blue/10 text-sm border border-transparent hover:border-sortmy-blue/20 transition-all duration-300">
-              <span className="bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">Log In</span>
-            </Button>
-          </Link>
-          <Link to="/signup">
             <ClickEffect effect="ripple" color="blue">
-              <NeonButton variant="gradient" className="text-sm">
-                <User className="w-4 h-4 mr-2 md:mr-1" />
-                <span className="hidden md:inline">Sign Up</span>
+              <NeonButton variant="cyan" className="text-sm">
+                <Users className="w-4 h-4 mr-2 md:mr-1" />
+                <span className="hidden md:inline">Explore Creators</span>
               </NeonButton>
             </ClickEffect>
           </Link>
+
+          {!user ? (
+            <>
+              <Link to="/login">
+                <Button variant="ghost" className="hidden md:flex hover:bg-sortmy-blue/10 text-sm border border-transparent hover:border-sortmy-blue/20 transition-all duration-300">
+                  <span className="bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">Log In</span>
+                </Button>
+              </Link>
+              <Link to="/signup">
+                <ClickEffect effect="ripple" color="blue">
+                  <NeonButton variant="gradient" className="text-sm">
+                    <User className="w-4 h-4 mr-2 md:mr-1" />
+                    <span className="hidden md:inline">Sign Up</span>
+                  </NeonButton>
+                </ClickEffect>
+              </Link>
+            </>
+          ) : (
+            <Link to="/dashboard">
+              <ClickEffect effect="ripple" color="blue">
+                <NeonButton variant="gradient" className="text-sm">
+                  <User className="w-4 h-4 mr-2 md:mr-1" />
+                  <span className="hidden md:inline">Dashboard</span>
+                </NeonButton>
+              </ClickEffect>
+            </Link>
+          )}
           <Button variant="ghost" size="icon" className="md:hidden hover:bg-sortmy-blue/10 border border-transparent hover:border-sortmy-blue/20 transition-all duration-300">
             <Menu className="w-5 h-5 text-sortmy-blue" />
           </Button>

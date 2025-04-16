@@ -51,6 +51,7 @@ function App() {
         <Route path="/old-login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/portfolio/:username" element={<InstagramStylePortfolio />} />
+        <Route path="/explore" element={<ExploreCreators />} />
 
         {/* Dashboard and related routes */}
         <Route path="/dashboard" element={

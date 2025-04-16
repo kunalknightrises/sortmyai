@@ -6,8 +6,8 @@ import { Slot } from '@radix-ui/react-slot';
 interface NeonButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
   children: React.ReactNode;
-  variant?: 'magenta' | 'cyan' | 'purple' | 'gradient';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'magenta' | 'cyan' | 'purple' | 'gradient' | 'outline';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
   glow?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
@@ -34,6 +34,7 @@ const NeonButton = forwardRef<HTMLButtonElement, NeonButtonProps>((
     sm: 'text-xs px-3 py-1.5',
     md: 'text-sm px-4 py-2',
     lg: 'text-base px-6 py-3',
+    icon: 'p-2 aspect-square',
   };
 
   // Color styles based on variant
@@ -42,6 +43,7 @@ const NeonButton = forwardRef<HTMLButtonElement, NeonButtonProps>((
     cyan: 'bg-[#0a0a0a] text-[#0066ff] border border-[#0066ff]/50',
     purple: 'bg-[#121212] text-white border border-[#0066ff]/30',
     gradient: 'bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-white border-none',
+    outline: 'bg-transparent text-[#0066ff] border border-[#0066ff]/50',
   };
 
   // Glow styles based on variant
@@ -50,11 +52,13 @@ const NeonButton = forwardRef<HTMLButtonElement, NeonButtonProps>((
     cyan: 'hover:shadow-[0_0_10px_rgba(0,102,255,0.5)] hover:border-[#0066ff]',
     purple: 'hover:shadow-[0_0_10px_rgba(0,102,255,0.3)] hover:border-[#0066ff]/60',
     gradient: 'hover:shadow-[0_0_15px_rgba(0,102,255,0.4)]',
+    outline: 'hover:shadow-[0_0_10px_rgba(0,102,255,0.3)] hover:border-[#0066ff]/80 hover:bg-[#0066ff]/10',
   } : {
     magenta: '',
     cyan: '',
     purple: '',
     gradient: '',
+    outline: '',
   };
 
   // Hover transform

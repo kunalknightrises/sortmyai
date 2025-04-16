@@ -3,19 +3,25 @@ import { User } from '@/types';
 import { fetchCreatorsWithPortfolio, searchCreators } from '@/services/creatorService';
 import { CreatorCard } from '@/components/creators/CreatorCard';
 import { Input } from '@/components/ui/input';
-import { Search, Users, RefreshCw } from 'lucide-react';
+import { Search, Users, RefreshCw, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import GlassCard from '@/components/ui/GlassCard';
 import NeonButton from '@/components/ui/NeonButton';
 import ClickEffect from '@/components/ui/ClickEffect';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
+import SynthwaveBackground from '@/components/ui/SynthwaveBackground';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const ExploreCreators = () => {
   const [creators, setCreators] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [backgroundType, setBackgroundType] = useState<'low' | 'medium' | 'high'>('medium');
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchCreators = async () => {
     try {
@@ -56,8 +62,30 @@ const ExploreCreators = () => {
   }, []);
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-8 relative">
+      {/* Background */}
+      <div className="fixed inset-0 z-0">
+        <SynthwaveBackground intensity={backgroundType} className="z-0" />
+      </div>
+
+      {/* Scanline effect */}
+      <div className="scanline-effect fixed inset-0 z-[1] pointer-events-none"></div>
+
+      {/* Theme toggle */}
+      <div className="absolute top-4 right-4 z-20 flex gap-2">
+        <NeonButton
+          variant="outline"
+          size="icon"
+          className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
+          onClick={() => setBackgroundType(prev => prev === 'low' ? 'medium' : prev === 'medium' ? 'high' : 'low')}
+          title="Toggle Background Intensity"
+        >
+          <RefreshCw className="h-4 w-4" />
+        </NeonButton>
+        <ThemeToggle />
+      </div>
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center">
             <Users className="w-8 h-8 mr-2 text-sortmy-blue" />
@@ -80,7 +108,7 @@ const ExploreCreators = () => {
         </ClickEffect>
       </div>
 
-      <GlassCard variant="bordered" className="border-sortmy-blue/20">
+      <GlassCard variant="bordered" className="border-sortmy-blue/20 relative z-10">
         <div className="p-4">
           <div className="w-full relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sortmy-blue" size={18} />
@@ -107,8 +135,34 @@ const ExploreCreators = () => {
         </div>
       </GlassCard>
 
+      {!user && (
+        <GlassCard variant="bordered" className="border-sortmy-blue/20 relative z-10 bg-sortmy-blue/10">
+          <div className="p-6 text-center">
+            <Lock className="w-8 h-8 mx-auto mb-3 text-sortmy-blue" />
+            <h3 className="text-xl font-bold mb-2">Sign Up to Follow Creators</h3>
+            <p className="text-gray-300 mb-4">Create an account to follow creators and view their full profiles</p>
+            <div className="flex justify-center gap-4">
+              <ClickEffect effect="ripple" color="blue">
+                <Link to="/login">
+                  <NeonButton variant="cyan">
+                    Log In
+                  </NeonButton>
+                </Link>
+              </ClickEffect>
+              <ClickEffect effect="ripple" color="blue">
+                <Link to="/signup">
+                  <NeonButton variant="gradient">
+                    Sign Up
+                  </NeonButton>
+                </Link>
+              </ClickEffect>
+            </div>
+          </div>
+        </GlassCard>
+      )}
+
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
           {Array(8).fill(0).map((_, i) => (
             <div key={i} className="bg-sortmy-dark/50 border border-sortmy-blue/20 rounded-lg p-6 flex flex-col items-center">
               <Skeleton className="h-24 w-24 rounded-full mb-4" />
@@ -133,14 +187,14 @@ const ExploreCreators = () => {
           ))}
         </div>
       ) : creators.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12 relative z-10">
           <p className="text-lg mb-2">No creators found</p>
           <p className="text-gray-400">
             {searchQuery ? 'Try a different search term' : 'Check back later for new creators'}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
           {creators.map((creator) => (
             <CreatorCard key={creator.id} creator={creator} />
           ))}

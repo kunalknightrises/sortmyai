@@ -1,20 +1,45 @@
 import { User } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ExternalLink, Users } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ExternalLink, Users, Lock } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import HoverEffect from '@/components/ui/HoverEffect';
 import NeonButton from '@/components/ui/NeonButton';
 import ClickEffect from '@/components/ui/ClickEffect';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreatorCardProps {
   creator: User;
 }
 
 export const CreatorCard = ({ creator }: CreatorCardProps) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const getInitials = () => {
     if (!creator || !creator.username) return 'U';
     return creator.username.substring(0, 2).toUpperCase();
+  };
+
+  const handleFollowClick = () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "You need to sign in to follow creators",
+        variant: "default"
+      });
+      navigate('/signup');
+      return;
+    }
+
+    // Follow functionality would be implemented here
+    toast({
+      title: "Following " + creator.username,
+      description: "You are now following this creator",
+      variant: "success"
+    });
   };
 
   return (
@@ -67,7 +92,12 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
             </Link>
           </ClickEffect>
           <ClickEffect effect="ripple" color="blue">
-            <NeonButton variant="magenta" size="sm">
+            <NeonButton
+              variant="magenta"
+              size="sm"
+              onClick={handleFollowClick}
+            >
+              {!user ? <Lock className="w-3 h-3 mr-1" /> : null}
               <Users className="w-4 h-4 mr-2" />
               Follow
             </NeonButton>
