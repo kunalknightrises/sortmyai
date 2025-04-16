@@ -15,6 +15,7 @@ import AddTool from '@/components/dashboard/AddTool';
 import AIToolsLibrary from '@/components/dashboard/AIToolsLibrary';
 import Portfolio from '@/components/dashboard/Portfolio';
 import AddPortfolio from '@/components/dashboard/AddPortfolio';
+import ExploreCreators from '@/components/dashboard/ExploreCreators';
 import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
 import Index from '@/pages/Index';
 import Dashboard from '@/components/Dashboard';
@@ -116,6 +117,14 @@ function App() {
           <ProtectedRoute>
             <DashboardLayout>
               <AddPortfolio />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/explore-creators" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ExploreCreators />
             </DashboardLayout>
           </ProtectedRoute>
         } />

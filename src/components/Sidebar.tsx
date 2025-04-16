@@ -10,7 +10,8 @@ import {
   Settings,
   GraduationCap,
   Upload,
-  ShieldCheck
+  ShieldCheck,
+  Users
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -27,6 +28,11 @@ const Sidebar = () => {
       icon: <LayoutGrid size={20} />,
       label: "Portfolio",
       path: "/dashboard/portfolio",
+    },
+    {
+      icon: <Users size={20} />,
+      label: "Explore Creators",
+      path: "/dashboard/explore-creators",
     },
     {
       icon: <GraduationCap size={20} />,
