@@ -1,20 +1,25 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  LayoutGrid, 
-  User, 
+import {
+  LayoutDashboard,
+  Briefcase,
+  LayoutGrid,
+  User,
   Settings,
   Brain,
   Menu,
   X,
-  GraduationCap
+  GraduationCap,
+  Sparkles
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import AuroraBackground from '@/components/ui/AuroraBackground';
+import SynthwaveBackground from '@/components/ui/SynthwaveBackground';
+// import GlassCard from '@/components/ui/GlassCard';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 
 interface DashboardLayoutProps {
@@ -37,8 +42,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="flex items-center mb-8 py-2">
-        <Brain className="w-8 h-8 mr-2" />
-        <span className="text-xl font-bold tracking-tight">SortMyAI</span>
+        <div className="relative">
+          <Brain className="w-8 h-8 mr-2 text-sortmy-blue" />
+          <Sparkles className="w-3 h-3 absolute -top-1 -right-1 text-sortmy-blue animate-pulse" />
+        </div>
+        <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">SortMyAI</span>
       </div>
 
       <div className="flex-1 flex flex-col space-y-1">
@@ -47,10 +55,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             key={i}
             to={item.path}
             className={({ isActive }) => `
-              flex items-center gap-3 py-3 px-4 rounded-md transition-colors
+              flex items-center gap-3 py-3 px-4 rounded-md transition-all duration-300
               ${isActive
-                ? 'bg-sortmy-blue/20 text-sortmy-blue'
-                : 'hover:bg-sortmy-gray/20 text-gray-300 hover:text-white'}
+                ? 'bg-sortmy-blue/10 text-sortmy-blue border-l-2 border-sortmy-blue pl-3 shadow-[0_0_10px_rgba(0,102,255,0.2)] hover:shadow-[0_0_15px_rgba(0,102,255,0.3)]'
+                : 'hover:bg-sortmy-blue/5 text-gray-300 hover:text-white hover:translate-x-1 hover:border-l hover:border-sortmy-blue/30'}
             `}
             onClick={() => isMobile && setIsMenuOpen(false)}
           >
@@ -62,13 +70,39 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     </div>
   );
 
+  // State for background type and intensity
+  const [backgroundType, setBackgroundType] = useState<'aurora' | 'synthwave'>('synthwave');
+  const [backgroundIntensity, setBackgroundIntensity] = useState<'low' | 'medium' | 'high'>('medium');
+
+  // Adjust background based on the current page
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.includes('/dashboard/achievements')) {
+      setBackgroundIntensity('high');
+    } else if (path.includes('/dashboard/academy') || path.includes('/dashboard/portfolio')) {
+      setBackgroundIntensity('medium');
+    } else {
+      setBackgroundIntensity('low');
+    }
+  }, [window.location.pathname]);
+
   return (
-    <div className="flex h-screen bg-sortmy-dark text-white overflow-hidden">
+    <div className="flex h-screen bg-sortmy-dark text-white overflow-hidden relative">
+      {/* Background */}
+      {backgroundType === 'aurora' ? (
+        <AuroraBackground intensity={50} className="z-0" />
+      ) : (
+        <SynthwaveBackground intensity={backgroundIntensity} className="z-0" />
+      )}
+
+      {/* Scanline effect */}
+      <div className="scanline-effect z-[1]"></div>
+
       {/* Mobile Menu Toggle */}
       {isMobile && (
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="fixed top-4 left-4 z-50"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
@@ -78,7 +112,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
       {/* Desktop Sidebar */}
       {!isMobile && (
-        <div className="border-r border-sortmy-gray/30 bg-sortmy-darker w-64 flex-shrink-0 p-4">
+        <div className="border-r border-sortmy-blue/20 bg-sortmy-darker/70 backdrop-blur-md w-64 flex-shrink-0 p-4 z-10 shadow-[0_0_15px_rgba(0,102,255,0.1)]">
+          {/* Subtle scanline effect */}
+          <div className="absolute inset-0 pointer-events-none z-[-1] bg-scanline opacity-5"></div>
           <SidebarContent />
         </div>
       )}
@@ -86,15 +122,35 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Mobile Sidebar using Sheet component */}
       {isMobile && (
         <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-          <SheetContent side="left" className="w-[80%] border-r border-sortmy-gray/30 bg-sortmy-darker p-4">
+          <SheetContent side="left" className="w-[80%] border-r border-sortmy-blue/20 bg-sortmy-darker/70 backdrop-blur-md p-4 shadow-[0_0_15px_rgba(0,102,255,0.1)]">
+            {/* Subtle scanline effect */}
+            <div className="absolute inset-0 pointer-events-none z-[-1] bg-scanline opacity-5"></div>
             <SidebarContent />
           </SheetContent>
         </Sheet>
       )}
 
       {/* Main Content with padding adjustment for mobile */}
-      <div className={`flex-1 p-4 overflow-y-auto ${isMobile ? 'pt-16' : ''}`}>
-        {children}
+      <div className={`flex-1 p-4 overflow-y-auto ${isMobile ? 'pt-16' : ''} z-10 relative bg-sortmy-dark/20 backdrop-blur-[2px]`}>
+        {/* Theme toggle */}
+        <div className="absolute top-4 right-4 z-20 flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
+            onClick={() => setBackgroundType(prev => prev === 'aurora' ? 'synthwave' : 'aurora')}
+            title="Toggle Background Style"
+          >
+            <Sparkles className="h-4 w-4" />
+          </Button>
+          <ThemeToggle />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative">
+          {/* Subtle scanline effect */}
+          <div className="absolute inset-0 pointer-events-none z-[-1] bg-scanline opacity-10"></div>
+          {children}
+        </div>
       </div>
     </div>
   );

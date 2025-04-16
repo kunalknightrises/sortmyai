@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -14,11 +13,18 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
+import NeuCard from "@/components/ui/NeuCard";
+import NeonButton from "@/components/ui/NeonButton";
+import HoverEffect from "@/components/ui/HoverEffect";
+import ClickEffect from "@/components/ui/ClickEffect";
+import AnimatedTooltip from "@/components/ui/AnimatedTooltip";
+import EnhancedXPProgress from "@/components/gamification/EnhancedXPProgress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { User, Award, Zap } from 'lucide-react';
-import XPProgress from '@/components/gamification/XPProgress';
+// import XPProgress from '@/components/gamification/XPProgress';
 import StreakCounter from '@/components/gamification/StreakCounter';
 import BadgeDisplay from '@/components/gamification/BadgeDisplay';
 import { Badge as BadgeType } from '@/types/gamification';
@@ -60,10 +66,10 @@ const Profile = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
-  
+
   const enhancedUser = React.useMemo(() => {
     if (!user) return null;
-    
+
     return {
       ...user,
       email: user.email || undefined,
@@ -74,12 +80,12 @@ const Profile = () => {
       badges: user.badges || ['badge1', 'badge2'],
     };
   }, [user]);
-  
+
   const handleLogout = async () => {
     await signOut();
     navigate('/login');
   };
-  
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -98,16 +104,16 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-sortmy-dark">
+    <div className="min-h-screen">
       <div className="container mx-auto p-4 max-w-5xl">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Your Profile</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">Your Profile</h1>
           <p className="text-gray-400">Manage your personal information and preferences</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="md:col-span-1 space-y-6">
-            <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
+            <GlassCard variant="bordered" className="border-sortmy-blue/20">
               <CardContent className="pt-6 flex flex-col items-center text-center">
                 <Avatar className="w-24 h-24 mb-4">
                   {user?.avatar_url ? (
@@ -118,47 +124,51 @@ const Profile = () => {
                     </AvatarFallback>
                   )}
                 </Avatar>
-                
+
                 <h2 className="text-xl font-bold mb-1">{user?.username || 'Username'}</h2>
                 <p className="text-gray-400 mb-3">{user?.email || 'email@example.com'}</p>
-                
+
                 {user?.is_premium && (
                   <Badge className="bg-gradient-to-r from-yellow-400/20 to-yellow-600/20 text-yellow-400 border-yellow-400/30 mb-3">
                     Premium User
                   </Badge>
                 )}
-                
+
                 <div className="flex justify-center space-x-4 w-full">
-                  <XPProgress user={enhancedUser} variant="compact" />
+                  <EnhancedXPProgress xp={enhancedUser?.xp || 0} level={enhancedUser?.level || 1} xpForNextLevel={500} />
                   <StreakCounter user={enhancedUser} />
                 </div>
-                
+
                 <div className="w-full pt-4">
-                  <Button variant="outline" className="w-full" asChild>
-                    <a href={`/portfolio/${user?.username || ''}`}>
-                      View Public Profile
-                    </a>
-                  </Button>
+                  <HoverEffect effect="lift" color="blue">
+                    <NeonButton variant="gradient" className="w-full" asChild>
+                      <a href={`/portfolio/${user?.username || ''}`}>
+                        View Public Profile
+                      </a>
+                    </NeonButton>
+                  </HoverEffect>
                 </div>
               </CardContent>
-            </Card>
-            
+            </GlassCard>
+
             {/* Add Google Drive Storage Card */}
             {user && <GoogleDriveStorage userId={user.id} onFileUpload={handleFileUpload} />}
-            
-            <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
+
+            <NeuCard variant="flat" color="dark" className="border-sortmy-blue/10">
               <CardHeader>
                 <CardTitle>Account Management</CardTitle>
                 <CardDescription>Manage your account settings</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button variant="destructive" className="w-full" onClick={handleLogout}>
-                  Logout
-                </Button>
+                <ClickEffect effect="ripple" color="blue">
+                  <NeonButton variant="magenta" className="w-full" onClick={handleLogout}>
+                    Logout
+                  </NeonButton>
+                </ClickEffect>
               </CardContent>
-            </Card>
+            </NeuCard>
           </div>
-          
+
           <div className="md:col-span-2">
             <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <TabsList className="grid grid-cols-2">
@@ -171,9 +181,9 @@ const Profile = () => {
                   Achievements
                 </TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="profile" className="space-y-4">
-                <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
+                <GlassCard variant="glowing" intensity="low" className="border-sortmy-blue/20">
                   <CardHeader>
                     <CardTitle>Personal Information</CardTitle>
                     <CardDescription>Update your personal details</CardDescription>
@@ -199,7 +209,7 @@ const Profile = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-300">Avatar URL</label>
                       <input
@@ -209,47 +219,49 @@ const Profile = () => {
                         disabled
                       />
                     </div>
-                    
-                    <Button variant="secondary" disabled>
-                      Update Profile (Coming Soon)
-                    </Button>
+
+                    <AnimatedTooltip content="This feature is coming soon" position="top">
+                      <NeonButton variant="cyan" disabled>
+                        Update Profile (Coming Soon)
+                      </NeonButton>
+                    </AnimatedTooltip>
                   </CardContent>
-                </Card>
-                
-                <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
+                </GlassCard>
+
+                <NeuCard variant="elevated" color="purple" className="border-sortmy-blue/20">
                   <CardHeader>
                     <CardTitle>Portfolio Stats</CardTitle>
                     <CardDescription>Your portfolio performance</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card className="bg-sortmy-gray/20 border-sortmy-gray/30">
+                      <GlassCard variant="bordered" intensity="low" className="border-sortmy-blue/10">
                         <CardContent className="p-4">
                           <div className="text-2xl font-bold">0</div>
                           <p className="text-sm text-gray-400">Total Items</p>
                         </CardContent>
-                      </Card>
-                      
-                      <Card className="bg-sortmy-gray/20 border-sortmy-gray/30">
+                      </GlassCard>
+
+                      <GlassCard variant="bordered" intensity="low" className="border-sortmy-blue/10">
                         <CardContent className="p-4">
                           <div className="text-2xl font-bold">0</div>
                           <p className="text-sm text-gray-400">Total Views</p>
                         </CardContent>
-                      </Card>
+                      </GlassCard>
                     </div>
                   </CardContent>
-                </Card>
+                </NeuCard>
               </TabsContent>
-              
+
               <TabsContent value="achievements" className="space-y-4">
-                <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
+                <GlassCard variant="glowing" intensity="medium" className="border-sortmy-blue/20">
                   <CardHeader>
                     <CardTitle>Your Achievements</CardTitle>
                     <CardDescription>Track your progress and badges</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card className="bg-sortmy-gray/20 border-sortmy-gray/30">
+                      <NeuCard variant="flat" color="dark" className="border-sortmy-blue/10">
                         <CardContent className="p-4">
                           <div className="flex items-center text-2xl font-bold">
                             <Award className="w-6 h-6 mr-2 text-yellow-400" />
@@ -257,9 +269,9 @@ const Profile = () => {
                           </div>
                           <p className="text-sm text-gray-400">Badges Earned</p>
                         </CardContent>
-                      </Card>
-                      
-                      <Card className="bg-sortmy-gray/20 border-sortmy-gray/30">
+                      </NeuCard>
+
+                      <NeuCard variant="flat" color="dark" className="border-sortmy-blue/10">
                         <CardContent className="p-4">
                           <div className="flex items-center text-2xl font-bold">
                             <Zap className="w-6 h-6 mr-2 text-sortmy-blue" />
@@ -267,12 +279,12 @@ const Profile = () => {
                           </div>
                           <p className="text-sm text-gray-400">Total XP</p>
                         </CardContent>
-                      </Card>
+                      </NeuCard>
                     </div>
-                    
+
                     <BadgeDisplay badges={mockBadges} />
                   </CardContent>
-                </Card>
+                </GlassCard>
               </TabsContent>
             </Tabs>
           </div>

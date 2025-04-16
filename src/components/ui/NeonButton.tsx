@@ -1,0 +1,95 @@
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
+
+interface NeonButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  asChild?: boolean;
+  children: React.ReactNode;
+  variant?: 'magenta' | 'cyan' | 'purple' | 'gradient';
+  size?: 'sm' | 'md' | 'lg';
+  glow?: boolean;
+  loading?: boolean;
+  icon?: React.ReactNode;
+}
+
+const NeonButton: React.FC<NeonButtonProps> = ({
+  children,
+  className,
+  variant = 'magenta',
+  size = 'md',
+  glow = true,
+  loading = false,
+  disabled = false,
+  icon,
+  ...props
+}) => {
+  // Base styles
+  const baseStyles = 'relative rounded-md font-medium transition-all duration-300 flex items-center justify-center';
+
+  // Size styles
+  const sizeStyles = {
+    sm: 'text-xs px-3 py-1.5',
+    md: 'text-sm px-4 py-2',
+    lg: 'text-base px-6 py-3',
+  };
+
+  // Color styles based on variant
+  const colorStyles = {
+    magenta: 'bg-[#0a0a0a] text-[#0066ff] border border-[#0066ff]/50',
+    cyan: 'bg-[#0a0a0a] text-[#0066ff] border border-[#0066ff]/50',
+    purple: 'bg-[#121212] text-white border border-[#0066ff]/30',
+    gradient: 'bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-white border-none',
+  };
+
+  // Glow styles based on variant
+  const glowStyles = glow ? {
+    magenta: 'hover:shadow-[0_0_10px_rgba(0,102,255,0.5)] hover:border-[#0066ff]',
+    cyan: 'hover:shadow-[0_0_10px_rgba(0,102,255,0.5)] hover:border-[#0066ff]',
+    purple: 'hover:shadow-[0_0_10px_rgba(0,102,255,0.3)] hover:border-[#0066ff]/60',
+    gradient: 'hover:shadow-[0_0_15px_rgba(0,102,255,0.4)]',
+  } : {
+    magenta: '',
+    cyan: '',
+    purple: '',
+    gradient: '',
+  };
+
+  // Hover transform
+  const hoverTransform = 'hover:-translate-y-0.5';
+
+  // Disabled styles
+  const disabledStyles = (disabled || loading)
+    ? 'opacity-50 cursor-not-allowed hover:transform-none hover:shadow-none'
+    : '';
+
+  return (
+    <button
+      className={cn(
+        baseStyles,
+        sizeStyles[size],
+        colorStyles[variant],
+        glowStyles[variant],
+        hoverTransform,
+        disabledStyles,
+        className
+      )}
+      disabled={disabled || loading}
+      {...props}
+    >
+      {loading && (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      )}
+      {!loading && icon && (
+        <span className="mr-2">{icon}</span>
+      )}
+      {children}
+
+      {/* Subtle gradient overlay for non-gradient buttons */}
+      {variant !== 'gradient' && (
+        <span className="absolute inset-0 rounded-md bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+      )}
+    </button>
+  );
+};
+
+export default NeonButton;

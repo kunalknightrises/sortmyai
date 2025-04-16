@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PortfolioItem, User } from '@/types';
 import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
+// import { Skeleton } from '@/components/ui/skeleton';
 import CreatorProfileHeader from '@/components/CreatorProfileHeader';
 import { PortfolioFilterTools } from '@/components/portfolio/PortfolioFilterTools';
 import PortfolioTabs from '@/components/portfolio/PortfolioTabs';
@@ -11,9 +11,14 @@ import { fetchUserProfile, fetchPortfolioItems, migratePortfolioItems } from '@/
 import { useAuth } from '@/contexts/AuthContext';
 import { doc, updateDoc, arrayRemove, arrayUnion, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import ProfileEditForm from '@/components/profile/ProfileEditForm';
+// import GlassCard from '@/components/ui/GlassCard';
+import NeonButton from '@/components/ui/NeonButton';
+import ClickEffect from '@/components/ui/ClickEffect';
+import NeonSkeleton from '@/components/ui/NeonSkeleton';
+import { LayoutGrid } from 'lucide-react';
 
 const Portfolio = () => {
   const { username } = useParams<{ username: string }>();
@@ -303,24 +308,28 @@ const Portfolio = () => {
 
   return (
     <div className="max-w-screen-lg mx-auto px-4">
+      <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center mb-6">
+        <LayoutGrid className="w-8 h-8 mr-2 text-sortmy-blue" />
+        Portfolio
+      </h1>
       {/* Profile Header */}
       {loading ? (
         <div className="py-8">
           <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-            <Skeleton className="h-24 w-24 md:h-36 md:w-36 rounded-full" />
+            <NeonSkeleton height="144px" width="144px" className="rounded-full" />
             <div className="flex-1 space-y-4 text-center md:text-left">
-              <Skeleton className="h-8 w-48 mx-auto md:mx-0" />
-              <Skeleton className="h-4 w-full max-w-md" />
+              <NeonSkeleton height="32px" width="192px" className="mx-auto md:mx-0" />
+              <NeonSkeleton height="16px" className="w-full max-w-md" />
               <div className="flex justify-center md:justify-start gap-3 pt-2">
-                <Skeleton className="h-10 w-24" />
-                <Skeleton className="h-10 w-24" />
+                <NeonSkeleton height="40px" width="96px" />
+                <NeonSkeleton height="40px" width="96px" />
               </div>
             </div>
           </div>
           <div className="flex justify-center gap-8 mt-8">
-            <Skeleton className="h-6 w-16" />
-            <Skeleton className="h-6 w-16" />
-            <Skeleton className="h-6 w-16" />
+            <NeonSkeleton height="24px" width="64px" />
+            <NeonSkeleton height="24px" width="64px" />
+            <NeonSkeleton height="24px" width="64px" />
           </div>
         </div>
       ) : (
@@ -363,7 +372,7 @@ const Portfolio = () => {
       {/* Profile Edit Dialog */}
       {user && isCurrentUser && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-[600px] bg-sortmy-dark border-sortmy-gray">
+          <DialogContent className="sm:max-w-[600px] bg-sortmy-dark border-sortmy-blue/20 backdrop-blur-md">
             <ProfileEditForm
               user={user}
               onSubmit={async () => {
@@ -379,7 +388,7 @@ const Portfolio = () => {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-sortmy-dark border-sortmy-blue/20 backdrop-blur-md">
           <AlertDialogHeader>
             <AlertDialogTitle>
               {itemToDelete?.status === 'deleted' ? 'Permanently Delete Project?' : 'Delete Project?'}
@@ -391,14 +400,21 @@ const Portfolio = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={actionInProgress}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              disabled={actionInProgress}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              {actionInProgress ? 'Deleting...' : 'Delete'}
-            </AlertDialogAction>
+            <ClickEffect effect="ripple" color="blue">
+              <NeonButton variant="cyan" disabled={actionInProgress} onClick={() => setShowDeleteDialog(false)}>
+                Cancel
+              </NeonButton>
+            </ClickEffect>
+            <ClickEffect effect="ripple" color="blue">
+              <NeonButton
+                variant="magenta"
+                onClick={confirmDelete}
+                disabled={actionInProgress}
+                className="bg-red-500 hover:bg-red-600 border-red-500/50"
+              >
+                {actionInProgress ? 'Deleting...' : 'Delete'}
+              </NeonButton>
+            </ClickEffect>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

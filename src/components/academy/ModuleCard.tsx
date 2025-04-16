@@ -1,7 +1,10 @@
 
-import { PlayCircle, Zap, FileText } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { PlayCircle, Zap, FileText, CheckCircle } from "lucide-react";
+import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import GlassCard from "@/components/ui/GlassCard";
+import NeonButton from "@/components/ui/NeonButton";
+import ClickEffect from "@/components/ui/ClickEffect";
+import AnimatedTooltip from "@/components/ui/AnimatedTooltip";
 import { motion } from "framer-motion";
 import YoutubeShortEmbed from "@/components/academy/YoutubeShortEmbed";
 import { Module } from "@/types/academy";
@@ -20,26 +23,28 @@ const ModuleCard = ({ module, onStartModule, tierId }: ModuleCardProps) => {
       transition={{ duration: 0.3 }}
       className="flex flex-col h-full"
     >
-      <Card className="border-sortmy-gray/30 bg-sortmy-gray/10 h-full card-glow">
+      <GlassCard variant="bordered" className="border-sortmy-blue/20 h-full">
         {module.videoId && (
           <div className="px-6 pt-6 pb-0">
             <YoutubeShortEmbed videoId={module.videoId} title={module.title} />
           </div>
         )}
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">{module.title}</CardTitle>
+          <CardTitle className="text-lg bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{module.title}</CardTitle>
           <CardDescription>{module.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center">
-            <Zap className="h-4 w-4 text-sortmy-blue mr-1" />
-            <span className="text-sm text-sortmy-blue">+{module.xpReward} XP</span>
-          </div>
-          
+          <AnimatedTooltip content="Complete this module to earn XP" position="top">
+            <div className="flex items-center">
+              <Zap className="h-4 w-4 text-sortmy-blue mr-1" />
+              <span className="text-sm text-sortmy-blue">+{module.xpReward} XP</span>
+            </div>
+          </AnimatedTooltip>
+
           {module.resourceUrl && (
-            <a 
+            <a
               href={module.resourceUrl}
-              className="inline-flex items-center text-xs text-sortmy-blue hover:underline"
+              className="inline-flex items-center text-xs text-sortmy-blue hover:text-sortmy-blue/80 transition-colors p-1 rounded-md hover:bg-sortmy-blue/5"
             >
               <FileText className="h-3 w-3 mr-1" />
               Download Prompt Template
@@ -47,22 +52,27 @@ const ModuleCard = ({ module, onStartModule, tierId }: ModuleCardProps) => {
           )}
         </CardContent>
         <CardFooter>
-          <Button
-            className="w-full gap-2"
-            onClick={() => onStartModule(tierId, module.id)}
-            variant={module.isCompleted ? "secondary" : "default"}
-          >
-            {module.isCompleted ? (
-              <>Completed</>
-            ) : (
-              <>
-                <PlayCircle className="h-4 w-4" />
-                Start
-              </>
-            )}
-          </Button>
+          <ClickEffect effect="ripple" color="blue">
+            <NeonButton
+              variant={module.isCompleted ? "cyan" : "gradient"}
+              className="w-full gap-2"
+              onClick={() => onStartModule(tierId, module.id)}
+            >
+              {module.isCompleted ? (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Completed
+                </>
+              ) : (
+                <>
+                  <PlayCircle className="h-4 w-4 mr-1" />
+                  Start Module
+                </>
+              )}
+            </NeonButton>
+          </ClickEffect>
         </CardFooter>
-      </Card>
+      </GlassCard>
     </motion.div>
   );
 };

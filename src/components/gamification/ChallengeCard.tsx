@@ -1,10 +1,14 @@
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
+import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Zap, Trophy } from "lucide-react";
+import { Zap, Trophy, Target } from "lucide-react";
 import { Challenge } from "@/types/gamification";
+import GlassCard from "@/components/ui/GlassCard";
+import NeonButton from "@/components/ui/NeonButton";
+// import HoverEffect from "@/components/ui/HoverEffect";
+import ClickEffect from "@/components/ui/ClickEffect";
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -14,7 +18,7 @@ interface ChallengeCardProps {
 
 const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) => {
   const progressPercentage = Math.round((challenge.progress / challenge.totalSteps) * 100);
-  
+
   const getDifficultyColor = (difficulty: Challenge['difficulty']) => {
     switch (difficulty) {
       case 'easy':
@@ -29,17 +33,18 @@ const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) =>
         return 'text-gray-400 border-gray-400/30 bg-gray-400/10';
     }
   };
-  
+
   return (
-    <Card className={`border-sortmy-gray/30 bg-sortmy-gray/10 ${className}`}>
+    <div className="h-full">
+      <GlassCard variant="bordered" className={`border-sortmy-blue/20 ${className} hover:translate-y-[-5px] hover:shadow-lg transition-all duration-300`}>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-base">{challenge.name}</CardTitle>
+            <CardTitle className="text-base bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{challenge.name}</CardTitle>
             <CardDescription>{challenge.description}</CardDescription>
           </div>
-          <Badge 
-            variant="outline" 
+          <Badge
+            variant="outline"
             className={`uppercase text-xs ${getDifficultyColor(challenge.difficulty)}`}
           >
             {challenge.difficulty}
@@ -59,7 +64,7 @@ const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) =>
             </div>
           )}
         </div>
-        
+
         {challenge.progress > 0 && (
           <div className="space-y-1">
             <div className="flex justify-between text-xs">
@@ -72,20 +77,25 @@ const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) =>
       </CardContent>
       <CardFooter>
         {challenge.isCompleted ? (
-          <Button className="w-full" disabled>
+          <NeonButton variant="cyan" className="w-full" disabled>
+            <Trophy className="w-4 h-4 mr-2" />
             Completed
-          </Button>
+          </NeonButton>
         ) : (
-          <Button 
-            className="w-full" 
-            variant={challenge.progress > 0 ? "default" : "outline"}
-            onClick={onStart}
-          >
-            {challenge.progress > 0 ? "Continue" : "Start Challenge"}
-          </Button>
+          <ClickEffect effect="ripple" color="blue">
+            <NeonButton
+              className="w-full"
+              variant={challenge.progress > 0 ? "gradient" : "magenta"}
+              onClick={onStart}
+            >
+              <Target className="w-4 h-4 mr-2" />
+              {challenge.progress > 0 ? "Continue" : "Start Challenge"}
+            </NeonButton>
+          </ClickEffect>
         )}
       </CardFooter>
-    </Card>
+      </GlassCard>
+    </div>
   );
 };
 

@@ -13,6 +13,8 @@ export interface User {
   profession?: string;
   website?: string;
   role?: 'admin' | 'intern' | 'basic';
+  followers_count?: number;
+  following_count?: number;
   // Gamification related properties
   xp: number;
   level: number;

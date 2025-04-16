@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import './styles/synthwave-theme.css'; // Import synthwave theme
 import { BrowserRouter } from 'react-router-dom';
 import { FirebaseConnectionProvider } from './contexts/FirebaseConnectionContext';
 import { AuthProvider } from './contexts/AuthContext';

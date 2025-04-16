@@ -2,6 +2,11 @@
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import TierSection from "@/components/academy/TierSection";
+import GlassCard from "@/components/ui/GlassCard";
+import NeonButton from "@/components/ui/NeonButton";
+import HoverEffect from "@/components/ui/HoverEffect";
+import AISuggestion from "@/components/ui/AISuggestion";
+import { GraduationCap, Sparkles } from "lucide-react";
 import { Tier } from "@/types/academy";
 
 const Academy = () => {
@@ -104,20 +109,46 @@ const Academy = () => {
   return (
     <div className="space-y-6 p-1 md:p-4">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold">Academy</h1>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center">
+          <GraduationCap className="w-6 h-6 mr-2 text-sortmy-blue" />
+          Academy
+        </h1>
         <p className="text-gray-400">
           Master AI skills and earn XP through structured learning paths
         </p>
       </div>
 
-      <Separator className="bg-sortmy-gray/30" />
+      <GlassCard variant="bordered" className="border-sortmy-blue/20">
+        <div className="p-4">
+          <div className="flex items-center mb-2">
+            <Sparkles className="w-5 h-5 mr-2 text-sortmy-blue" />
+            <h2 className="text-lg font-semibold">AI Learning Path</h2>
+          </div>
+          <p className="text-sm text-gray-300 mb-4">
+            Complete modules to earn XP and unlock advanced content. Track your progress and build your AI skills systematically.
+          </p>
+          <HoverEffect effect="lift" color="blue">
+            <NeonButton variant="gradient" size="sm" onClick={() => console.log('View learning path')}>
+              View Learning Path
+            </NeonButton>
+          </HoverEffect>
+        </div>
+      </GlassCard>
+
+      <AISuggestion
+        suggestion="Based on your interests, you might want to check out the 'Role-based Prompting' module next."
+        actionText="Start Module"
+        onAction={() => handleStartModule('tier1', 'module5')}
+      />
+
+      <Separator className="bg-sortmy-blue/20" />
 
       <div className="space-y-8">
         {tiers.map((tier) => (
-          <TierSection 
-            key={tier.id} 
-            tier={tier} 
-            onStartModule={handleStartModule} 
+          <TierSection
+            key={tier.id}
+            tier={tier}
+            onStartModule={handleStartModule}
           />
         ))}
       </div>

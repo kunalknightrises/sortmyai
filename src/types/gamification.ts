@@ -26,6 +26,11 @@ export interface Badge {
   isEarned: boolean;
   earnedDate?: string;
   requiredXP?: number;
+  xpReward?: number;
+  unlocked?: boolean;
+  unlockedAt?: string;
+  color?: string;
+  animation?: 'pulse' | 'glow' | 'spin' | 'bounce';
 }
 
 export interface LeaderboardUser {
@@ -56,4 +61,36 @@ export interface AIKnowledge {
   categories: {
     [key: string]: number;
   };
+}
+
+export interface LevelProgress {
+  currentXP: number;
+  currentLevel: number;
+  xpForCurrentLevel: number;
+  xpForNextLevel: number;
+  percentageComplete: number;
+  estimatedTimeToNextLevel?: string;
+}
+
+export interface Notification {
+  id: string;
+  type: 'badge_unlocked' | 'level_up' | 'streak_milestone' | 'achievement' | 'system';
+  title: string;
+  message: string;
+  icon?: string;
+  color?: string;
+  timestamp: string;
+  read: boolean;
+  data?: any;
+}
+
+export interface StreakInfo {
+  currentStreak: number;
+  longestStreak: number;
+  lastActiveDate: string;
+  nextMilestone: number;
+  streakHistory: {
+    date: string;
+    active: boolean;
+  }[];
 }

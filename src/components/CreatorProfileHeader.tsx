@@ -85,11 +85,11 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
               <div className="text-xs text-gray-400">posts</div>
             </div>
             <div className="text-center">
-              <div className="font-bold">1.4K</div>
+              <div className="font-bold">{user.followers_count || 0}</div>
               <div className="text-xs text-gray-400">followers</div>
             </div>
             <div className="text-center">
-              <div className="font-bold">284</div>
+              <div className="font-bold">{user.following_count || 0}</div>
               <div className="text-xs text-gray-400">following</div>
             </div>
             <div className="text-center">
@@ -113,7 +113,9 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
                 {user.website.replace(/^https?:\/\//, '')}
               </a>
             )}
-            <p className="text-sm text-sortmy-blue mt-1">sortmy.ai/{user.username}</p>
+            <a href={`/portfolio/${user.username}`} className="text-sm text-sortmy-blue mt-1 hover:underline cursor-pointer">
+              sortmy.ai/{user.username}
+            </a>
           </div>
         </div>
       </div>

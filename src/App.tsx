@@ -21,6 +21,7 @@ import Achievements from '@/pages/Achievements';
 import { useEffect } from 'react';
 import Academy from '@/pages/Academy';
 import AIToolsUpload from '@/pages/AIToolsUpload';
+import SynthwaveDemo from '@/pages/SynthwaveDemo';
 import { initializeCapacitor } from '@/lib/capacitor';
 import '@/lib/debug-utils'; // Import debug utilities
 
@@ -98,6 +99,10 @@ function App() {
           </ProtectedRoute>
         } />
 
+        <Route path="/portfolio/:username" element={
+          <Portfolio />
+        } />
+
         <Route path="/dashboard/portfolio/add" element={
           <ProtectedRoute>
             <DashboardLayout>
@@ -131,6 +136,9 @@ function App() {
             </DashboardLayout>
           </ProtectedRoute>
         } />
+
+        {/* Synthwave UI Demo route */}
+        <Route path="/synthwave-demo" element={<SynthwaveDemo />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

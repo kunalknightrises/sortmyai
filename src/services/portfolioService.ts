@@ -26,7 +26,9 @@ export const fetchUserProfile = async (username: string): Promise<User> => {
           level: data.level || 1,
           streak_days: data.streak_days || 0,
           last_login: data.last_login || new Date().toISOString(),
-          badges: data.badges || []
+          badges: data.badges || [],
+          followers_count: data.followers_count || 0,
+          following_count: data.following_count || 0
         } as User;
       }
       throw new Error('User not found');
@@ -45,7 +47,9 @@ export const fetchUserProfile = async (username: string): Promise<User> => {
       level: userData.level || 1,
       streak_days: userData.streak_days || 0,
       last_login: userData.last_login || new Date().toISOString(),
-      badges: userData.badges || []
+      badges: userData.badges || [],
+      followers_count: userData.followers_count || 0,
+      following_count: userData.following_count || 0
     } as User;
   } catch (error) {
     console.error('Error fetching user profile:', error);

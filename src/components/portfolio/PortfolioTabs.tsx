@@ -2,8 +2,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PortfolioItem } from "@/types";
 import { PortfolioItemCard } from "./PortfolioItemCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Lightbox } from "@/components/ui/Lightbox";
+import { Video } from "lucide-react";
 
 interface PortfolioTabsProps {
   loading: boolean;
@@ -111,32 +113,54 @@ export const PortfolioTabsWithLightbox = ({
           )}
         </TabsContent>
 
-        <TabsContent value="reels" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <TabsContent value="reels">
           {loading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-[300px] w-full" />
-            ))
-          ) : (
-            filteredItems
-              .filter(item => item.content_type === 'reel' || item.content_type === 'both')
-              .map((item) => (
-                <div key={item.id} onClick={() => handleItemClick(item)} className="cursor-pointer">
-                  <PortfolioItemCard
-                    item={item}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onArchive={onArchive}
-                    onRestore={onRestore}
-                    isOwner={isOwner}
-                    isReel={true}
-                  />
-                </div>
-              ))
-          )}
-          {!loading && filteredItems.filter(item => item.content_type === 'reel' || item.content_type === 'both').length === 0 && (
-            <div className="col-span-3 text-center py-8 text-gray-500">
-              No reels found. Create your first reel by selecting "Reel Only" or "Both Post and Reel" when adding content.
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-[300px] w-full" />
+              ))}
             </div>
+          ) : (
+            <>
+              {filteredItems.filter(item => item.content_type === 'reel' || item.content_type === 'both').length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredItems
+                    .filter(item => item.content_type === 'reel' || item.content_type === 'both')
+                    .map((item) => (
+                      <div key={item.id} onClick={() => handleItemClick(item)} className="cursor-pointer">
+                        <PortfolioItemCard
+                          item={item}
+                          onEdit={onEdit}
+                          onDelete={onDelete}
+                          onArchive={onArchive}
+                          onRestore={onRestore}
+                          isOwner={isOwner}
+                          isReel={true}
+                        />
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-sortmy-gray/10 rounded-lg border border-sortmy-gray/20">
+                  <div className="mx-auto w-16 h-16 rounded-full bg-sortmy-gray/20 flex items-center justify-center mb-4">
+                    <Video className="w-8 h-8 text-sortmy-blue/70" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">No Reels Found</h3>
+                  <p className="text-gray-400 max-w-md mx-auto mb-6">
+                    Create your first reel by selecting "Reel Only" or "Both Post and Reel" when adding content.
+                  </p>
+                  {isOwner && (
+                    <Button
+                      onClick={() => window.location.href = '/dashboard/portfolio/add'}
+                      variant="outline"
+                      className="bg-sortmy-gray/20 border-sortmy-gray/30"
+                    >
+                      Create Your First Reel
+                    </Button>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </TabsContent>
 

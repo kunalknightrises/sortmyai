@@ -60,7 +60,7 @@ export default function AddPortfolio() {
         description: 'Your project has been added to your portfolio.',
       });
 
-      navigate('/portfolio');
+      navigate('/dashboard/portfolio');
     } catch (error) {
       toast({
         title: 'Error',

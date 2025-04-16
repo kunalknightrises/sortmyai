@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, ExternalLink, Heart, Eye, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ExternalLink, Heart, Eye, Play, Pause, Volume2, VolumeX, Video } from 'lucide-react';
 import { PortfolioItem } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ImageItem } from './ImageItem';
@@ -114,12 +114,25 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
                         {(() => {
                           const fileId = getGoogleDriveFileId(images[currentImageIndex]);
                           if (fileId) {
+                            // Check if this is a reel
+                            const isReel = item.content_type === 'reel' || item.content_type === 'both';
+
                             return (
-                              <iframe
-                                src={`https://drive.google.com/file/d/${fileId}/preview`}
-                                allow="autoplay; fullscreen"
-                                className="w-full h-full border-0"
-                              />
+                              <div className="relative w-full h-full">
+                                <iframe
+                                  src={`https://drive.google.com/file/d/${fileId}/preview`}
+                                  allow="autoplay; fullscreen"
+                                  className="w-full h-full border-0"
+                                />
+
+                                {/* Reel indicator if applicable */}
+                                {isReel && (
+                                  <div className="absolute top-4 left-4 z-10 bg-blue-500/80 text-white px-3 py-1 rounded text-sm font-medium flex items-center gap-1">
+                                    <Video className="w-4 h-4" />
+                                    Reel
+                                  </div>
+                                )}
+                              </div>
                             );
                           }
                           return (
@@ -132,32 +145,43 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
                     ) : (
                       /* Direct Video */
                       <>
-                        <video
-                          ref={videoRef}
-                          src={images[currentImageIndex]}
-                          className="w-full h-full object-contain"
-                          controls
-                          muted={isMuted}
-                          playsInline
-                          autoPlay
-                          poster={item.thumbnail_url}
-                          onClick={(e) => e.stopPropagation()}
-                        />
+                        <div className="relative w-full h-full">
+                          <video
+                            ref={videoRef}
+                            src={images[currentImageIndex]}
+                            className="w-full h-full object-contain"
+                            controls
+                            muted={isMuted}
+                            playsInline
+                            autoPlay
+                            poster={item.thumbnail_url}
+                            onClick={(e) => e.stopPropagation()}
+                            loop={item.content_type === 'reel' || item.content_type === 'both'}
+                          />
 
-                        {/* Video controls overlay */}
-                        <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/50 rounded-md px-2 py-1 z-10">
-                          <button
-                            onClick={togglePlay}
-                            className="p-1 hover:bg-sortmy-gray/20 rounded-full transition-colors"
-                          >
-                            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                          </button>
-                          <button
-                            onClick={toggleMute}
-                            className="p-1 hover:bg-sortmy-gray/20 rounded-full transition-colors"
-                          >
-                            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                          </button>
+                          {/* Video controls overlay */}
+                          <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/50 rounded-md px-2 py-1 z-10">
+                            <button
+                              onClick={togglePlay}
+                              className="p-1 hover:bg-sortmy-gray/20 rounded-full transition-colors"
+                            >
+                              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                            </button>
+                            <button
+                              onClick={toggleMute}
+                              className="p-1 hover:bg-sortmy-gray/20 rounded-full transition-colors"
+                            >
+                              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                            </button>
+                          </div>
+
+                          {/* Reel indicator if applicable */}
+                          {(item.content_type === 'reel' || item.content_type === 'both') && (
+                            <div className="absolute top-4 left-4 z-10 bg-blue-500/80 text-white px-3 py-1 rounded text-sm font-medium flex items-center gap-1">
+                              <Video className="w-4 h-4" />
+                              Reel
+                            </div>
+                          )}
                         </div>
                       </>
                     )}
