@@ -110,7 +110,11 @@ const AIToolsLibrary = () => {
     // Filter by tab
     if (activeTab === 'free') {
       filtered = filtered.filter(tool =>
-        tool.pricing === 'Free' || tool.pricing === 'Freemium'
+        tool.pricing === 'Free'
+      );
+    } else if (activeTab === 'freemium') {
+      filtered = filtered.filter(tool =>
+        tool.pricing === 'Freemium'
       );
     } else if (activeTab === 'paid') {
       filtered = filtered.filter(tool =>
@@ -268,6 +272,7 @@ const AIToolsLibrary = () => {
             <TabsList className="bg-sortmy-darker border border-sortmy-blue/20 mb-4">
               <TabsTrigger value="all">All Tools</TabsTrigger>
               <TabsTrigger value="free">Free</TabsTrigger>
+              <TabsTrigger value="freemium">Freemium</TabsTrigger>
               <TabsTrigger value="paid">Paid</TabsTrigger>
             </TabsList>
 
@@ -440,17 +445,478 @@ const AIToolsLibrary = () => {
 
             <TabsContent value="free" className="m-0">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Content is filtered by the useEffect */}
-                {/* This is the same grid as "all" but filtered by the activeTab state */}
-                {/* The actual rendering is handled by the shared code above */}
+                {loading ? (
+                  // Loading skeletons
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <GlassCard key={index} variant="bordered" className="border-sortmy-blue/20 p-4 h-64">
+                      <div className="flex items-center mb-4">
+                        <NeonSkeleton className="h-10 w-10 rounded-md" />
+                        <div className="ml-3 space-y-2 flex-1">
+                          <NeonSkeleton className="h-4 w-3/4" />
+                          <NeonSkeleton className="h-3 w-1/2" />
+                        </div>
+                      </div>
+                      <NeonSkeleton className="h-20 w-full mb-4" />
+                      <div className="flex justify-between items-center">
+                        <NeonSkeleton className="h-8 w-24" />
+                        <NeonSkeleton className="h-8 w-24" />
+                      </div>
+                    </GlassCard>
+                  ))
+                ) : filteredTools.length > 0 ? (
+                  filteredTools.map(tool => (
+                    <GlassCard
+                      key={tool.id}
+                      variant="bordered"
+                      className="border-sortmy-blue/20 p-4 hover:shadow-[0_0_15px_rgba(0,102,255,0.15)] transition-all duration-300 hover:translate-y-[-5px]"
+                    >
+                      <div className="flex items-center mb-3">
+                        {(tool.logoUrl || tool.logoLink) && !failedImages.has(tool.id) ? (
+                          <img
+                            src={tool.logoUrl || tool.logoLink}
+                            alt={`${tool.name} logo`}
+                            className="w-10 h-10 rounded-md object-cover border border-sortmy-blue/20"
+                            onError={() => {
+                              setFailedImages(prev => {
+                                const newSet = new Set(prev);
+                                newSet.add(tool.id);
+                                return newSet;
+                              });
+                            }}
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-md bg-sortmy-blue/20 flex items-center justify-center">
+                            <Zap className="w-6 h-6 text-sortmy-blue" />
+                          </div>
+                        )}
+                        <div className="ml-3">
+                          <h3 className="font-medium bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">
+                            {tool.name}
+                          </h3>
+                          <p className="text-xs text-gray-400">{tool.useCase}</p>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-gray-300 mb-3 line-clamp-3">
+                        {tool.description}
+                      </p>
+
+                      {tool.tags && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {(() => {
+                            // Convert tags to array if it's a string
+                            const tagArray = typeof tool.tags === 'string'
+                              ? tool.tags.split(',').map(tag => tag.trim())
+                              : tool.tags;
+
+                            if (!Array.isArray(tagArray)) return null;
+
+                            return (
+                              <>
+                                {tagArray.slice(0, 3).map(tag => (
+                                  <Badge
+                                    key={tag}
+                                    variant="outline"
+                                    className="text-xs border-sortmy-blue/20 bg-sortmy-blue/5"
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {tagArray.length > 3 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs border-sortmy-blue/20 bg-sortmy-blue/5"
+                                  >
+                                    +{tagArray.length - 3}
+                                  </Badge>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center mt-auto">
+                        <Badge
+                          variant={tool.pricing === 'Free' ? 'default' : 'outline'}
+                          className="bg-green-500/20 text-green-400 border-green-500/30"
+                        >
+                          {tool.pricing || 'Unknown'}
+                        </Badge>
+
+                        <div className="flex gap-2">
+                          {(tool.website || tool.websiteLink) && (
+                            <a
+                              href={formatWebsiteUrl(tool.website || tool.websiteLink || '')}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 rounded-md bg-sortmy-blue/10 hover:bg-sortmy-blue/20 transition-colors"
+                            >
+                              <ExternalLink className="w-4 h-4 text-sortmy-blue" />
+                            </a>
+                          )}
+
+                          <ClickEffect effect="ripple" color="blue">
+                            <NeonButton
+                              variant="cyan"
+                              size="sm"
+                              className="px-3"
+                              onClick={() => addToolToTracker(tool)}
+                              disabled={savingToolIds.includes(tool.id)}
+                            >
+                              {savingToolIds.includes(tool.id) ? (
+                                <span className="flex items-center">
+                                  <Skeleton className="h-4 w-4 rounded-full animate-spin mr-2" />
+                                  Saving
+                                </span>
+                              ) : (
+                                <span className="flex items-center">
+                                  <Plus className="w-4 h-4 mr-1" />
+                                  Add
+                                </span>
+                              )}
+                            </NeonButton>
+                          </ClickEffect>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  ))
+                ) : (
+                  <div className="col-span-full flex flex-col items-center justify-center py-12">
+                    <Search className="w-12 h-12 text-sortmy-gray mb-4" />
+                    <h3 className="text-xl font-medium mb-2">No tools found</h3>
+                    <p className="text-gray-400 text-center max-w-md">
+                      We couldn't find any free tools. Try adjusting your filters or search query.
+                    </p>
+                    <ClickEffect effect="ripple" color="blue">
+                      <NeonButton
+                        variant="cyan"
+                        className="mt-4"
+                        onClick={clearFilters}
+                      >
+                        Clear Filters
+                      </NeonButton>
+                    </ClickEffect>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="freemium" className="m-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {loading ? (
+                  // Loading skeletons
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <GlassCard key={index} variant="bordered" className="border-sortmy-blue/20 p-4 h-64">
+                      <div className="flex items-center mb-4">
+                        <NeonSkeleton className="h-10 w-10 rounded-md" />
+                        <div className="ml-3 space-y-2 flex-1">
+                          <NeonSkeleton className="h-4 w-3/4" />
+                          <NeonSkeleton className="h-3 w-1/2" />
+                        </div>
+                      </div>
+                      <NeonSkeleton className="h-20 w-full mb-4" />
+                      <div className="flex justify-between items-center">
+                        <NeonSkeleton className="h-8 w-24" />
+                        <NeonSkeleton className="h-8 w-24" />
+                      </div>
+                    </GlassCard>
+                  ))
+                ) : filteredTools.length > 0 ? (
+                  filteredTools.map(tool => (
+                    <GlassCard
+                      key={tool.id}
+                      variant="bordered"
+                      className="border-sortmy-blue/20 p-4 hover:shadow-[0_0_15px_rgba(0,102,255,0.15)] transition-all duration-300 hover:translate-y-[-5px]"
+                    >
+                      <div className="flex items-center mb-3">
+                        {(tool.logoUrl || tool.logoLink) && !failedImages.has(tool.id) ? (
+                          <img
+                            src={tool.logoUrl || tool.logoLink}
+                            alt={`${tool.name} logo`}
+                            className="w-10 h-10 rounded-md object-cover border border-sortmy-blue/20"
+                            onError={() => {
+                              setFailedImages(prev => {
+                                const newSet = new Set(prev);
+                                newSet.add(tool.id);
+                                return newSet;
+                              });
+                            }}
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-md bg-sortmy-blue/20 flex items-center justify-center">
+                            <Zap className="w-6 h-6 text-sortmy-blue" />
+                          </div>
+                        )}
+                        <div className="ml-3">
+                          <h3 className="font-medium bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">
+                            {tool.name}
+                          </h3>
+                          <p className="text-xs text-gray-400">{tool.useCase}</p>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-gray-300 mb-3 line-clamp-3">
+                        {tool.description}
+                      </p>
+
+                      {tool.tags && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {(() => {
+                            // Convert tags to array if it's a string
+                            const tagArray = typeof tool.tags === 'string'
+                              ? tool.tags.split(',').map(tag => tag.trim())
+                              : tool.tags;
+
+                            if (!Array.isArray(tagArray)) return null;
+
+                            return (
+                              <>
+                                {tagArray.slice(0, 3).map(tag => (
+                                  <Badge
+                                    key={tag}
+                                    variant="outline"
+                                    className="text-xs border-sortmy-blue/20 bg-sortmy-blue/5"
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {tagArray.length > 3 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs border-sortmy-blue/20 bg-sortmy-blue/5"
+                                  >
+                                    +{tagArray.length - 3}
+                                  </Badge>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center mt-auto">
+                        <Badge
+                          variant="secondary"
+                          className="bg-blue-500/20 text-blue-400 border-blue-500/30"
+                        >
+                          {tool.pricing || 'Unknown'}
+                        </Badge>
+
+                        <div className="flex gap-2">
+                          {(tool.website || tool.websiteLink) && (
+                            <a
+                              href={formatWebsiteUrl(tool.website || tool.websiteLink || '')}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 rounded-md bg-sortmy-blue/10 hover:bg-sortmy-blue/20 transition-colors"
+                            >
+                              <ExternalLink className="w-4 h-4 text-sortmy-blue" />
+                            </a>
+                          )}
+
+                          <ClickEffect effect="ripple" color="blue">
+                            <NeonButton
+                              variant="cyan"
+                              size="sm"
+                              className="px-3"
+                              onClick={() => addToolToTracker(tool)}
+                              disabled={savingToolIds.includes(tool.id)}
+                            >
+                              {savingToolIds.includes(tool.id) ? (
+                                <span className="flex items-center">
+                                  <Skeleton className="h-4 w-4 rounded-full animate-spin mr-2" />
+                                  Saving
+                                </span>
+                              ) : (
+                                <span className="flex items-center">
+                                  <Plus className="w-4 h-4 mr-1" />
+                                  Add
+                                </span>
+                              )}
+                            </NeonButton>
+                          </ClickEffect>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  ))
+                ) : (
+                  <div className="col-span-full flex flex-col items-center justify-center py-12">
+                    <Search className="w-12 h-12 text-sortmy-gray mb-4" />
+                    <h3 className="text-xl font-medium mb-2">No tools found</h3>
+                    <p className="text-gray-400 text-center max-w-md">
+                      We couldn't find any freemium tools. Try adjusting your filters or search query.
+                    </p>
+                    <ClickEffect effect="ripple" color="blue">
+                      <NeonButton
+                        variant="cyan"
+                        className="mt-4"
+                        onClick={clearFilters}
+                      >
+                        Clear Filters
+                      </NeonButton>
+                    </ClickEffect>
+                  </div>
+                )}
               </div>
             </TabsContent>
 
             <TabsContent value="paid" className="m-0">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Content is filtered by the useEffect */}
-                {/* This is the same grid as "all" but filtered by the activeTab state */}
-                {/* The actual rendering is handled by the shared code above */}
+                {loading ? (
+                  // Loading skeletons
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <GlassCard key={index} variant="bordered" className="border-sortmy-blue/20 p-4 h-64">
+                      <div className="flex items-center mb-4">
+                        <NeonSkeleton className="h-10 w-10 rounded-md" />
+                        <div className="ml-3 space-y-2 flex-1">
+                          <NeonSkeleton className="h-4 w-3/4" />
+                          <NeonSkeleton className="h-3 w-1/2" />
+                        </div>
+                      </div>
+                      <NeonSkeleton className="h-20 w-full mb-4" />
+                      <div className="flex justify-between items-center">
+                        <NeonSkeleton className="h-8 w-24" />
+                        <NeonSkeleton className="h-8 w-24" />
+                      </div>
+                    </GlassCard>
+                  ))
+                ) : filteredTools.length > 0 ? (
+                  filteredTools.map(tool => (
+                    <GlassCard
+                      key={tool.id}
+                      variant="bordered"
+                      className="border-sortmy-blue/20 p-4 hover:shadow-[0_0_15px_rgba(0,102,255,0.15)] transition-all duration-300 hover:translate-y-[-5px]"
+                    >
+                      <div className="flex items-center mb-3">
+                        {(tool.logoUrl || tool.logoLink) && !failedImages.has(tool.id) ? (
+                          <img
+                            src={tool.logoUrl || tool.logoLink}
+                            alt={`${tool.name} logo`}
+                            className="w-10 h-10 rounded-md object-cover border border-sortmy-blue/20"
+                            onError={() => {
+                              setFailedImages(prev => {
+                                const newSet = new Set(prev);
+                                newSet.add(tool.id);
+                                return newSet;
+                              });
+                            }}
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-md bg-sortmy-blue/20 flex items-center justify-center">
+                            <Zap className="w-6 h-6 text-sortmy-blue" />
+                          </div>
+                        )}
+                        <div className="ml-3">
+                          <h3 className="font-medium bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">
+                            {tool.name}
+                          </h3>
+                          <p className="text-xs text-gray-400">{tool.useCase}</p>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-gray-300 mb-3 line-clamp-3">
+                        {tool.description}
+                      </p>
+
+                      {tool.tags && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {(() => {
+                            // Convert tags to array if it's a string
+                            const tagArray = typeof tool.tags === 'string'
+                              ? tool.tags.split(',').map(tag => tag.trim())
+                              : tool.tags;
+
+                            if (!Array.isArray(tagArray)) return null;
+
+                            return (
+                              <>
+                                {tagArray.slice(0, 3).map(tag => (
+                                  <Badge
+                                    key={tag}
+                                    variant="outline"
+                                    className="text-xs border-sortmy-blue/20 bg-sortmy-blue/5"
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {tagArray.length > 3 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs border-sortmy-blue/20 bg-sortmy-blue/5"
+                                  >
+                                    +{tagArray.length - 3}
+                                  </Badge>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center mt-auto">
+                        <Badge
+                          variant="outline"
+                          className="bg-purple-500/20 text-purple-400 border-purple-500/30"
+                        >
+                          {tool.pricing || 'Unknown'}
+                        </Badge>
+
+                        <div className="flex gap-2">
+                          {(tool.website || tool.websiteLink) && (
+                            <a
+                              href={formatWebsiteUrl(tool.website || tool.websiteLink || '')}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 rounded-md bg-sortmy-blue/10 hover:bg-sortmy-blue/20 transition-colors"
+                            >
+                              <ExternalLink className="w-4 h-4 text-sortmy-blue" />
+                            </a>
+                          )}
+
+                          <ClickEffect effect="ripple" color="blue">
+                            <NeonButton
+                              variant="cyan"
+                              size="sm"
+                              className="px-3"
+                              onClick={() => addToolToTracker(tool)}
+                              disabled={savingToolIds.includes(tool.id)}
+                            >
+                              {savingToolIds.includes(tool.id) ? (
+                                <span className="flex items-center">
+                                  <Skeleton className="h-4 w-4 rounded-full animate-spin mr-2" />
+                                  Saving
+                                </span>
+                              ) : (
+                                <span className="flex items-center">
+                                  <Plus className="w-4 h-4 mr-1" />
+                                  Add
+                                </span>
+                              )}
+                            </NeonButton>
+                          </ClickEffect>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  ))
+                ) : (
+                  <div className="col-span-full flex flex-col items-center justify-center py-12">
+                    <Search className="w-12 h-12 text-sortmy-gray mb-4" />
+                    <h3 className="text-xl font-medium mb-2">No tools found</h3>
+                    <p className="text-gray-400 text-center max-w-md">
+                      We couldn't find any paid tools. Try adjusting your filters or search query.
+                    </p>
+                    <ClickEffect effect="ripple" color="blue">
+                      <NeonButton
+                        variant="cyan"
+                        className="mt-4"
+                        onClick={clearFilters}
+                      >
+                        Clear Filters
+                      </NeonButton>
+                    </ClickEffect>
+                  </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>

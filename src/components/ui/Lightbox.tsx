@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { X, ChevronLeft, ChevronRight, ExternalLink, Heart, Eye, Play, Pause, Volume2, VolumeX, Video } from 'lucide-react';
 import { PortfolioItem } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -69,10 +70,10 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
     };
   }, []);
 
-  if (!isOpen || !item) return null;
+  // Removed this line as we now check at the beginning of the render function
 
   // Handle multiple images if available
-  const images = item.media_urls ? item.media_urls : item.media_url ? [item.media_url] : [];
+  const images = item?.media_urls ? item.media_urls : item?.media_url ? [item.media_url] : [];
 
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -84,7 +85,10 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
     setCurrentImageIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
   };
 
-  return (
+  if (!isOpen || !item) return null;
+
+  // Create a portal to render the lightbox at the root level of the DOM
+  return ReactDOM.createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md overflow-hidden"
       onClick={onClose}
@@ -277,7 +281,8 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
