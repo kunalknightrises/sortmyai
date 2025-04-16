@@ -6,6 +6,7 @@ import './styles/synthwave-theme.css'; // Import synthwave theme
 import { BrowserRouter } from 'react-router-dom';
 import { FirebaseConnectionProvider } from './contexts/FirebaseConnectionContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { MessageNotificationProvider } from './contexts/MessageNotificationContext';
 import { ToastProvider } from '@/components/ToastProvider';
 import { initializeCapacitor } from '@/lib/capacitor';
 
@@ -17,8 +18,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <FirebaseConnectionProvider>
         <AuthProvider>
-          <App />
-          <ToastProvider />
+          <MessageNotificationProvider>
+            <App />
+            <ToastProvider />
+          </MessageNotificationProvider>
         </AuthProvider>
       </FirebaseConnectionProvider>
     </BrowserRouter>

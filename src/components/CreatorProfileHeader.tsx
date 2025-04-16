@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { MessageSquare, Users, Settings, Edit, ExternalLink } from 'lucide-react';
+import { Users, Settings, Edit, ExternalLink } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { User, PortfolioItem } from '@/types';
 import ProfileEditForm from './profile/ProfileEditForm';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
+import MessageButton from '@/components/messaging/MessageButton';
 
 interface CreatorProfileHeaderProps {
   user: User | null;
@@ -62,10 +63,12 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
                 </Button>
               ) : (
                 <>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    Message
-                  </Button>
+                  <MessageButton
+                    userId={user.uid}
+                    username={user.username || ''}
+                    variant="outline"
+                    size="sm"
+                  />
                   <Button size="sm" className="gap-2 bg-sortmy-blue hover:bg-sortmy-blue/90">
                     <Users className="w-4 h-4" />
                     Follow

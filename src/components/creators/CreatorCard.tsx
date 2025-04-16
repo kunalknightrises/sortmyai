@@ -1,13 +1,14 @@
 import { User } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ExternalLink, Users, Lock } from 'lucide-react';
+import { ExternalLink, Users, Lock, MessageSquare } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import HoverEffect from '@/components/ui/HoverEffect';
 import NeonButton from '@/components/ui/NeonButton';
 import ClickEffect from '@/components/ui/ClickEffect';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import MessageButton from '@/components/messaging/MessageButton';
 
 interface CreatorCardProps {
   creator: User;
@@ -91,6 +92,12 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
               </NeonButton>
             </Link>
           </ClickEffect>
+          <MessageButton
+            userId={creator.uid}
+            username={creator.username || ''}
+            variant="outline"
+            size="sm"
+          />
           <ClickEffect effect="ripple" color="blue">
             <NeonButton
               variant="magenta"

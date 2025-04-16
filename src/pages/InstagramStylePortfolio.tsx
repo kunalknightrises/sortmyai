@@ -34,8 +34,7 @@ const InstagramStylePortfolio = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-  const [backgroundType, setBackgroundType] = useState<'aurora' | 'synthwave'>('synthwave');
-  const backgroundIntensity = 'low' as const;
+  const [backgroundType, setBackgroundType] = useState<'aurora' | 'synthwave' | 'simple'>('simple');
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
 
@@ -126,15 +125,19 @@ const InstagramStylePortfolio = () => {
     <div className="flex min-h-screen bg-sortmy-dark relative">
       {/* Background */}
       <div className="fixed inset-0 z-0">
-        {backgroundType === 'aurora' ? (
+        {backgroundType === 'aurora' && (
           <AuroraBackground intensity={50} className="z-0" />
-        ) : (
-          <SynthwaveBackground intensity={backgroundIntensity} className="z-0" />
+        )}
+        {backgroundType === 'synthwave' && (
+          <SynthwaveBackground intensity="low" className="z-0" />
+        )}
+        {backgroundType === 'simple' && (
+          <div className="absolute inset-0 bg-sortmy-dark">
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0d001a] to-[#0a0a2e] opacity-80"></div>
+            <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+          </div>
         )}
       </div>
-
-      {/* Scanline effect */}
-      <div className="scanline-effect fixed inset-0 z-[1] pointer-events-none"></div>
 
       {/* Sidebar for authenticated users */}
       {currentUser && <Sidebar />}
@@ -145,7 +148,13 @@ const InstagramStylePortfolio = () => {
           variant="outline"
           size="icon"
           className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
-          onClick={() => setBackgroundType(prev => prev === 'aurora' ? 'synthwave' : 'aurora')}
+          onClick={() => {
+            setBackgroundType(prev => {
+              if (prev === 'simple') return 'synthwave';
+              if (prev === 'synthwave') return 'aurora';
+              return 'simple';
+            });
+          }}
           title="Toggle Background Style"
         >
           <Sparkles className="h-4 w-4" />

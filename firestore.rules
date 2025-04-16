@@ -66,5 +66,39 @@ service cloud.firestore {
         (request.auth.token.admin == true ||
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
+
+    // Conversations collection
+    match /conversations/{conversationId} {
+      // Allow read if user is a participant
+      allow read: if isAuthenticated() &&
+        request.auth.uid in resource.data.participants;
+
+      // Allow create if user is a participant
+      allow create: if isAuthenticated() &&
+        request.auth.uid in request.resource.data.participants;
+
+      // Allow update if user is a participant and only updating message-related fields
+      allow update: if isAuthenticated() &&
+        request.auth.uid in resource.data.participants &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['lastMessage', 'updatedAt', 'serverTime']);
+    }
+
+    // Messages subcollection
+    match /conversations/{conversationId}/messages/{messageId} {
+      // Allow read if user is a participant in the parent conversation
+      allow read: if isAuthenticated() &&
+        request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+
+      // Allow create if user is the sender and a participant
+      allow create: if isAuthenticated() &&
+        request.auth.uid == request.resource.data.senderId &&
+        request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+
+      // Allow update for marking messages as read if user is the receiver
+      allow update: if isAuthenticated() &&
+        request.auth.uid == resource.data.receiverId &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+    }
   }
 }

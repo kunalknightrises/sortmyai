@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
+import PushNotificationInitializer from './components/PushNotificationInitializer';
 
 // Pages
 import Login from '@/pages/Login';
@@ -24,6 +25,7 @@ import { useEffect } from 'react';
 import Academy from '@/pages/Academy';
 import AIToolsUpload from '@/pages/AIToolsUpload';
 import SynthwaveDemo from '@/pages/SynthwaveDemo';
+import Messages from '@/pages/Messages';
 import { initializeCapacitor } from '@/lib/capacitor';
 import '@/lib/debug-utils'; // Import debug utilities
 
@@ -44,6 +46,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <PushNotificationInitializer />
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<EmailLogin />} />
@@ -152,6 +155,15 @@ function App() {
           <ProtectedRoute>
             <DashboardLayout>
               <AIToolsUpload />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* Messages route */}
+        <Route path="/dashboard/messages" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Messages />
             </DashboardLayout>
           </ProtectedRoute>
         } />

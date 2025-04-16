@@ -12,8 +12,11 @@ import {
   X,
   GraduationCap,
   Sparkles,
-  Users
+  Users,
+  MessageSquare
 } from 'lucide-react';
+import { useMessageNotifications } from '@/contexts/MessageNotificationContext';
+import NotificationBadge from '@/components/ui/notification-badge';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -36,41 +39,51 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { icon: <Briefcase size={20} />, label: "Tool Tracker", path: "/dashboard/tools" },
     { icon: <LayoutGrid size={20} />, label: "Portfolio", path: "/dashboard/portfolio" },
     { icon: <Users size={20} />, label: "Explore Creators", path: "/dashboard/explore-creators" },
+    { icon: <MessageSquare size={20} />, label: "Messages", path: "/dashboard/messages" },
     { icon: <GraduationCap size={20} />, label: "Academy", path: "/dashboard/academy" },
     { icon: <User size={20} />, label: "Profile", path: "/dashboard/profile" },
     { icon: <Settings size={20} />, label: "Settings", path: "/dashboard/settings" },
   ];
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center mb-8 py-2">
-        <div className="relative">
-          <Brain className="w-8 h-8 mr-2 text-sortmy-blue" />
-          <Sparkles className="w-3 h-3 absolute -top-1 -right-1 text-sortmy-blue animate-pulse" />
-        </div>
-        <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">SortMyAI</span>
-      </div>
+  const SidebarContent = () => {
+    const { totalUnreadMessages } = useMessageNotifications();
 
-      <div className="flex-1 flex flex-col space-y-1">
-        {sidebarItems.map((item, i) => (
-          <NavLink
-            key={i}
-            to={item.path}
-            className={({ isActive }) => `
-              flex items-center gap-3 py-3 px-4 rounded-md transition-all duration-300
-              ${isActive
-                ? 'bg-sortmy-blue/10 text-sortmy-blue border-l-2 border-sortmy-blue pl-3 shadow-[0_0_10px_rgba(0,102,255,0.2)] hover:shadow-[0_0_15px_rgba(0,102,255,0.3)]'
-                : 'hover:bg-sortmy-blue/5 text-gray-300 hover:text-white hover:translate-x-1 hover:border-l hover:border-sortmy-blue/30'}
-            `}
-            onClick={() => isMobile && setIsMenuOpen(false)}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex items-center mb-8 py-2">
+          <div className="relative">
+            <Brain className="w-8 h-8 mr-2 text-sortmy-blue" />
+            <Sparkles className="w-3 h-3 absolute -top-1 -right-1 text-sortmy-blue animate-pulse" />
+          </div>
+          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">SortMyAI</span>
+        </div>
+
+        <div className="flex-1 flex flex-col space-y-1">
+          {sidebarItems.map((item, i) => (
+            <NavLink
+              key={i}
+              to={item.path}
+              className={({ isActive }) => `
+                flex items-center gap-3 py-3 px-4 rounded-md transition-all duration-300 relative
+                ${isActive
+                  ? 'bg-sortmy-blue/10 text-sortmy-blue border-l-2 border-sortmy-blue pl-3 shadow-[0_0_10px_rgba(0,102,255,0.2)] hover:shadow-[0_0_15px_rgba(0,102,255,0.3)]'
+                  : 'hover:bg-sortmy-blue/5 text-gray-300 hover:text-white hover:translate-x-1 hover:border-l hover:border-sortmy-blue/30'}
+              `}
+              onClick={() => isMobile && setIsMenuOpen(false)}
+            >
+              <div className="relative">
+                {item.icon}
+                {item.label === 'Messages' && totalUnreadMessages > 0 && (
+                  <NotificationBadge count={totalUnreadMessages} />
+                )}
+              </div>
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // State for background type and intensity
   const [backgroundType, setBackgroundType] = useState<'aurora' | 'synthwave'>('synthwave');
