@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { Slot } from '@radix-ui/react-slot';
 
 interface NeonButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
@@ -12,17 +13,19 @@ interface NeonButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
   icon?: React.ReactNode;
 }
 
-const NeonButton: React.FC<NeonButtonProps> = ({
-  children,
-  className,
-  variant = 'magenta',
-  size = 'md',
-  glow = true,
-  loading = false,
-  disabled = false,
-  icon,
-  ...props
-}) => {
+const NeonButton = forwardRef<HTMLButtonElement, NeonButtonProps>((
+  {
+    children,
+    className,
+    variant = 'magenta',
+    size = 'md',
+    glow = true,
+    loading = false,
+    disabled = false,
+    icon,
+    asChild = false,
+    ...props
+  }, ref) => {
   // Base styles
   const baseStyles = 'relative rounded-md font-medium transition-all duration-300 flex items-center justify-center';
 
@@ -62,8 +65,10 @@ const NeonButton: React.FC<NeonButtonProps> = ({
     ? 'opacity-50 cursor-not-allowed hover:transform-none hover:shadow-none'
     : '';
 
+  const Comp = asChild ? Slot : 'button';
+
   return (
-    <button
+    <Comp
       className={cn(
         baseStyles,
         sizeStyles[size],
@@ -74,6 +79,7 @@ const NeonButton: React.FC<NeonButtonProps> = ({
         className
       )}
       disabled={disabled || loading}
+      ref={ref}
       {...props}
     >
       {loading && (
@@ -88,8 +94,10 @@ const NeonButton: React.FC<NeonButtonProps> = ({
       {variant !== 'gradient' && (
         <span className="absolute inset-0 rounded-md bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
       )}
-    </button>
+    </Comp>
   );
-};
+});
+
+NeonButton.displayName = 'NeonButton';
 
 export default NeonButton;

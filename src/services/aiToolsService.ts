@@ -2,7 +2,7 @@ import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase
 import { db } from '@/lib/firebase';
 import { AITool } from '@/types';
 
-const COLLECTION_NAME = 'aiTools';
+const COLLECTION_NAME = 'ai-tools';
 
 // Add a single AI tool
 export const addAITool = async (tool: Omit<AITool, 'id'>): Promise<string> => {

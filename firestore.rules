@@ -48,12 +48,20 @@ service cloud.firestore {
     }
 
     // AI Tools collection
-    match /aiTools/{toolId} {
+    match /ai-tools/{toolId} {
       // Allow anyone to read AI tools
       allow read: if true;
 
       // Only allow admins to write to AI tools collection
       // This requires a custom claim 'admin' to be set for admin users
+      allow write: if isAuthenticated() &&
+        (request.auth.token.admin == true ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    // For backward compatibility
+    match /aiTools/{toolId} {
+      allow read: if true;
       allow write: if isAuthenticated() &&
         (request.auth.token.admin == true ||
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
