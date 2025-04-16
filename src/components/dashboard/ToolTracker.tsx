@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Briefcase } from 'lucide-react';
+import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Briefcase, Library } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 // import NeuCard from '@/components/ui/NeuCard';
 import NeonButton from '@/components/ui/NeonButton';
@@ -83,20 +83,31 @@ const ToolTracker = () => {
           </p>
         </div>
 
-        <ClickEffect effect="ripple" color="blue">
-          <NeonButton variant="gradient" asChild>
-            <Link to="/dashboard/tools/add">
-              <PlusCircle className="w-4 h-4 mr-2" />
-              Add a Tool
-            </Link>
-          </NeonButton>
-        </ClickEffect>
+        <div className="flex gap-3">
+          <ClickEffect effect="ripple" color="blue">
+            <NeonButton variant="cyan" asChild>
+              <Link to="/dashboard/tools/library">
+                <Library className="w-4 h-4 mr-2" />
+                AI Tools Library
+              </Link>
+            </NeonButton>
+          </ClickEffect>
+
+          <ClickEffect effect="ripple" color="blue">
+            <NeonButton variant="gradient" asChild>
+              <Link to="/dashboard/tools/add">
+                <PlusCircle className="w-4 h-4 mr-2" />
+                Add a Tool
+              </Link>
+            </NeonButton>
+          </ClickEffect>
+        </div>
       </div>
 
       <AISuggestion
-        suggestion="Try adding tags to your tools to organize them better."
-        actionText="Learn More"
-        onAction={() => console.log('Learn more about tags')}
+        suggestion="Explore our AI Tools Library to discover new tools for your workflow."
+        actionText="Explore Library"
+        onAction={() => navigate('/dashboard/tools/library')}
         autoHide={true}
       />
 

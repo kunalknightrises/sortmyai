@@ -12,6 +12,7 @@ import Profile from '@/pages/Profile';
 import Settings from '@/pages/Settings';
 import ToolTracker from '@/components/dashboard/ToolTracker';
 import AddTool from '@/components/dashboard/AddTool';
+import AIToolsLibrary from '@/components/dashboard/AIToolsLibrary';
 import Portfolio from '@/components/dashboard/Portfolio';
 import AddPortfolio from '@/components/dashboard/AddPortfolio';
 import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
@@ -87,6 +88,14 @@ function App() {
           <ProtectedRoute>
             <DashboardLayout>
               <AddTool />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/tools/library" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <AIToolsLibrary />
             </DashboardLayout>
           </ProtectedRoute>
         } />

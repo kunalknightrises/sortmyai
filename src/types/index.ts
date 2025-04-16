@@ -72,15 +72,15 @@ export interface Tool {
 }
 
 export interface AITool {
-  id?: string;
+  id: string;
   name: string;
   useCase: string;
   description: string;
-  tags: string;
+  tags: string[];
   pricing: string;
   excelsAt: string;
-  websiteLink: string;
-  logoLink: string;
+  website: string;
+  logoUrl: string;
   createdAt?: string;
   updatedAt?: string;
 }
