@@ -141,11 +141,11 @@ const Profile = () => {
 
                 <div className="w-full pt-4">
                   <HoverEffect effect="lift" color="blue">
-                    <NeonButton variant="gradient" className="w-full" asChild>
-                      <a href={`/portfolio/${user?.username || ''}`}>
+                    <a href={`/portfolio/${user?.username || ''}`}>
+                      <NeonButton variant="gradient" className="w-full">
                         View Public Profile
-                      </a>
-                    </NeonButton>
+                      </NeonButton>
+                    </a>
                   </HoverEffect>
                 </div>
               </CardContent>

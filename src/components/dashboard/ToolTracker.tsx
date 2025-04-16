@@ -85,21 +85,21 @@ const ToolTracker = () => {
 
         <div className="flex gap-3">
           <ClickEffect effect="ripple" color="blue">
-            <NeonButton variant="cyan" asChild>
-              <Link to="/dashboard/tools/library">
+            <Link to="/dashboard/tools/library">
+              <NeonButton variant="cyan">
                 <Library className="w-4 h-4 mr-2" />
                 AI Tools Library
-              </Link>
-            </NeonButton>
+              </NeonButton>
+            </Link>
           </ClickEffect>
 
           <ClickEffect effect="ripple" color="blue">
-            <NeonButton variant="gradient" asChild>
-              <Link to="/dashboard/tools/add">
+            <Link to="/dashboard/tools/add">
+              <NeonButton variant="gradient">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 Add a Tool
-              </Link>
-            </NeonButton>
+              </NeonButton>
+            </Link>
           </ClickEffect>
         </div>
       </div>
@@ -143,12 +143,12 @@ const ToolTracker = () => {
             <div>
               <p className="text-lg mb-2">You haven't added any tools yet</p>
               <ClickEffect effect="bounce" color="blue">
-                <NeonButton variant="gradient" className="mt-4" asChild>
-                  <Link to="/dashboard/tools/add">
+                <Link to="/dashboard/tools/add">
+                  <NeonButton variant="gradient" className="mt-4">
                     <PlusCircle className="w-4 h-4 mr-2" />
                     Add Your First Tool
-                  </Link>
-                </NeonButton>
+                  </NeonButton>
+                </Link>
               </ClickEffect>
             </div>
           )}
@@ -192,12 +192,12 @@ const ToolTracker = () => {
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex space-x-2">
                     <AnimatedTooltip content="Visit website" position="top">
-                      <NeonButton variant="cyan" size="sm" asChild>
-                        <a href={tool.website || tool.website_url} target="_blank" rel="noopener noreferrer">
+                      <a href={tool.website || tool.website_url} target="_blank" rel="noopener noreferrer">
+                        <NeonButton variant="cyan" size="sm">
                           <ExternalLink className="w-4 h-4 mr-1" />
                           Visit
-                        </a>
-                      </NeonButton>
+                        </NeonButton>
+                      </a>
                     </AnimatedTooltip>
                     <AnimatedTooltip content="Edit tool" position="top">
                       <NeonButton variant="magenta" size="sm" onClick={() => navigate(`/dashboard/tools/edit/${tool.id}`)}>

@@ -154,12 +154,12 @@ const Dashboard = () => {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">Dashboard</h1>
 
                 <ClickEffect effect="ripple" color="blue">
-                  <NeonButton variant="gradient" asChild>
-                    <Link to="/dashboard/tools/add">
+                  <Link to="/dashboard/tools/add">
+                    <NeonButton variant="gradient">
                       <PlusCircle className="w-4 h-4 mr-2" />
                       Add a Tool
-                    </Link>
-                  </NeonButton>
+                    </NeonButton>
+                  </Link>
                 </ClickEffect>
               </div>
 
@@ -259,12 +259,14 @@ const Dashboard = () => {
                     <BadgeDisplay badges={mockBadges} className="pt-2" />
 
                     <div className="pt-2">
-                      <NeonButton variant="magenta" size="sm" className="w-full">
-                        <Link to="/dashboard/achievements" className="w-full flex items-center justify-center">
-                          <Award className="w-4 h-4 mr-2" />
-                          View All Achievements
-                        </Link>
-                      </NeonButton>
+                      <Link to="/dashboard/achievements" className="w-full">
+                        <NeonButton variant="magenta" size="sm" className="w-full">
+                          <span className="flex items-center justify-center">
+                            <Award className="w-4 h-4 mr-2" />
+                            View All Achievements
+                          </span>
+                        </NeonButton>
+                      </Link>
                     </div>
                   </CardContent>
                 </GlassCard>
@@ -289,9 +291,9 @@ const Dashboard = () => {
                         </AnimatedTooltip>
                       </div>
                       <HoverEffect effect="lift" color="blue">
-                        <NeonButton variant="gradient" size="sm" asChild>
-                          <Link to="/dashboard/tools/add">Start Now</Link>
-                        </NeonButton>
+                        <Link to="/dashboard/tools/add">
+                          <NeonButton variant="gradient" size="sm">Start Now</NeonButton>
+                        </Link>
                       </HoverEffect>
                     </div>
 
@@ -308,11 +310,11 @@ const Dashboard = () => {
                         <Briefcase className="w-5 h-5 mr-2 text-sortmy-blue" />
                         <span className="text-white">Recent Tools</span>
                       </CardTitle>
-                      <NeonButton variant="magenta" size="sm" className="text-xs">
-                        <Link to="/dashboard/tools" className="flex items-center">
-                          View All <ArrowRight className="w-4 h-4 ml-1" />
-                        </Link>
-                      </NeonButton>
+                      <Link to="/dashboard/tools">
+                        <NeonButton variant="magenta" size="sm" className="text-xs">
+                          <span className="flex items-center">View All <ArrowRight className="w-4 h-4 ml-1" /></span>
+                        </NeonButton>
+                      </Link>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -345,12 +347,12 @@ const Dashboard = () => {
                         <Briefcase className="mx-auto w-12 h-12 mb-3 opacity-30" />
                         <p>You haven't added any tools yet</p>
                         <ClickEffect effect="bounce" color="blue">
-                          <NeonButton variant="magenta" size="sm" className="mt-4" asChild>
-                            <Link to="/dashboard/tools/add">
+                          <Link to="/dashboard/tools/add">
+                            <NeonButton variant="magenta" size="sm" className="mt-4">
                               <PlusCircle className="w-4 h-4 mr-2" />
                               Add Your First Tool
-                            </Link>
-                          </NeonButton>
+                            </NeonButton>
+                          </Link>
                         </ClickEffect>
                       </div>
                     )}
@@ -364,11 +366,11 @@ const Dashboard = () => {
                         <LayoutGrid className="w-5 h-5 mr-2 text-sortmy-blue" />
                         <span className="text-white">Recent Portfolio Items</span>
                       </CardTitle>
-                      <NeonButton variant="cyan" size="sm" className="text-xs">
-                        <Link to="/dashboard/portfolio" className="flex items-center">
-                          View All <ArrowRight className="w-4 h-4 ml-1" />
-                        </Link>
-                      </NeonButton>
+                      <Link to="/dashboard/portfolio">
+                        <NeonButton variant="cyan" size="sm" className="text-xs">
+                          <span className="flex items-center">View All <ArrowRight className="w-4 h-4 ml-1" /></span>
+                        </NeonButton>
+                      </Link>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -405,12 +407,12 @@ const Dashboard = () => {
                         <LayoutGrid className="mx-auto w-12 h-12 mb-3 opacity-30" />
                         <p>You haven't added any portfolio items yet</p>
                         <ClickEffect effect="particles" color="blue">
-                          <NeonButton variant="cyan" size="sm" className="mt-4" asChild>
-                            <Link to="/dashboard/portfolio/add">
+                          <Link to="/dashboard/portfolio/add">
+                            <NeonButton variant="cyan" size="sm" className="mt-4">
                               <PlusCircle className="w-4 h-4 mr-2" />
                               Create Your First Portfolio Item
-                            </Link>
-                          </NeonButton>
+                            </NeonButton>
+                          </Link>
                         </ClickEffect>
                       </div>
                     )}
