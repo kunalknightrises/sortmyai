@@ -269,6 +269,14 @@
   z-index: 1;
 }
 
+/* Grid Pattern */
+.bg-grid-pattern {
+  background-image: linear-gradient(rgba(0, 102, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 102, 255, 0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center center;
+}
+
 /* Scanline Animation */
 @keyframes scanline {
   0% {

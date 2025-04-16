@@ -9,11 +9,13 @@ import CreatorProfileHeader from '@/components/CreatorProfileHeader';
 import { PortfolioFilterTools } from '@/components/portfolio/PortfolioFilterTools';
 import { PortfolioTabs } from '@/components/portfolio/PortfolioTabs';
 import { useAuth } from '@/contexts/AuthContext';
-import SynthwaveBackground from '@/components/ui/SynthwaveBackground';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import { Button } from '@/components/ui/button';
 import NeonButton from '@/components/ui/NeonButton';
 import ClickEffect from '@/components/ui/ClickEffect';
 import { NavLink } from 'react-router-dom';
+import SynthwaveBackground from '@/components/ui/SynthwaveBackground';
+import AuroraBackground from '@/components/ui/AuroraBackground';
 import {
   LayoutDashboard,
   Briefcase,
@@ -24,7 +26,6 @@ import {
   GraduationCap,
   Sparkles,
   Users,
-  RefreshCw,
   Lock
 } from 'lucide-react';
 
@@ -33,7 +34,8 @@ const InstagramStylePortfolio = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-  const [backgroundType, setBackgroundType] = useState<'low' | 'medium' | 'high'>('medium');
+  const [backgroundType, setBackgroundType] = useState<'aurora' | 'synthwave'>('synthwave');
+  const backgroundIntensity = 'low' as const;
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
 
@@ -124,7 +126,11 @@ const InstagramStylePortfolio = () => {
     <div className="flex min-h-screen bg-sortmy-dark relative">
       {/* Background */}
       <div className="fixed inset-0 z-0">
-        <SynthwaveBackground intensity={backgroundType} className="z-0" />
+        {backgroundType === 'aurora' ? (
+          <AuroraBackground intensity={50} className="z-0" />
+        ) : (
+          <SynthwaveBackground intensity={backgroundIntensity} className="z-0" />
+        )}
       </div>
 
       {/* Scanline effect */}
@@ -135,15 +141,15 @@ const InstagramStylePortfolio = () => {
 
       {/* Theme toggle */}
       <div className="absolute top-4 right-4 z-20 flex gap-2">
-        <NeonButton
+        <Button
           variant="outline"
           size="icon"
           className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
-          onClick={() => setBackgroundType(prev => prev === 'low' ? 'medium' : prev === 'medium' ? 'high' : 'low')}
-          title="Toggle Background Intensity"
+          onClick={() => setBackgroundType(prev => prev === 'aurora' ? 'synthwave' : 'aurora')}
+          title="Toggle Background Style"
         >
-          <RefreshCw className="h-4 w-4" />
-        </NeonButton>
+          <Sparkles className="h-4 w-4" />
+        </Button>
         <ThemeToggle />
       </div>
 

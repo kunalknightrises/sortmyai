@@ -3,7 +3,7 @@ import { User } from '@/types';
 import { fetchCreatorsWithPortfolio, searchCreators } from '@/services/creatorService';
 import { CreatorCard } from '@/components/creators/CreatorCard';
 import { Input } from '@/components/ui/input';
-import { Search, Users, RefreshCw, Lock } from 'lucide-react';
+import { Search, Users, RefreshCw, Lock, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import GlassCard from '@/components/ui/GlassCard';
 import NeonButton from '@/components/ui/NeonButton';
@@ -11,15 +11,18 @@ import ClickEffect from '@/components/ui/ClickEffect';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
-import SynthwaveBackground from '@/components/ui/SynthwaveBackground';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import { Button } from '@/components/ui/button';
+import SynthwaveBackground from '@/components/ui/SynthwaveBackground';
+import AuroraBackground from '@/components/ui/AuroraBackground';
 
 const ExploreCreators = () => {
   const [creators, setCreators] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [backgroundType, setBackgroundType] = useState<'low' | 'medium' | 'high'>('medium');
+  const [backgroundType, setBackgroundType] = useState<'aurora' | 'synthwave'>('synthwave');
+  const backgroundIntensity = 'low' as const;
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -65,7 +68,11 @@ const ExploreCreators = () => {
     <div className="space-y-8 relative">
       {/* Background */}
       <div className="fixed inset-0 z-0">
-        <SynthwaveBackground intensity={backgroundType} className="z-0" />
+        {backgroundType === 'aurora' ? (
+          <AuroraBackground intensity={50} className="z-0" />
+        ) : (
+          <SynthwaveBackground intensity={backgroundIntensity} className="z-0" />
+        )}
       </div>
 
       {/* Scanline effect */}
@@ -73,15 +80,15 @@ const ExploreCreators = () => {
 
       {/* Theme toggle */}
       <div className="absolute top-4 right-4 z-20 flex gap-2">
-        <NeonButton
+        <Button
           variant="outline"
           size="icon"
           className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
-          onClick={() => setBackgroundType(prev => prev === 'low' ? 'medium' : prev === 'medium' ? 'high' : 'low')}
-          title="Toggle Background Intensity"
+          onClick={() => setBackgroundType(prev => prev === 'aurora' ? 'synthwave' : 'aurora')}
+          title="Toggle Background Style"
         >
-          <RefreshCw className="h-4 w-4" />
-        </NeonButton>
+          <Sparkles className="h-4 w-4" />
+        </Button>
         <ThemeToggle />
       </div>
 
