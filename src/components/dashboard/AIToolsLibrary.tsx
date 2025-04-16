@@ -22,6 +22,7 @@ const AIToolsLibrary = () => {
   const [allTags, setAllTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingToolIds, setSavingToolIds] = useState<string[]>([]);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState('all');
 
   const { user } = useAuth();
@@ -32,7 +33,7 @@ const AIToolsLibrary = () => {
     const fetchTools = async () => {
       try {
         setLoading(true);
-        const toolsCollection = collection(db, 'ai-tools');
+        const toolsCollection = collection(db, 'aiTools');
         const toolsSnapshot = await getDocs(toolsCollection);
 
         const toolsList: AITool[] = [];
@@ -45,9 +46,16 @@ const AIToolsLibrary = () => {
             id: doc.id
           };
 
-          // Extract all tags for filtering
-          if (tool.tags && Array.isArray(tool.tags)) {
-            tool.tags.forEach(tag => tagsSet.add(tag));
+          // Convert tags to array if it's a string
+          if (tool.tags) {
+            if (typeof tool.tags === 'string') {
+              tool.tags = tool.tags.split(',').map(tag => tag.trim());
+            }
+
+            // Extract all tags for filtering
+            if (Array.isArray(tool.tags)) {
+              tool.tags.forEach(tag => tagsSet.add(tag));
+            }
           }
 
           toolsList.push(tool);
@@ -87,9 +95,16 @@ const AIToolsLibrary = () => {
 
     // Filter by selected tags
     if (selectedTags.length > 0) {
-      filtered = filtered.filter(tool =>
-        tool.tags && selectedTags.every(tag => tool.tags.includes(tag))
-      );
+      filtered = filtered.filter(tool => {
+        if (!tool.tags) return false;
+
+        // Convert tags to array if it's a string
+        const tagArray = typeof tool.tags === 'string'
+          ? tool.tags.split(',').map(tag => tag.trim())
+          : tool.tags;
+
+        return Array.isArray(tagArray) && selectedTags.every(tag => tagArray.includes(tag));
+      });
     }
 
     // Filter by tab
@@ -127,8 +142,8 @@ const AIToolsLibrary = () => {
           id: tool.id,
           name: tool.name,
           useCase: tool.useCase,
-          logoUrl: tool.logoUrl,
-          website: tool.website,
+          logoUrl: tool.logoUrl || tool.logoLink,
+          website: formatWebsiteUrl(tool.website || tool.websiteLink || ''),
           addedAt: new Date().toISOString(),
         })
       });
@@ -164,6 +179,19 @@ const AIToolsLibrary = () => {
     setSearchQuery('');
     setSelectedTags([]);
     setActiveTab('all');
+  };
+
+  // Format website URL to ensure it has http/https prefix
+  const formatWebsiteUrl = (url: string): string => {
+    if (!url) return '#';
+
+    // Check if the URL already has a protocol
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // Add https:// prefix if missing
+    return `https://${url}`;
   };
 
   return (
@@ -271,11 +299,18 @@ const AIToolsLibrary = () => {
                       className="border-sortmy-blue/20 p-4 hover:shadow-[0_0_15px_rgba(0,102,255,0.15)] transition-all duration-300 hover:translate-y-[-5px]"
                     >
                       <div className="flex items-center mb-3">
-                        {tool.logoUrl ? (
+                        {(tool.logoUrl || tool.logoLink) && !failedImages.has(tool.id) ? (
                           <img
-                            src={tool.logoUrl}
+                            src={tool.logoUrl || tool.logoLink}
                             alt={`${tool.name} logo`}
                             className="w-10 h-10 rounded-md object-cover border border-sortmy-blue/20"
+                            onError={() => {
+                              setFailedImages(prev => {
+                                const newSet = new Set(prev);
+                                newSet.add(tool.id);
+                                return newSet;
+                              });
+                            }}
                           />
                         ) : (
                           <div className="w-10 h-10 rounded-md bg-sortmy-blue/20 flex items-center justify-center">
@@ -296,23 +331,36 @@ const AIToolsLibrary = () => {
 
                       {tool.tags && (
                         <div className="flex flex-wrap gap-1 mb-3">
-                          {tool.tags.slice(0, 3).map(tag => (
-                            <Badge
-                              key={tag}
-                              variant="outline"
-                              className="text-xs border-sortmy-blue/20 bg-sortmy-blue/5"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                          {tool.tags.length > 3 && (
-                            <Badge
-                              variant="outline"
-                              className="text-xs border-sortmy-blue/20 bg-sortmy-blue/5"
-                            >
-                              +{tool.tags.length - 3}
-                            </Badge>
-                          )}
+                          {(() => {
+                            // Convert tags to array if it's a string
+                            const tagArray = typeof tool.tags === 'string'
+                              ? tool.tags.split(',').map(tag => tag.trim())
+                              : tool.tags;
+
+                            if (!Array.isArray(tagArray)) return null;
+
+                            return (
+                              <>
+                                {tagArray.slice(0, 3).map(tag => (
+                                  <Badge
+                                    key={tag}
+                                    variant="outline"
+                                    className="text-xs border-sortmy-blue/20 bg-sortmy-blue/5"
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {tagArray.length > 3 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs border-sortmy-blue/20 bg-sortmy-blue/5"
+                                  >
+                                    +{tagArray.length - 3}
+                                  </Badge>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       )}
 
@@ -333,9 +381,9 @@ const AIToolsLibrary = () => {
                         </Badge>
 
                         <div className="flex gap-2">
-                          {tool.website && (
+                          {(tool.website || tool.websiteLink) && (
                             <a
-                              href={tool.website}
+                              href={formatWebsiteUrl(tool.website || tool.websiteLink || '')}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="p-1.5 rounded-md bg-sortmy-blue/10 hover:bg-sortmy-blue/20 transition-colors"

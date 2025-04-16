@@ -76,11 +76,13 @@ export interface AITool {
   name: string;
   useCase: string;
   description: string;
-  tags: string[];
+  tags: string[] | string;
   pricing: string;
   excelsAt: string;
-  website: string;
-  logoUrl: string;
+  website?: string;
+  websiteLink?: string;
+  logoUrl?: string;
+  logoLink?: string;
   createdAt?: string;
   updatedAt?: string;
 }
