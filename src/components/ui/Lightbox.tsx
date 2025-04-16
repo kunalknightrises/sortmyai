@@ -86,23 +86,24 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md overflow-hidden"
       onClick={onClose}
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
     >
       <div
-        className="relative w-full max-w-5xl max-h-[90vh] bg-gray-900 rounded-lg overflow-hidden flex flex-col md:flex-row"
+        className="relative w-[95vw] max-w-5xl max-h-[90vh] bg-sortmy-darker border border-sortmy-blue/20 rounded-lg overflow-hidden flex flex-col md:flex-row shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
-          className="absolute top-4 right-4 z-10 p-1 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-sortmy-darker/80 hover:bg-sortmy-blue/20 border border-sortmy-blue/30 transition-all duration-300 text-white"
           onClick={onClose}
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Media section */}
-        <div className="relative w-full md:w-3/5 h-[40vh] md:h-[90vh] bg-black/30">
+        <div className="relative w-full md:w-3/5 h-[40vh] md:h-[90vh] bg-sortmy-darker/50 border-r border-sortmy-blue/10">
           {images.length > 0 ? (
             <>
               <div className="w-full h-full">
@@ -199,20 +200,20 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
               {images.length > 1 && (
                 <>
                   <button
-                    className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-sortmy-darker/80 hover:bg-sortmy-blue/20 border border-sortmy-blue/30 transition-all duration-300"
                     onClick={handlePrevImage}
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-sortmy-darker/80 hover:bg-sortmy-blue/20 border border-sortmy-blue/30 transition-all duration-300"
                     onClick={handleNextImage}
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
 
                   {/* Image counter */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-black/50 text-xs">
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-sortmy-darker/80 border border-sortmy-blue/30 text-xs font-medium">
                     {currentImageIndex + 1} / {images.length}
                   </div>
                 </>
@@ -226,8 +227,8 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
         </div>
 
         {/* Details section */}
-        <div className="w-full md:w-2/5 p-6 overflow-y-auto max-h-[50vh] md:max-h-[90vh]">
-          <h2 className="text-2xl font-bold mb-2">{item.title}</h2>
+        <div className="w-full md:w-2/5 p-6 overflow-y-auto max-h-[50vh] md:max-h-[90vh] bg-sortmy-darker/80 backdrop-blur-md">
+          <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{item.title}</h2>
 
           <div className="flex items-center gap-3 text-sm text-gray-400 mb-4">
             <span>{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
@@ -246,7 +247,7 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
               href={item.project_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 mb-4"
+              className="inline-flex items-center gap-1 text-sortmy-blue hover:text-sortmy-blue/80 mb-4 transition-colors duration-300 border-b border-sortmy-blue/30 pb-1 px-1"
             >
               <ExternalLink className="w-4 h-4" />
               <span>Visit Project</span>
@@ -254,16 +255,20 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
           )}
 
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Description</h3>
-            <p className="text-gray-300 whitespace-pre-line">{item.description}</p>
+            <h3 className="text-sm font-medium text-sortmy-blue mb-2">Description</h3>
+            <p className="text-gray-300 whitespace-pre-line bg-sortmy-darker/50 p-3 rounded-md border border-sortmy-blue/10">{item.description}</p>
           </div>
 
           {item.tools_used && item.tools_used.length > 0 && (
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-400 mb-2">Tools Used</h3>
+              <h3 className="text-sm font-medium text-sortmy-blue mb-2">Tools Used</h3>
               <div className="flex flex-wrap gap-2">
                 {item.tools_used.map((tool, index) => (
-                  <Badge key={index} variant="outline" className="bg-gray-800/50">
+                  <Badge
+                    key={index}
+                    variant="outline"
+                    className="bg-sortmy-blue/10 border-sortmy-blue/30 hover:bg-sortmy-blue/20 transition-colors duration-300"
+                  >
                     {tool}
                   </Badge>
                 ))}

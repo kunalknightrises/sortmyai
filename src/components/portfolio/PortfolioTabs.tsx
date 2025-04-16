@@ -72,14 +72,22 @@ export const PortfolioTabsWithLightbox = ({
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const handleItemClick = (item: PortfolioItem) => {
-    setSelectedItem(item);
-    setIsLightboxOpen(true);
+    openLightbox(item);
   };
 
-  // Debug: Log items and their content types
-  console.log('All filtered items:', filteredItems);
-  console.log('Reel items:', filteredItems.filter(item => item.content_type === 'reel' || item.content_type === 'both'));
-  console.log('Post items:', filteredItems.filter(item => item.content_type === 'post' || item.content_type === 'both'));
+  // Handle lightbox open/close
+  const openLightbox = (item: PortfolioItem) => {
+    setSelectedItem(item);
+    setIsLightboxOpen(true);
+    // Add a class to the body to prevent scrolling
+    document.body.classList.add('overflow-hidden');
+  };
+
+  const closeLightbox = () => {
+    setIsLightboxOpen(false);
+    // Remove the class from the body to allow scrolling again
+    document.body.classList.remove('overflow-hidden');
+  };
 
   return (
     <>
@@ -175,7 +183,7 @@ export const PortfolioTabsWithLightbox = ({
       <Lightbox
         item={selectedItem}
         isOpen={isLightboxOpen}
-        onClose={() => setIsLightboxOpen(false)}
+        onClose={closeLightbox}
       />
     </>
   );
