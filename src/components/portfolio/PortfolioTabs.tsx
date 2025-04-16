@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Lightbox } from "@/components/ui/Lightbox";
-import { Video } from "lucide-react";
+import { Video, AlertTriangle } from "lucide-react";
 
 interface PortfolioTabsProps {
   loading: boolean;
@@ -70,6 +70,7 @@ export const PortfolioTabsWithLightbox = ({
 }: PortfolioTabsProps) => {
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  // const { toast } = useToast(); // Uncomment if needed for future use
 
   const handleItemClick = (item: PortfolioItem) => {
     openLightbox(item);
@@ -123,7 +124,16 @@ export const PortfolioTabsWithLightbox = ({
             filteredItems
               .filter(item => item.content_type === 'post' || item.content_type === 'both')
               .map((item) => (
-                <div key={item.id} onClick={() => handleItemClick(item)} className="cursor-pointer">
+                <div key={item.id} onClick={() => handleItemClick(item)} className="cursor-pointer relative">
+                  {/* Error indicator for items with missing or invalid media */}
+                  {((!item.media_url && (!item.media_urls || item.media_urls.length === 0)) ||
+                    (item.media_url && item.media_url.includes('drive.google.com') &&
+                     !item.media_url.includes('/d/') && !item.media_url.includes('id='))) && (
+                    <div className="absolute top-2 right-2 z-20 bg-red-500/80 text-white px-2 py-1 rounded-md flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      <span className="text-xs">Media Error</span>
+                    </div>
+                  )}
                   <PortfolioItemCard
                     item={item}
                     onEdit={onEdit}
@@ -151,7 +161,16 @@ export const PortfolioTabsWithLightbox = ({
                   {filteredItems
                     .filter(item => item.content_type === 'reel' || item.content_type === 'both')
                     .map((item) => (
-                      <div key={item.id} onClick={() => handleItemClick(item)} className="cursor-pointer">
+                      <div key={item.id} onClick={() => handleItemClick(item)} className="cursor-pointer relative">
+                        {/* Error indicator for items with missing or invalid media */}
+                        {((!item.media_url && (!item.media_urls || item.media_urls.length === 0)) ||
+                          (item.media_url && item.media_url.includes('drive.google.com') &&
+                           !item.media_url.includes('/d/') && !item.media_url.includes('id='))) && (
+                          <div className="absolute top-2 right-2 z-20 bg-red-500/80 text-white px-2 py-1 rounded-md flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            <span className="text-xs">Media Error</span>
+                          </div>
+                        )}
                         <PortfolioItemCard
                           item={item}
                           onEdit={onEdit}

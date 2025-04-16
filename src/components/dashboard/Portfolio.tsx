@@ -33,6 +33,8 @@ const Portfolio = () => {
   const [itemToDelete, setItemToDelete] = useState<PortfolioItem | null>(null);
   const [actionInProgress, setActionInProgress] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [showClearTrashDialog, setShowClearTrashDialog] = useState(false);
+  const [showRecoverAllDialog, setShowRecoverAllDialog] = useState(false);
 
   // Function to fetch profile data
   const fetchProfileData = async () => {
@@ -162,6 +164,33 @@ const Portfolio = () => {
               });
             }
           }
+        }
+      } else {
+        // Handle non-Google Drive items (regular portfolio items)
+        // For now, just update the local state to mark it as deleted
+        // This is a temporary solution until we implement proper deletion for all item types
+        if (itemToDelete.status !== 'deleted') {
+          // Soft delete - mark as deleted
+          setPortfolioItems(prev =>
+            prev.map(item =>
+              item.id === itemToDelete.id
+                ? { ...item, status: 'deleted', deleted_at: new Date().toISOString() }
+                : item
+            )
+          );
+
+          toast({
+            title: "Project Deleted",
+            description: "The project has been moved to trash."
+          });
+        } else {
+          // Hard delete - remove from state
+          setPortfolioItems(prev => prev.filter(item => item.id !== itemToDelete.id));
+
+          toast({
+            title: "Project Permanently Deleted",
+            description: "The project has been permanently removed."
+          });
         }
       }
     } catch (error) {
@@ -306,6 +335,124 @@ const Portfolio = () => {
 
   const isCurrentUser = !username || (currentUser && username === currentUser.username) || false;
 
+  // Get all items in trash
+  const trashItems = portfolioItems.filter(item => item.status === 'deleted');
+
+  // Handle clearing all trash items
+  const handleClearTrash = () => {
+    setShowClearTrashDialog(true);
+  };
+
+  const confirmClearTrash = async () => {
+    if (!user) return;
+
+    setActionInProgress(true);
+    try {
+      // Get the current user document
+      const userRef = doc(db, 'users', user.id);
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.data();
+
+      if (userData?.gdrive_portfolio_items) {
+        // Find all deleted items
+        const items = userData.gdrive_portfolio_items;
+        const deletedItems = items.filter((item: any) => item.status === 'deleted');
+
+        // Remove all deleted items
+        for (const item of deletedItems) {
+          await updateDoc(userRef, {
+            gdrive_portfolio_items: arrayRemove(item)
+          });
+        }
+
+        // Update local state to remove all deleted items
+        setPortfolioItems(prev => prev.filter(item => item.status !== 'deleted'));
+
+        toast({
+          title: "Trash Cleared",
+          description: `${deletedItems.length} items have been permanently removed.`
+        });
+      }
+    } catch (error) {
+      console.error('Error clearing trash:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear trash. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setActionInProgress(false);
+      setShowClearTrashDialog(false);
+    }
+  };
+
+  // Handle recovering all trash items
+  const handleRecoverAll = () => {
+    setShowRecoverAllDialog(true);
+  };
+
+  const confirmRecoverAll = async () => {
+    if (!user) return;
+
+    setActionInProgress(true);
+    try {
+      // Get the current user document
+      const userRef = doc(db, 'users', user.id);
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.data();
+
+      if (userData?.gdrive_portfolio_items) {
+        // Find all deleted items
+        const items = userData.gdrive_portfolio_items;
+        const deletedItems = items.filter((item: any) => item.status === 'deleted');
+
+        // Recover all deleted items
+        for (const item of deletedItems) {
+          // Remove the old item
+          await updateDoc(userRef, {
+            gdrive_portfolio_items: arrayRemove(item)
+          });
+
+          // Add the updated item
+          const updatedItem = {
+            ...item,
+            status: 'published',
+            deleted_at: null,
+            updated_at: new Date().toISOString()
+          };
+
+          await updateDoc(userRef, {
+            gdrive_portfolio_items: arrayUnion(updatedItem)
+          });
+        }
+
+        // Update local state
+        setPortfolioItems(prev =>
+          prev.map(item =>
+            item.status === 'deleted'
+              ? { ...item, status: 'published', deleted_at: undefined }
+              : item
+          )
+        );
+
+        toast({
+          title: "All Items Recovered",
+          description: `${deletedItems.length} items have been restored from trash.`
+        });
+      }
+    } catch (error) {
+      console.error('Error recovering items:', error);
+      toast({
+        title: "Error",
+        description: "Failed to recover items. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setActionInProgress(false);
+      setShowRecoverAllDialog(false);
+    }
+  };
+
   return (
     <div className="max-w-screen-lg mx-auto px-4">
       <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center mb-6">
@@ -350,11 +497,37 @@ const Portfolio = () => {
         />
       )}
 
-      {/* Add Project Card - Only show for current user */}
+      {/* Add Project Card and Trash Management - Only show for current user */}
       {isCurrentUser && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <AddProjectCard onClick={handleAddProject} />
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <AddProjectCard onClick={handleAddProject} />
+          </div>
+
+          {/* Trash Management */}
+          {trashItems.length > 0 && (
+            <div className="mb-6 p-4 bg-sortmy-gray/10 border border-sortmy-blue/20 rounded-lg">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold">Trash</h3>
+                  <p className="text-sm text-gray-400">{trashItems.length} item{trashItems.length !== 1 ? 's' : ''} in trash</p>
+                </div>
+                <div className="flex gap-3">
+                  <ClickEffect effect="ripple" color="blue">
+                    <NeonButton variant="cyan" onClick={handleRecoverAll}>
+                      Recover All
+                    </NeonButton>
+                  </ClickEffect>
+                  <ClickEffect effect="ripple" color="blue">
+                    <NeonButton variant="magenta" className="bg-red-500/30 hover:bg-red-500/50" onClick={handleClearTrash}>
+                      Clear Trash
+                    </NeonButton>
+                  </ClickEffect>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Content Tabs */}
@@ -413,6 +586,63 @@ const Portfolio = () => {
                 className="bg-red-500 hover:bg-red-600 border-red-500/50"
               >
                 {actionInProgress ? 'Deleting...' : 'Delete'}
+              </NeonButton>
+            </ClickEffect>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear Trash Confirmation Dialog */}
+      <AlertDialog open={showClearTrashDialog} onOpenChange={setShowClearTrashDialog}>
+        <AlertDialogContent className="bg-sortmy-dark border-sortmy-blue/20 backdrop-blur-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear Trash?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all {trashItems.length} item{trashItems.length !== 1 ? 's' : ''} in your trash. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <ClickEffect effect="ripple" color="blue">
+              <NeonButton variant="cyan" disabled={actionInProgress} onClick={() => setShowClearTrashDialog(false)}>
+                Cancel
+              </NeonButton>
+            </ClickEffect>
+            <ClickEffect effect="ripple" color="blue">
+              <NeonButton
+                variant="magenta"
+                onClick={confirmClearTrash}
+                disabled={actionInProgress}
+                className="bg-red-500 hover:bg-red-600 border-red-500/50"
+              >
+                {actionInProgress ? 'Clearing...' : 'Clear All'}
+              </NeonButton>
+            </ClickEffect>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Recover All Confirmation Dialog */}
+      <AlertDialog open={showRecoverAllDialog} onOpenChange={setShowRecoverAllDialog}>
+        <AlertDialogContent className="bg-sortmy-dark border-sortmy-blue/20 backdrop-blur-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Recover All Items?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will restore all {trashItems.length} item{trashItems.length !== 1 ? 's' : ''} from your trash.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <ClickEffect effect="ripple" color="blue">
+              <NeonButton variant="cyan" disabled={actionInProgress} onClick={() => setShowRecoverAllDialog(false)}>
+                Cancel
+              </NeonButton>
+            </ClickEffect>
+            <ClickEffect effect="ripple" color="blue">
+              <NeonButton
+                variant="gradient"
+                onClick={confirmRecoverAll}
+                disabled={actionInProgress}
+              >
+                {actionInProgress ? 'Recovering...' : 'Recover All'}
               </NeonButton>
             </ClickEffect>
           </AlertDialogFooter>

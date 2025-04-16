@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { PortfolioItem } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreVertical, Heart, Lock, ChevronLeft, ChevronRight, Edit, Archive, Trash2, AlertCircle, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { MoreVertical, Heart, Lock, ChevronLeft, ChevronRight, Edit, Archive, Trash2, AlertCircle, Play, Pause, Volume2, VolumeX, AlertTriangle } from 'lucide-react';
 import { ImageItem } from '../ui/ImageItem';
 import { useToast } from '@/hooks/use-toast';
 import GlassCard from '@/components/ui/GlassCard';
@@ -105,6 +105,11 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
   const images = item.media_urls && item.media_urls.length > 0
     ? item.media_urls
     : item.media_url ? [item.media_url] : [];
+
+  // Check if the item has media errors
+  const hasMediaError = (!item.media_url && (!item.media_urls || item.media_urls.length === 0)) ||
+    (item.media_url && item.media_url.includes('drive.google.com') &&
+     !item.media_url.includes('/d/') && !item.media_url.includes('id='));
 
   // Handle status-specific actions
   const handleEdit = (e: React.MouseEvent) => {
@@ -214,7 +219,29 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
             Reel
           </div>
         )}
-        {item.media_type === 'image' && images.length > 0 && (
+        {/* Show media error placeholder if there's an issue with the media */}
+        {hasMediaError && (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-sortmy-gray/20 p-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-2">
+              <AlertTriangle className="w-6 h-6 text-red-400" />
+            </div>
+            <p className="text-sm text-gray-400 mb-1">Media Error</p>
+            <p className="text-xs text-gray-500">This item has invalid or missing media</p>
+            {isOwner && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onDelete) onDelete(item);
+                }}
+                className="mt-3 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded flex items-center gap-1 transition-colors"
+              >
+                <Trash2 className="w-3 h-3" />
+                Delete Item
+              </button>
+            )}
+          </div>
+        )}
+        {item.media_type === 'image' && images.length > 0 && !hasMediaError && (
           <>
             {/* Image navigation controls if multiple images */}
             {images.length > 1 && (
@@ -307,7 +334,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
             )}
           </>
         )}
-        {item.media_type === 'video' && (
+        {item.media_type === 'video' && !hasMediaError && (
           <div className="relative w-full h-full">
             {/* Option A: Google Drive Embed */}
             {item.media_url && item.media_url.includes('drive.google.com') && (
