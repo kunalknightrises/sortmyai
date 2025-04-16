@@ -3,7 +3,7 @@ import { PortfolioItem } from "@/types";
 import { PortfolioItemCard } from "./PortfolioItemCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Lightbox } from "@/components/ui/Lightbox";
 import { Video } from "lucide-react";
 
@@ -74,6 +74,22 @@ export const PortfolioTabsWithLightbox = ({
   const handleItemClick = (item: PortfolioItem) => {
     openLightbox(item);
   };
+
+  // Make sure to close the lightbox when a delete action is triggered
+  useEffect(() => {
+    const handleDeleteAction = () => {
+      if (isLightboxOpen) {
+        closeLightbox();
+      }
+    };
+
+    // Listen for custom event that will be dispatched when delete is clicked
+    window.addEventListener('portfolio:delete-action', handleDeleteAction);
+
+    return () => {
+      window.removeEventListener('portfolio:delete-action', handleDeleteAction);
+    };
+  }, [isLightboxOpen]);
 
   // Handle lightbox open/close
   const openLightbox = (item: PortfolioItem) => {

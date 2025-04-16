@@ -107,14 +107,24 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
     : item.media_url ? [item.media_url] : [];
 
   // Handle status-specific actions
-  const handleEdit = () => {
+  const handleEdit = (e: React.MouseEvent) => {
+    // Stop event propagation to prevent lightbox from opening
+    e.stopPropagation();
+
     if (onEdit) {
       onEdit(item);
     }
     setShowActions(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    // Stop event propagation to prevent lightbox from opening
+    e.stopPropagation();
+
+    // Dispatch a custom event to notify that delete was clicked
+    // This will be used to close the lightbox if it's open
+    window.dispatchEvent(new CustomEvent('portfolio:delete-action'));
+
     if (onDelete) {
       onDelete(item);
     } else {
@@ -127,7 +137,10 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
     setShowActions(false);
   };
 
-  const handleArchive = () => {
+  const handleArchive = (e: React.MouseEvent) => {
+    // Stop event propagation to prevent lightbox from opening
+    e.stopPropagation();
+
     if (onArchive) {
       onArchive(item);
     } else {
@@ -140,7 +153,10 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
     setShowActions(false);
   };
 
-  const handleRestore = () => {
+  const handleRestore = (e: React.MouseEvent) => {
+    // Stop event propagation to prevent lightbox from opening
+    e.stopPropagation();
+
     if (onRestore) {
       onRestore(item);
     } else {
@@ -425,7 +441,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
                 <div className="absolute right-0 mt-1 w-48 bg-sortmy-darker border border-sortmy-blue/20 rounded-lg shadow-lg overflow-hidden z-10 backdrop-blur-sm">
                   {!isDeleted && (
                     <button
-                      onClick={handleEdit}
+                      onClick={(e) => handleEdit(e)}
                       className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
                     >
                       <Edit className="w-4 h-4" />
@@ -435,7 +451,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
 
                   {!isArchived && !isDeleted && (
                     <button
-                      onClick={handleArchive}
+                      onClick={(e) => handleArchive(e)}
                       className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
                     >
                       <Archive className="w-4 h-4" />
@@ -445,7 +461,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
 
                   {(isArchived || isDraft) && !isDeleted && (
                     <button
-                      onClick={handleRestore}
+                      onClick={(e) => handleRestore(e)}
                       className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
                     >
                       <AlertCircle className="w-4 h-4" />
@@ -454,7 +470,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
                   )}
 
                   <button
-                    onClick={handleDelete}
+                    onClick={(e) => handleDelete(e)}
                     className="w-full px-4 py-2 text-left text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
