@@ -62,7 +62,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         level: 1,
         streak_days: 0,
         last_login: new Date().toISOString(),
-        badges: []
+        badges: [],
+        followers_count: 0,
+        following_count: 0,
+        following: []
       };
 
       // If user not found, create new user
@@ -116,7 +119,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         level: 1,
         streak_days: 0,
         last_login: new Date().toISOString(),
-        badges: []
+        badges: [],
+        followers_count: 0,
+        following_count: 0,
+        following: []
       } as AuthUser;
     }
   };

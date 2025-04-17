@@ -197,7 +197,7 @@ const ExploreCreators = () => {
               </div>
               <div className="flex justify-center gap-2 mt-auto">
                 <Skeleton className="h-9 w-32" />
-                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-32" />
               </div>
             </div>
           ))}

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Users, Settings, Edit, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Users, Settings, Edit, ExternalLink, UserCheck, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { User, PortfolioItem } from '@/types';
@@ -7,6 +7,9 @@ import ProfileEditForm from './profile/ProfileEditForm';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import MessageButton from '@/components/messaging/MessageButton';
+import { followCreator, unfollowCreator, checkIfFollowing } from '@/services/followService';
+import { useToast } from '@/hooks/use-toast';
+import FollowersModal from './profile/FollowersModal';
 
 interface CreatorProfileHeaderProps {
   user: User | null;
@@ -16,16 +19,77 @@ interface CreatorProfileHeaderProps {
 }
 
 const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditClick }: CreatorProfileHeaderProps) => {
+  const { user: currentUser } = useAuth();
+  const { toast } = useToast();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [followerCount, setFollowerCount] = useState(user?.followers_count || 0);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'followers' | 'following'>('followers');
 
   if (!user) return null;
+
+  // Check if the current user is following this creator
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!currentUser || isCurrentUser) return;
+
+      try {
+        const following = await checkIfFollowing(currentUser.uid, user.uid);
+        setIsFollowing(following);
+      } catch (error) {
+        console.error('Error checking follow status:', error);
+      }
+    };
+
+    checkFollowStatus();
+  }, [currentUser, user.uid, isCurrentUser]);
 
   const getInitials = () => {
     if (!user || !user.username) return 'U';
     return user.username.substring(0, 2).toUpperCase();
   };
 
+  const handleFollowClick = async () => {
+    if (!currentUser) return;
+
+    setIsLoading(true);
+
+    try {
+      if (isFollowing) {
+        // Unfollow the creator
+        await unfollowCreator(currentUser.uid, user.uid);
+        setIsFollowing(false);
+        setFollowerCount(prev => Math.max(0, prev - 1));
+        toast({
+          title: "Unfollowed " + user.username,
+          description: "You are no longer following this creator",
+          variant: "default"
+        });
+      } else {
+        // Follow the creator
+        await followCreator(currentUser.uid, user.uid);
+        setIsFollowing(true);
+        setFollowerCount(prev => prev + 1);
+        toast({
+          title: "Following " + user.username,
+          description: "You are now following this creator",
+          variant: "success"
+        });
+      }
+    } catch (error) {
+      console.error('Error following/unfollowing creator:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const postCount = portfolio?.length || 0;
-  const totalLikes = portfolio?.reduce((acc, item) => acc + (item.likes || 0), 0) || 0;
 
   return (
     <div className="py-8 border-b border-sortmy-gray/30">
@@ -69,9 +133,20 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
                     variant="outline"
                     size="sm"
                   />
-                  <Button size="sm" className="gap-2 bg-sortmy-blue hover:bg-sortmy-blue/90">
-                    <Users className="w-4 h-4" />
-                    Follow
+                  <Button
+                    size="sm"
+                    className={`gap-2 ${isFollowing ? 'bg-sortmy-dark border border-sortmy-blue/50' : 'bg-sortmy-blue hover:bg-sortmy-blue/90'}`}
+                    onClick={handleFollowClick}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : isFollowing ? (
+                      <UserCheck className="w-4 h-4" />
+                    ) : (
+                      <Users className="w-4 h-4" />
+                    )}
+                    {isFollowing ? 'Following' : 'Follow'}
                   </Button>
                 </>
               )}
@@ -87,18 +162,27 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
               <div className="font-bold">{postCount}</div>
               <div className="text-xs text-gray-400">posts</div>
             </div>
-            <div className="text-center">
-              <div className="font-bold">{user.followers_count || 0}</div>
+            <div
+              className="text-center cursor-pointer hover:text-sortmy-blue transition-colors"
+              onClick={() => {
+                setActiveTab('followers');
+                setShowFollowersModal(true);
+              }}
+            >
+              <div className="font-bold">{followerCount}</div>
               <div className="text-xs text-gray-400">followers</div>
             </div>
-            <div className="text-center">
+            <div
+              className="text-center cursor-pointer hover:text-sortmy-blue transition-colors"
+              onClick={() => {
+                setActiveTab('following');
+                setShowFollowersModal(true);
+              }}
+            >
               <div className="font-bold">{user.following_count || 0}</div>
               <div className="text-xs text-gray-400">following</div>
             </div>
-            <div className="text-center">
-              <div className="font-bold">{totalLikes}</div>
-              <div className="text-xs text-gray-400">likes</div>
-            </div>
+
           </div>
 
           {/* Bio */}
@@ -122,6 +206,19 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
           </div>
         </div>
       </div>
+
+      {/* Followers/Following Modal */}
+      {user && (
+        <FollowersModal
+          isOpen={showFollowersModal}
+          onClose={() => setShowFollowersModal(false)}
+          userId={user.uid}
+          username={user.username || ''}
+          initialTab={activeTab}
+          followerCount={followerCount}
+          followingCount={user.following_count || 0}
+        />
+      )}
     </div>
   );
 };

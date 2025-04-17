@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 import PushNotificationInitializer from './components/PushNotificationInitializer';
+import PortfolioProvider from './contexts/PortfolioContext';
 
 // Pages
 import Login from '@/pages/Login';
@@ -26,6 +27,8 @@ import Academy from '@/pages/Academy';
 import AIToolsUpload from '@/pages/AIToolsUpload';
 import SynthwaveDemo from '@/pages/SynthwaveDemo';
 import Messages from '@/pages/Messages';
+import UserInteractions from '@/pages/UserInteractions';
+import Analytics from '@/pages/Analytics';
 import { initializeCapacitor } from '@/lib/capacitor';
 import '@/lib/debug-utils'; // Import debug utilities
 
@@ -46,8 +49,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PushNotificationInitializer />
-      <Routes>
+      <PortfolioProvider>
+        <PushNotificationInitializer />
+        <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<EmailLogin />} />
         <Route path="/popup-login" element={<SimpleLogin />} />
@@ -168,11 +172,30 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* User Interactions route */}
+        <Route path="/dashboard/interactions" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <UserInteractions />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* Analytics route */}
+        <Route path="/dashboard/analytics" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Analytics />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
         {/* Synthwave UI Demo route */}
         <Route path="/synthwave-demo" element={<SynthwaveDemo />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+        </Routes>
+      </PortfolioProvider>
     </QueryClientProvider>
   );
 }

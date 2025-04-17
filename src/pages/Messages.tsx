@@ -9,17 +9,17 @@ import {
   getMessages,
   sendMessage,
   markMessageAsRead,
-  subscribeToMessages,
-  getOrCreateConversation
+  subscribeToMessages
+  // getOrCreateConversation - will be used in future update
 } from '@/services/messageService';
 import ConversationListItem from '@/components/messaging/ConversationListItem';
 import MessageBubble from '@/components/messaging/MessageBubble';
 import MessageInput from '@/components/messaging/MessageInput';
 import EmptyState from '@/components/messaging/EmptyState';
-import { Separator } from '@/components/ui/separator';
+// import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, ArrowLeft } from 'lucide-react';
+import { Search, ArrowLeft } from 'lucide-react';
 import { User } from '@/types';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -239,6 +239,7 @@ const Messages: React.FC = () => {
   );
 
   // Start a new conversation with a user
+  /* This function will be used in a future update
   const startNewConversation = async (userId: string) => {
     if (!user) return;
 
@@ -261,7 +262,7 @@ const Messages: React.FC = () => {
         variant: 'destructive'
       });
     }
-  };
+  }; */
 
   return (
     <div className="space-y-6">

@@ -11,7 +11,9 @@ import {
   GraduationCap,
   Upload,
   ShieldCheck,
-  Users
+  Users,
+  Heart,
+  BarChart2
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -48,6 +50,16 @@ const Sidebar = () => {
       icon: <Award size={20} />,
       label: "Achievements",
       path: "/dashboard/achievements",
+    },
+    {
+      icon: <Heart size={20} />,
+      label: "My Interactions",
+      path: "/dashboard/interactions",
+    },
+    {
+      icon: <BarChart2 size={20} />,
+      label: "Analytics",
+      path: "/dashboard/analytics",
     },
     {
       icon: <User size={20} />,

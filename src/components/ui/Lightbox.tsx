@@ -1,10 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { X, ChevronLeft, ChevronRight, ExternalLink, Heart, Eye, Play, Pause, Volume2, VolumeX, Video } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ExternalLink, Eye, Play, Pause, Volume2, VolumeX, Video, MessageSquare } from 'lucide-react';
 import { PortfolioItem } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ImageItem } from './ImageItem';
 import { Badge } from './badge';
+import LikeButton from '@/components/interactions/LikeButton';
+import CommentSection from '@/components/interactions/CommentSection';
+import LikesModal from '@/components/interactions/LikesModal';
+import { getPostInteractionStats } from '@/services/interactionService';
+import { useAuth } from '@/contexts/AuthContext';
+import { Separator } from './separator';
 
 interface LightboxProps {
   item: PortfolioItem | null;
@@ -13,16 +19,50 @@ interface LightboxProps {
 }
 
 export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => {
+  const { user } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [likeCount, setLikeCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
+  const [userHasLiked, setUserHasLiked] = useState(false);
+  const [showLikesModal, setShowLikesModal] = useState(false);
 
-  // Reset image index when item changes
+  // Reset image index and fetch interaction stats when item changes
   useEffect(() => {
     setCurrentImageIndex(0);
     setIsPlaying(false);
-  }, [item]);
+
+    // Fetch interaction stats when item changes
+    const fetchInteractionStats = async () => {
+      if (item && isOpen) {
+        try {
+          // Use default values if item.id is not defined
+          if (!item.id) {
+            console.warn('Portfolio item has no ID, using default interaction values');
+            setLikeCount(item.likes || 0);
+            setCommentCount(item.comments || 0);
+            setUserHasLiked(false);
+            return;
+          }
+
+          const stats = await getPostInteractionStats(item.id, user?.uid);
+          setLikeCount(stats.likes);
+          setCommentCount(stats.comments);
+          setUserHasLiked(stats.userHasLiked);
+        } catch (error) {
+          console.error('Error fetching interaction stats:', error);
+          // Use default values on error
+          setLikeCount(item.likes || 0);
+          setCommentCount(item.comments || 0);
+          setUserHasLiked(false);
+        }
+      }
+    };
+
+    fetchInteractionStats();
+  }, [item, isOpen, user?.uid, item?.likes, item?.comments]);
 
   // Extract Google Drive file ID if present
   const getGoogleDriveFileId = (url: string): string | null => {
@@ -240,9 +280,28 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
               <Eye className="w-4 h-4" />
               <span>{item.views}</span>
             </div>
+            <div className="flex items-center gap-2">
+              <LikeButton
+                postId={item.id}
+                initialLikeCount={likeCount}
+                initialLiked={userHasLiked}
+                onLikeChange={(liked, newCount) => {
+                  setUserHasLiked(liked);
+                  setLikeCount(newCount);
+                }}
+                size="sm"
+                showCount={false}
+              />
+              <button
+                className="text-gray-400 hover:text-sortmy-blue transition-colors"
+                onClick={() => setShowLikesModal(true)}
+              >
+                {likeCount} likes
+              </button>
+            </div>
             <div className="flex items-center gap-1">
-              <Heart className={`w-4 h-4 ${item.likes > 0 ? 'text-red-500 fill-red-500' : ''}`} />
-              <span>{item.likes}</span>
+              <MessageSquare className="w-4 h-4" />
+              <span>{commentCount}</span>
             </div>
           </div>
 
@@ -279,8 +338,25 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
               </div>
             </div>
           )}
+
+          <Separator className="my-4 bg-sortmy-blue/20" />
+
+          {/* Comments section */}
+          <CommentSection
+            postId={item.id}
+            initialCommentCount={commentCount}
+            onCommentCountChange={setCommentCount}
+          />
         </div>
       </div>
+
+      {/* Likes modal */}
+      <LikesModal
+        isOpen={showLikesModal}
+        onClose={() => setShowLikesModal(false)}
+        postId={item.id}
+        likeCount={likeCount}
+      />
     </div>,
     document.body
   );

@@ -98,6 +98,49 @@ export const migratePortfolioItems = async (userId: string): Promise<void> => {
   }
 };
 
+// Get a single portfolio item by ID
+export const getPortfolioItemById = async (itemId: string): Promise<PortfolioItem | null> => {
+  try {
+    // First try to get from the portfolio collection
+    const portfolioDoc = await getDoc(doc(db, 'portfolio', itemId));
+
+    if (portfolioDoc.exists()) {
+      return {
+        id: portfolioDoc.id,
+        ...portfolioDoc.data()
+      } as PortfolioItem;
+    }
+
+    // If not found in the collection, search in all users' portfolio items
+    const usersRef = collection(db, 'users');
+    const usersSnapshot = await getDocs(usersRef);
+
+    for (const userDoc of usersSnapshot.docs) {
+      const userData = userDoc.data();
+
+      // Check if user has gdrive_portfolio_items
+      if (userData.gdrive_portfolio_items && Array.isArray(userData.gdrive_portfolio_items)) {
+        const item = userData.gdrive_portfolio_items.find((item: any) => item.id === itemId);
+
+        if (item) {
+          return {
+            ...item,
+            userId: userDoc.id,
+            authorId: userDoc.id,
+            authorName: userData.username || 'Unknown User',
+            authorAvatar: userData.avatar_url || ''
+          } as PortfolioItem;
+        }
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting portfolio item by ID:', error);
+    throw error;
+  }
+};
+
 export const fetchPortfolioItems = async (userId: string): Promise<PortfolioItem[]> => {
   try {
     // Get items from Firebase
@@ -148,6 +191,7 @@ export const fetchPortfolioItems = async (userId: string): Promise<PortfolioItem
             tools_used: item.tools_used || [],
             categories: item.categories || [],
             likes: item.likes || 0,
+            comments: item.comments || 0,
             views: item.views || 0,
             project_url: item.project_url || '',
             is_public: item.is_public !== undefined ? item.is_public : true,

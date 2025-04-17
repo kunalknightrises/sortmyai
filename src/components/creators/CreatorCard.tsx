@@ -1,14 +1,15 @@
+import { useState, useEffect } from 'react';
 import { User } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ExternalLink, Users, Lock, MessageSquare } from 'lucide-react';
+import { ExternalLink, Users, Lock, UserCheck, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import HoverEffect from '@/components/ui/HoverEffect';
 import NeonButton from '@/components/ui/NeonButton';
 import ClickEffect from '@/components/ui/ClickEffect';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import MessageButton from '@/components/messaging/MessageButton';
+import { followCreator, unfollowCreator, checkIfFollowing } from '@/services/followService';
 
 interface CreatorCardProps {
   creator: User;
@@ -18,13 +19,32 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [followerCount, setFollowerCount] = useState(creator.followers_count || 0);
+
+  // Check if the user is following this creator
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!user) return;
+
+      try {
+        const following = await checkIfFollowing(user.uid, creator.uid);
+        setIsFollowing(following);
+      } catch (error) {
+        console.error('Error checking follow status:', error);
+      }
+    };
+
+    checkFollowStatus();
+  }, [user, creator.uid]);
 
   const getInitials = () => {
     if (!creator || !creator.username) return 'U';
     return creator.username.substring(0, 2).toUpperCase();
   };
 
-  const handleFollowClick = () => {
+  const handleFollowClick = async () => {
     if (!user) {
       toast({
         title: "Sign in required",
@@ -35,12 +55,40 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
       return;
     }
 
-    // Follow functionality would be implemented here
-    toast({
-      title: "Following " + creator.username,
-      description: "You are now following this creator",
-      variant: "success"
-    });
+    setIsLoading(true);
+
+    try {
+      if (isFollowing) {
+        // Unfollow the creator
+        await unfollowCreator(user.uid, creator.uid);
+        setIsFollowing(false);
+        setFollowerCount(prev => Math.max(0, prev - 1));
+        toast({
+          title: "Unfollowed " + creator.username,
+          description: "You are no longer following this creator",
+          variant: "default"
+        });
+      } else {
+        // Follow the creator
+        await followCreator(user.uid, creator.uid);
+        setIsFollowing(true);
+        setFollowerCount(prev => prev + 1);
+        toast({
+          title: "Following " + creator.username,
+          description: "You are now following this creator",
+          variant: "success"
+        });
+      }
+    } catch (error) {
+      console.error('Error following/unfollowing creator:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -73,7 +121,7 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
 
           <div className="flex justify-center gap-6 mb-4">
             <div className="text-center">
-              <div className="font-bold">{creator.followers_count || 0}</div>
+              <div className="font-bold">{followerCount}</div>
               <div className="text-xs text-gray-400">followers</div>
             </div>
             <div className="text-center">
@@ -92,21 +140,23 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
               </NeonButton>
             </Link>
           </ClickEffect>
-          <MessageButton
-            userId={creator.uid}
-            username={creator.username || ''}
-            variant="outline"
-            size="sm"
-          />
           <ClickEffect effect="ripple" color="blue">
             <NeonButton
-              variant="magenta"
+              variant={isFollowing ? "outline" : "magenta"}
               size="sm"
               onClick={handleFollowClick}
+              disabled={isLoading}
             >
-              {!user ? <Lock className="w-3 h-3 mr-1" /> : null}
-              <Users className="w-4 h-4 mr-2" />
-              Follow
+              {!user ? (
+                <Lock className="w-3 h-3 mr-1" />
+              ) : isLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : isFollowing ? (
+                <UserCheck className="w-4 h-4 mr-2" />
+              ) : (
+                <Users className="w-4 h-4 mr-2" />
+              )}
+              {isFollowing ? "Following" : "Follow"}
             </NeonButton>
           </ClickEffect>
         </CardFooter>

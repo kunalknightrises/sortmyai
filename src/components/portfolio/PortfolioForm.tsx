@@ -121,6 +121,7 @@ export function PortfolioForm({ user, initialData, onSubmit, isLoading, skipFire
         tools_used: formData.tools_used || [],
         categories: [],
         likes: 0,
+        comments: 0,
         views: 0,
         project_url: formData.project_url || '',
         is_public: formData.is_public,

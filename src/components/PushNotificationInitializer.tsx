@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { initializePushNotifications, setupMessageHandler, showNotification } from '@/services/notificationService';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+// import { useToast } from '@/hooks/use-toast';
 
 const PushNotificationInitializer = () => {
   const { user } = useAuth();
   const [initialized, setInitialized] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  // Toast is not used in this component
 
   useEffect(() => {
     // Only initialize once and when user is logged in

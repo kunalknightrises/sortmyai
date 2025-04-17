@@ -2,12 +2,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { PortfolioItem } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreVertical, Heart, Lock, ChevronLeft, ChevronRight, Edit, Archive, Trash2, AlertCircle, Play, Pause, Volume2, VolumeX, AlertTriangle } from 'lucide-react';
+import { MoreVertical, Lock, ChevronLeft, ChevronRight, Edit, Archive, Trash2, AlertCircle, Play, Pause, Volume2, VolumeX, AlertTriangle, MessageSquare } from 'lucide-react';
 import { ImageItem } from '../ui/ImageItem';
 import { useToast } from '@/hooks/use-toast';
 import GlassCard from '@/components/ui/GlassCard';
 // import HoverEffect from '@/components/ui/HoverEffect';
 import AnimatedTooltip from '@/components/ui/AnimatedTooltip';
+import LikeButton from '@/components/interactions/LikeButton';
+import { getPostInteractionStats } from '@/services/interactionService';
+import { trackView } from '@/services/analyticsService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PortfolioItemCardProps {
   item: PortfolioItem;
@@ -26,6 +30,46 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [likeCount, setLikeCount] = useState(item.likes || 0);
+  const [commentCount, setCommentCount] = useState(item.comments || 0);
+  const [userHasLiked, setUserHasLiked] = useState(false);
+
+  // Fetch interaction stats and track view when component mounts
+  useEffect(() => {
+    const fetchInteractionStats = async () => {
+      try {
+        // Use default values if item.id is not defined
+        if (!item.id) {
+          console.warn('Portfolio item has no ID, using default interaction values');
+          return;
+        }
+
+        const stats = await getPostInteractionStats(item.id, user?.uid);
+        setLikeCount(stats.likes);
+        setCommentCount(stats.comments);
+        setUserHasLiked(stats.userHasLiked);
+
+        // Track view for analytics
+        if (!isOwner) { // Don't track views from the owner
+          try {
+            await trackView(item.id, 'portfolio', user);
+          } catch (viewError) {
+            console.error('Error tracking view:', viewError);
+            // Continue anyway, this is just analytics
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching interaction stats:', error);
+        // Use default values on error
+        setLikeCount(item.likes || 0);
+        setCommentCount(item.comments || 0);
+        setUserHasLiked(false);
+      }
+    };
+
+    fetchInteractionStats();
+  }, [item.id, user, isOwner, item.likes, item.comments]);
 
   // Extract Google Drive file ID if present
   const getGoogleDriveFileId = (url: string): string | null => {
@@ -523,9 +567,21 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
         </div>
 
         <div className="flex justify-between items-center text-sm text-slate-400">
-          <div className="flex items-center gap-2">
-            <Heart className="w-4 h-4" />
-            <span>{item.likes}</span>
+          <div className="flex items-center gap-4">
+            <LikeButton
+              postId={item.id}
+              initialLikeCount={likeCount}
+              initialLiked={userHasLiked}
+              onLikeChange={(liked, newCount) => {
+                setUserHasLiked(liked);
+                setLikeCount(newCount);
+              }}
+              size="sm"
+            />
+            <div className="flex items-center gap-1">
+              <MessageSquare className="w-4 h-4" />
+              <span>{commentCount}</span>
+            </div>
           </div>
           <span title={new Date(item.created_at).toLocaleString()}>
             {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
