@@ -299,16 +299,16 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({
   };
 
   return (
-    <Card className="p-6 bg-gray-800/50 border-gray-700">
-      <div className="flex items-center justify-between mb-6">
+    <Card className="p-6 bg-gray-800/50 border-gray-700 overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
         <div className="flex items-center gap-3">
-          <Cloud className="w-6 h-6 text-blue-400" />
-          <div>
-            <h3 className="text-lg font-semibold">Google Drive Storage</h3>
-            <p className="text-sm text-gray-400">Store your files securely in the cloud</p>
+          <Cloud className="w-6 h-6 text-blue-400 flex-shrink-0" />
+          <div className="min-w-0">
+            <h3 className="text-lg font-semibold truncate">Google Drive Storage</h3>
+            <p className="text-sm text-gray-400 truncate">Store your files securely in the cloud</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Badge
             variant={isConnected ? "default" : "outline"}
             className={isConnected ? "bg-green-500/20 text-green-400" : ""}
@@ -348,10 +348,10 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({
         </Button>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
             <Button
               onClick={() => document.getElementById('file-upload')?.click()}
-              className="flex-1"
+              className="w-full sm:flex-1"
               disabled={isAuthenticating}
             >
               <Upload className="w-4 h-4 mr-2" />
@@ -360,6 +360,7 @@ export const GoogleDriveStorage: React.FC<GoogleDriveStorageProps> = ({
             <Button
               variant="outline"
               disabled={isAuthenticating}
+              className="w-full sm:w-auto"
             >
               <FolderOpen className="w-4 h-4 mr-2" />
               Browse Files

@@ -152,7 +152,16 @@ const Profile = () => {
             </GlassCard>
 
             {/* Add Google Drive Storage Card */}
-            {user && <GoogleDriveStorage userId={user.id} onFileUpload={handleFileUpload} />}
+            {user && (
+              <div className="overflow-hidden">
+                <GoogleDriveStorage
+                  userId={user.id}
+                  onFileUpload={handleFileUpload}
+                  buttonText="Upload Profile Image"
+                  acceptedFileTypes="image/*"
+                />
+              </div>
+            )}
 
             <NeuCard variant="flat" color="dark" className="border-sortmy-blue/10">
               <CardHeader>
@@ -195,7 +204,7 @@ const Profile = () => {
                         <input
                           type="text"
                           value={user?.username || ''}
-                          className="mt-1 block w-full rounded-md border-gray-600 shadow-sm focus:border-sortmy-blue focus:ring-sortmy-blue bg-sortmy-dark text-white"
+                          className="mt-1 block w-full rounded-md border border-gray-600 shadow-sm focus:border-sortmy-blue focus:ring-sortmy-blue bg-sortmy-darker text-white"
                           disabled
                         />
                       </div>
@@ -204,7 +213,7 @@ const Profile = () => {
                         <input
                           type="email"
                           value={user?.email || ''}
-                          className="mt-1 block w-full rounded-md border-gray-600 shadow-sm focus:border-sortmy-blue focus:ring-sortmy-blue bg-sortmy-dark text-white"
+                          className="mt-1 block w-full rounded-md border border-gray-600 shadow-sm focus:border-sortmy-blue focus:ring-sortmy-blue bg-sortmy-darker text-white"
                           disabled
                         />
                       </div>
@@ -215,7 +224,7 @@ const Profile = () => {
                       <input
                         type="text"
                         value={user?.avatar_url || ''}
-                        className="mt-1 block w-full rounded-md border-gray-600 shadow-sm focus:border-sortmy-blue focus:ring-sortmy-blue bg-sortmy-dark text-white"
+                        className="mt-1 block w-full rounded-md border border-gray-600 shadow-sm focus:border-sortmy-blue focus:ring-sortmy-blue bg-sortmy-darker text-white"
                         disabled
                       />
                     </div>

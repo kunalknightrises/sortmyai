@@ -3,17 +3,18 @@ import { Link } from "react-router-dom";
 import DashboardPreview from './DashboardPreview';
 import NeonButton from "@/components/ui/NeonButton";
 import ClickEffect from "@/components/ui/ClickEffect";
-import AuroraBackground from "@/components/ui/AuroraBackground";
+// Background components
 
 const HeroSection = () => {
   return (
     <section className="pt-28 pb-8 md:pt-40 md:pb-16 px-4 relative overflow-hidden">
-      {/* Add a subtle aurora background with low intensity */}
-      <div className="absolute inset-0 z-[-1] opacity-50">
-        <AuroraBackground intensity={20} />
+      {/* Basic blue theme background */}
+      <div className="absolute inset-0 z-[-1]">
+        <div className="absolute inset-0 bg-sortmy-dark">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0b1121] to-[#0a0a2e] opacity-90"></div>
+          <div className="absolute inset-0 opacity-10 bg-grid-pattern"></div>
+        </div>
       </div>
-      {/* Subtle scanline effect */}
-      <div className="absolute inset-0 pointer-events-none z-[-1] bg-scanline opacity-5"></div>
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-10 md:mb-0">
