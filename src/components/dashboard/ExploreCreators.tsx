@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useBackground } from '@/contexts/BackgroundContext';
 import { User } from '@/types';
 import { fetchCreatorsWithPortfolio, searchCreators } from '@/services/creatorService';
 import { CreatorCard } from '@/components/creators/CreatorCard';
@@ -21,7 +22,7 @@ const ExploreCreators = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [backgroundType, setBackgroundType] = useState<'aurora' | 'synthwave' | 'simple'>('simple');
+  const { backgroundType, cycleBackgroundType } = useBackground();
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -87,13 +88,7 @@ const ExploreCreators = () => {
           variant="outline"
           size="icon"
           className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
-          onClick={() => {
-            setBackgroundType(prev => {
-              if (prev === 'simple') return 'synthwave';
-              if (prev === 'synthwave') return 'aurora';
-              return 'simple';
-            });
-          }}
+          onClick={cycleBackgroundType}
           title="Toggle Background Style"
         >
           <Sparkles className="h-4 w-4" />

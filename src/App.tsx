@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 import PushNotificationInitializer from './components/PushNotificationInitializer';
 import PortfolioProvider from './contexts/PortfolioContext';
+import BackgroundProvider from './contexts/BackgroundContext';
 
 // Pages
 import Login from '@/pages/Login';
@@ -49,9 +50,10 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PortfolioProvider>
-        <PushNotificationInitializer />
-        <Routes>
+      <BackgroundProvider>
+        <PortfolioProvider>
+          <PushNotificationInitializer />
+          <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<EmailLogin />} />
         <Route path="/popup-login" element={<SimpleLogin />} />
@@ -194,8 +196,9 @@ function App() {
         <Route path="/synthwave-demo" element={<SynthwaveDemo />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </PortfolioProvider>
+          </Routes>
+        </PortfolioProvider>
+      </BackgroundProvider>
     </QueryClientProvider>
   );
 }

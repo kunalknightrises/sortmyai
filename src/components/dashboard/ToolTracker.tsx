@@ -1,10 +1,15 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 // import { Button } from '@/components/ui/button';
-import { Tool } from '@/types';
+import { Tool as BaseTool } from '@/types';
+
+// Extended Tool type with source information
+interface Tool extends BaseTool {
+  source?: string;
+}
 import { useNavigate } from 'react-router-dom';
-import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, doc, getDoc, updateDoc, arrayRemove } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -12,7 +17,8 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFoo
 import { Link } from 'react-router-dom';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Briefcase, Library } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Briefcase, Library, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 // import NeuCard from '@/components/ui/NeuCard';
 import NeonButton from '@/components/ui/NeonButton';
@@ -27,11 +33,14 @@ const ToolTracker = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [filtersExpanded, setFiltersExpanded] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [toolToDelete, setToolToDelete] = useState<Tool | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { data: tools, isLoading, error } = useQuery({
+  const { data: tools, isLoading: isLoadingTools, error: toolsError } = useQuery({
     queryKey: ['tools', user?.uid],
     queryFn: async () => {
       const toolsRef = collection(db, 'tools');
@@ -39,11 +48,75 @@ const ToolTracker = () => {
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
-      })) as Tool[];
+        ...doc.data(),
+        source: 'tools_collection'
+      })) as (Tool & { source: string })[];
     },
     enabled: !!user?.uid
   });
+
+  // Fetch tools from user's toolTracker array
+  const { data: userTools, isLoading: isLoadingUserTools, error: userToolsError } = useQuery({
+    queryKey: ['userTools', user?.uid],
+    queryFn: async () => {
+      if (!user?.uid) return [];
+
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) return [];
+
+      const userData = userDoc.data();
+      const toolTracker = userData.toolTracker || [];
+
+      // Convert toolTracker items to Tool format
+      return toolTracker.map((tool: any) => {
+        // Extract tags from the tool if available
+        let tags: string[] = [];
+        if (tool.tags) {
+          tags = Array.isArray(tool.tags) ? tool.tags :
+                typeof tool.tags === 'string' ? tool.tags.split(',').map((t: string) => t.trim()) : [];
+        }
+
+        return {
+          id: tool.id,
+          name: tool.name,
+          description: tool.useCase || tool.description || '',
+          logo_url: tool.logoUrl || tool.logoLink,
+          website_url: tool.website || tool.websiteLink,
+          website: tool.website || tool.websiteLink,
+          tags: tags,
+          created_at: tool.addedAt || new Date().toISOString(),
+          user_id: user.uid,
+          category: tool.category || '',
+          price_tier: tool.pricing || 'free',
+          notes: tool.excelsAt || '',
+          source: 'user_tooltracker'
+        };
+      }) as (Tool & { source: string })[];
+    },
+    enabled: !!user?.uid
+  });
+
+  // Combine tools from both sources
+  const allTools = [...(tools || []), ...(userTools || [])];
+  const isLoading = isLoadingTools || isLoadingUserTools;
+  const error = toolsError || userToolsError;
+
+  // Extract all unique tags from tools
+  useEffect(() => {
+    if (allTools.length > 0) {
+      const tagsSet = new Set<string>();
+
+      allTools.forEach(tool => {
+        if (tool.tags && Array.isArray(tool.tags)) {
+          tool.tags.forEach(tag => tagsSet.add(tag));
+        }
+      });
+
+      setAllTags(Array.from(tagsSet));
+    }
+  }, [allTools]);
 
   const handleDeleteClick = (tool: Tool) => {
     setToolToDelete(tool);
@@ -55,9 +128,37 @@ const ToolTracker = () => {
 
     setIsDeleting(true);
     try {
-      await deleteDoc(doc(db, 'tools', toolToDelete.id));
-      // Invalidate and refetch the tools query
-      await queryClient.invalidateQueries({ queryKey: ['tools', user?.uid] });
+      // Check the source of the tool to determine how to delete it
+      if (toolToDelete.source === 'tools_collection') {
+        // Delete from tools collection
+        await deleteDoc(doc(db, 'tools', toolToDelete.id));
+        // Invalidate and refetch the tools query
+        await queryClient.invalidateQueries({ queryKey: ['tools', user?.uid] });
+      } else if (toolToDelete.source === 'user_tooltracker') {
+        // Delete from user's toolTracker array
+        const userRef = doc(db, 'users', user!.uid);
+
+        // Get the current toolTracker array
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const toolTracker = userData.toolTracker || [];
+
+          // Find the tool to remove
+          const toolToRemove = toolTracker.find((tool: any) => tool.id === toolToDelete.id);
+
+          if (toolToRemove) {
+            // Remove the tool from the array
+            await updateDoc(userRef, {
+              toolTracker: arrayRemove(toolToRemove)
+            });
+          }
+        }
+
+        // Invalidate and refetch the userTools query
+        await queryClient.invalidateQueries({ queryKey: ['userTools', user?.uid] });
+      }
+
       toast({
         title: "Tool deleted",
         description: "Your tool has been removed successfully.",
@@ -76,16 +177,41 @@ const ToolTracker = () => {
     }
   };
 
-  const filteredTools = tools?.filter(tool => {
+  const filteredTools = allTools?.filter(tool => {
+    // Filter by search query
     const searchLower = searchQuery.toLowerCase();
-    return (
+    const matchesSearch = (
       tool.name.toLowerCase().includes(searchLower) ||
       tool.description.toLowerCase().includes(searchLower) ||
       (tool.tags && Array.isArray(tool.tags) && tool.tags.some(tag =>
         typeof tag === 'string' && tag.toLowerCase().includes(searchLower)
       ))
     );
+
+    // Filter by selected tags
+    const matchesTags = selectedTags.length === 0 || (
+      tool.tags &&
+      Array.isArray(tool.tags) &&
+      selectedTags.every(tag => tool.tags.includes(tag))
+    );
+
+    return matchesSearch && matchesTags;
   });
+
+  // Toggle tag selection
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedTags([]);
+  };
 
   return (
     <>
@@ -129,18 +255,79 @@ const ToolTracker = () => {
           autoHide={true}
         />
 
-        <GlassCard variant="bordered" className="border-sortmy-blue/20">
-          <div className="p-4">
-            <div className="w-full relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sortmy-blue" size={18} />
-              <Input
-                placeholder="Search tools by name, description or tags..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-sortmy-gray/10 border-sortmy-blue/20 focus:border-sortmy-blue/50 transition-colors"
-              />
+        <GlassCard variant="bordered" className="border-sortmy-blue/20 p-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search input */}
+            <div className="w-full md:w-1/3">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-sortmy-blue" />
+                <Input
+                  placeholder="Search tools..."
+                  className="pl-8 bg-sortmy-darker/50 border-sortmy-blue/20"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Tags filter */}
+            <div className="w-full md:w-2/3">
+              <div className="flex items-center justify-between mb-2 cursor-pointer" onClick={() => setFiltersExpanded(!filtersExpanded)}>
+                <div className="flex items-center">
+                  <Filter className="w-4 h-4 mr-2 text-sortmy-blue" />
+                  <h3 className="font-medium">Filters</h3>
+                  {selectedTags.length > 0 && (
+                    <Badge className="ml-2 bg-sortmy-blue/20 text-sortmy-blue border-sortmy-blue/30">
+                      {selectedTags.length}
+                    </Badge>
+                  )}
+                </div>
+                <div className="p-1 rounded-full hover:bg-sortmy-blue/10 transition-colors">
+                  {filtersExpanded ? (
+                    <ChevronUp className="w-4 h-4 text-sortmy-blue" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-sortmy-blue" />
+                  )}
+                </div>
+              </div>
+
+              {filtersExpanded && (
+                <div className="mt-2 animate-in fade-in duration-300">
+                  <div className="flex flex-wrap gap-2">
+                    {allTags.map(tag => (
+                      <Badge
+                        key={tag}
+                        variant={selectedTags.includes(tag) ? "default" : "outline"}
+                        className={`cursor-pointer ${
+                          selectedTags.includes(tag)
+                            ? 'bg-sortmy-blue hover:bg-sortmy-blue/80'
+                            : 'hover:bg-sortmy-blue/10 border-sortmy-blue/20'
+                        }`}
+                        onClick={() => toggleTag(tag)}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Clear filters button - only shown when filters are applied */}
+          {(searchQuery || selectedTags.length > 0) && (
+            <div className="mt-4 flex justify-end">
+              <ClickEffect effect="ripple" color="blue">
+                <NeonButton
+                  variant="cyan"
+                  size="sm"
+                  onClick={clearFilters}
+                >
+                  Clear Filters
+                </NeonButton>
+              </ClickEffect>
+            </div>
+          )}
         </GlassCard>
 
         {isLoading ? (
@@ -197,15 +384,19 @@ const ToolTracker = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mt-3 mb-4">
-                    {tool.tags.map((tag, i) => (
-                      <span
-                        key={i}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sortmy-blue/20 text-sortmy-blue hover:bg-sortmy-blue/30 transition-colors cursor-pointer"
-                      >
-                        <Tag className="w-3 h-3 mr-1" />
-                        {tag}
-                      </span>
-                    ))}
+                    {tool.tags && Array.isArray(tool.tags) && tool.tags.length > 0 ? (
+                      tool.tags.map((tag, i) => (
+                        <span
+                          key={i}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sortmy-blue/20 text-sortmy-blue hover:bg-sortmy-blue/30 transition-colors cursor-pointer"
+                        >
+                          <Tag className="w-3 h-3 mr-1" />
+                          {tag}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-gray-400">No tags</span>
+                    )}
                   </div>
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex space-x-2">

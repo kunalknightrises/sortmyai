@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button} from '@/components/ui/button';
-import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Crown, Activity, Award, Target, Zap, Image, Video } from 'lucide-react';
+import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Crown, Activity, Award, Target, Zap, Image, Video, BarChart2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import XPProgress from './gamification/XPProgress';
@@ -179,14 +179,23 @@ const Dashboard = () => {
                     value={tools.length.toString()}
                     description="Tools tracked"
                     icon={<Briefcase className="w-5 h-5 text-sortmy-blue" />}
+                    link="/dashboard/tools"
                   />
                   <StatsCard
                     title="Portfolio Items"
                     value={portfolioItems.length.toString()}
                     description="Works published"
                     icon={<LayoutGrid className="w-5 h-5 text-sortmy-blue" />}
+                    link="/dashboard/portfolio"
                   />
-                  {user?.is_premium ? (
+                  <StatsCard
+                    title="Analytics"
+                    value="View"
+                    description="Track your engagement"
+                    icon={<BarChart2 className="w-5 h-5 text-sortmy-blue" />}
+                    link="/dashboard/analytics"
+                  />
+                  {false && user?.is_premium ? (
                     <Card className="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-sortmy-gray/30">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
@@ -198,13 +207,15 @@ const Dashboard = () => {
                       <CardContent className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Claude 3.5 Sonnet</span>
-                          <Badge variant={user.claude_enabled ? "default" : "outline"} className={user.claude_enabled ? "bg-green-500/20 text-green-400" : ""}>
-                            {user.claude_enabled ? "Enabled" : "Disabled"}
+                          <Badge variant={user?.claude_enabled ? "default" : "outline"} className={user?.claude_enabled ? "bg-green-500/20 text-green-400" : ""}>
+                            {user?.claude_enabled ? "Enabled" : "Disabled"}
                           </Badge>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-sm">Analytics</span>
-                          <Badge variant="default" className="bg-sortmy-blue/20 text-sortmy-blue">Active</Badge>
+                          <Link to="/dashboard/analytics">
+                            <Badge variant="default" className="bg-sortmy-blue/20 text-sortmy-blue hover:bg-sortmy-blue/30 cursor-pointer">View</Badge>
+                          </Link>
                         </div>
                       </CardContent>
                     </Card>
@@ -425,24 +436,27 @@ const Dashboard = () => {
   );
 };
 
-const StatsCard = ({ title, value, description, icon }: {
+const StatsCard = ({ title, value, description, icon, link }: {
   title: string;
   value: string;
   description: string;
   icon: React.ReactNode;
+  link?: string;
 }) => {
   return (
-    <GlassCard variant="glowing" intensity="medium" className="border-sortmy-blue/20">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg">{title}</CardTitle>
-        <div className="bg-sortmy-gray/20 p-2 rounded-full border border-sortmy-blue/20">
-          {icon}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-3xl font-bold bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">{value}</div>
-        <p className="text-xs text-gray-300 mt-1">{description}</p>
-      </CardContent>
+    <GlassCard variant="glowing" intensity="medium" className="border-sortmy-blue/20 hover:border-sortmy-blue/40 transition-all duration-300 cursor-pointer">
+      <Link to={link || '#'}>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg">{title}</CardTitle>
+          <div className="bg-sortmy-gray/20 p-2 rounded-full border border-sortmy-blue/20">
+            {icon}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">{value}</div>
+          <p className="text-xs text-gray-300 mt-1">{description}</p>
+        </CardContent>
+      </Link>
     </GlassCard>
   );
 };

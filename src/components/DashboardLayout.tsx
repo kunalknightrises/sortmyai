@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useBackground } from '@/contexts/BackgroundContext';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -85,9 +86,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     );
   };
 
-  // State for background type and intensity
-  const [backgroundType, setBackgroundType] = useState<'aurora' | 'synthwave'>('synthwave');
-  const [backgroundIntensity, setBackgroundIntensity] = useState<'low' | 'medium' | 'high'>('medium');
+  // Use the background context
+  const { backgroundType, backgroundIntensity, setBackgroundIntensity, setBackgroundType } = useBackground();
 
   // Adjust background based on the current page
   useEffect(() => {
@@ -153,7 +153,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             variant="outline"
             size="icon"
             className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
-            onClick={() => setBackgroundType(prev => prev === 'aurora' ? 'synthwave' : 'aurora')}
+            onClick={() => setBackgroundType(backgroundType === 'aurora' ? 'synthwave' :
+                           backgroundType === 'synthwave' ? 'simple' : 'aurora')}
             title="Toggle Background Style"
           >
             <Sparkles className="h-4 w-4" />

@@ -140,6 +140,13 @@ const AIToolsLibrary = () => {
     try {
       setSavingToolIds(prev => [...prev, tool.id]);
 
+      // Process tags if they exist
+      let tags: string[] = [];
+      if (tool.tags) {
+        tags = Array.isArray(tool.tags) ? tool.tags :
+              typeof tool.tags === 'string' ? tool.tags.split(',').map(tag => tag.trim()) : [];
+      }
+
       // Add tool to user's tool tracker in Firebase
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, {
@@ -147,8 +154,12 @@ const AIToolsLibrary = () => {
           id: tool.id,
           name: tool.name,
           useCase: tool.useCase,
+          description: tool.description,
           logoUrl: tool.logoUrl || tool.logoLink,
           website: formatWebsiteUrl(tool.website || tool.websiteLink || ''),
+          tags: tags,
+          pricing: tool.pricing,
+          excelsAt: tool.excelsAt,
           addedAt: new Date().toISOString(),
         })
       });

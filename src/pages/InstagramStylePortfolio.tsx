@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useBackground } from '@/contexts/BackgroundContext';
 import { useParams, Link } from 'react-router-dom';
 import { fetchUserProfile, fetchPortfolioItems } from '@/services/portfolioService';
 import { useToast } from '@/hooks/use-toast';
@@ -34,7 +35,7 @@ const InstagramStylePortfolio = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-  const [backgroundType, setBackgroundType] = useState<'aurora' | 'synthwave' | 'simple'>('simple');
+  const { backgroundType, cycleBackgroundType } = useBackground();
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
 
@@ -148,13 +149,7 @@ const InstagramStylePortfolio = () => {
           variant="outline"
           size="icon"
           className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
-          onClick={() => {
-            setBackgroundType(prev => {
-              if (prev === 'simple') return 'synthwave';
-              if (prev === 'synthwave') return 'aurora';
-              return 'simple';
-            });
-          }}
+          onClick={cycleBackgroundType}
           title="Toggle Background Style"
         >
           <Sparkles className="h-4 w-4" />
