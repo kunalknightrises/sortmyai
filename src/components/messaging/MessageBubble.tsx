@@ -3,6 +3,7 @@ import { Message } from '@/types/message';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface MessageBubbleProps {
   message: Message;
@@ -17,6 +18,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   senderAvatar,
   senderName
 }) => {
+  const navigate = useNavigate();
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -26,6 +29,13 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       .substring(0, 2);
   };
 
+  const handleProfileClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (senderName && senderName !== 'U') {
+      navigate(`/portfolio/${senderName}`);
+    }
+  };
+
   const formattedTime = formatDistanceToNow(new Date(message.timestamp), { addSuffix: true });
 
   return (
@@ -33,7 +43,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       "flex items-start gap-2 mb-4",
       isCurrentUser ? "flex-row-reverse" : "flex-row"
     )}>
-      <Avatar className="h-8 w-8 flex-shrink-0">
+      <Avatar className="h-8 w-8 flex-shrink-0 cursor-pointer" onClick={handleProfileClick}>
         <AvatarImage src={senderAvatar} />
         <AvatarFallback className="bg-sortmy-blue/20 text-sortmy-blue text-xs">
           {senderName ? getInitials(senderName) : 'U'}
@@ -42,27 +52,27 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
 
       <div className={cn(
         "max-w-[70%] rounded-lg p-3 shadow-sm",
-        isCurrentUser 
-          ? "bg-sortmy-blue text-white rounded-tr-none" 
+        isCurrentUser
+          ? "bg-sortmy-blue text-white rounded-tr-none"
           : "bg-sortmy-dark/50 border border-sortmy-blue/20 rounded-tl-none"
       )}>
         {message.content}
-        
+
         {message.attachmentUrl && message.attachmentType === 'image' && (
           <div className="mt-2">
-            <img 
-              src={message.attachmentUrl} 
-              alt="Attachment" 
+            <img
+              src={message.attachmentUrl}
+              alt="Attachment"
               className="rounded-md max-w-full max-h-60 object-contain"
             />
           </div>
         )}
-        
+
         {message.attachmentUrl && message.attachmentType === 'file' && (
           <div className="mt-2">
-            <a 
-              href={message.attachmentUrl} 
-              target="_blank" 
+            <a
+              href={message.attachmentUrl}
+              target="_blank"
               rel="noopener noreferrer"
               className="text-sm flex items-center gap-1 text-sortmy-blue underline"
             >
@@ -70,7 +80,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
             </a>
           </div>
         )}
-        
+
         <div className={cn(
           "text-xs mt-1",
           isCurrentUser ? "text-blue-100" : "text-gray-400"

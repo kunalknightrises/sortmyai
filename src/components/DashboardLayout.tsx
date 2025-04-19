@@ -8,23 +8,24 @@ import {
   LayoutGrid,
   User,
   Settings,
-  Brain,
   Menu,
   X,
   GraduationCap,
   Sparkles,
   Users,
-  MessageSquare
+  MessageSquare,
+  ImageIcon
 } from 'lucide-react';
+import SortMyAILogo from './ui/SortMyAILogo';
 import { useMessageNotifications } from '@/contexts/MessageNotificationContext';
 import NotificationBadge from '@/components/ui/notification-badge';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AuroraBackground from '@/components/ui/AuroraBackground';
-import SynthwaveBackground from '@/components/ui/SynthwaveBackground';
+
+
 // import GlassCard from '@/components/ui/GlassCard';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 
 
 interface DashboardLayoutProps {
@@ -36,10 +37,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const sidebarItems = [
-    { icon: <LayoutDashboard size={20} />, label: "Dashboard", path: "/dashboard" },
+    { icon: <LayoutDashboard size={20} />, label: "Command Centre", path: "/dashboard" },
     { icon: <Briefcase size={20} />, label: "Tool Tracker", path: "/dashboard/tools" },
     { icon: <LayoutGrid size={20} />, label: "Portfolio", path: "/dashboard/portfolio" },
     { icon: <Users size={20} />, label: "Explore Creators", path: "/dashboard/explore-creators" },
+    { icon: <ImageIcon size={20} />, label: "Explore Posts", path: "/dashboard/explore-posts" },
     { icon: <MessageSquare size={20} />, label: "Messages", path: "/dashboard/messages" },
     { icon: <GraduationCap size={20} />, label: "Academy", path: "/dashboard/academy" },
     { icon: <User size={20} />, label: "Profile", path: "/dashboard/profile" },
@@ -53,10 +55,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <div className="flex flex-col h-full">
         <div className="flex items-center mb-8 py-2">
           <div className="relative">
-            <Brain className="w-8 h-8 mr-2 text-sortmy-blue" />
+            <SortMyAILogo className="w-8 h-8 mr-2 text-sortmy-blue" />
             <Sparkles className="w-3 h-3 absolute -top-1 -right-1 text-sortmy-blue animate-pulse" />
           </div>
-          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">SortMyAI</span>
+          <span className="text-xl font-bold tracking-tight text-white">SortMyAI</span>
         </div>
 
         <div className="flex-1 flex flex-col space-y-1">
@@ -87,7 +89,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   // Use the background context
-  const { backgroundType, backgroundIntensity, setBackgroundIntensity, setBackgroundType } = useBackground();
+  const { backgroundType, setBackgroundType, setBackgroundIntensity } = useBackground();
 
   // Adjust background based on the current page
   useEffect(() => {
@@ -107,7 +109,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {backgroundType === 'aurora' ? (
         <AuroraBackground intensity={50} className="z-0" />
       ) : (
-        <SynthwaveBackground intensity={backgroundIntensity} className="z-0" />
+        <div className="fixed inset-0 bg-sortmy-dark z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0d001a] to-[#0a0a2e] opacity-80"></div>
+          <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+        </div>
       )}
 
       {/* Scanline effect */}
@@ -145,22 +150,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </Sheet>
       )}
 
+      {/* Background toggle button at bottom right - moved outside scrollable area */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
+          onClick={() => setBackgroundType(backgroundType === 'aurora' ? 'simple' : 'aurora')}
+          title="Toggle Background Style"
+        >
+          <Sparkles className="h-4 w-4" />
+        </Button>
+      </div>
+
       {/* Main Content with padding adjustment for mobile */}
       <div className={`flex-1 p-4 overflow-y-auto ${isMobile ? 'pt-16' : ''} z-10 relative bg-sortmy-dark/20 backdrop-blur-[2px]`}>
-        {/* Theme toggle */}
-        <div className="absolute top-4 right-4 z-20 flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
-            onClick={() => setBackgroundType(backgroundType === 'aurora' ? 'synthwave' :
-                           backgroundType === 'synthwave' ? 'simple' : 'aurora')}
-            title="Toggle Background Style"
-          >
-            <Sparkles className="h-4 w-4" />
-          </Button>
-          <ThemeToggle />
-        </div>
 
         <div className="max-w-7xl mx-auto relative">
           {/* Subtle scanline effect */}

@@ -30,29 +30,35 @@ export const PortfolioTabs = ({ loading, filteredItems, onTabChange }: Portfolio
   }
 
   return (
-    <Tabs defaultValue="posts" className="w-full mt-6" onValueChange={onTabChange}>
+    <Tabs defaultValue="images" className="w-full mt-6" onValueChange={onTabChange}>
       <TabsList className="grid w-full grid-cols-3 mb-6">
-        <TabsTrigger value="posts">Posts</TabsTrigger>
+        <TabsTrigger value="images">Images</TabsTrigger>
         <TabsTrigger value="reels">Reels</TabsTrigger>
-        <TabsTrigger value="tagged">Tagged</TabsTrigger>
+        <TabsTrigger value="links">Links</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="posts" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredItems.map((item) => (
-          <PortfolioItemCard key={item.id} item={item} />
-        ))}
+      <TabsContent value="images" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredItems
+          .filter(item => (!item.content_type || item.content_type === 'post' || item.content_type === 'both') && !item.project_url)
+          .map((item) => (
+            <PortfolioItemCard key={item.id} item={item} />
+          ))}
       </TabsContent>
 
-      <TabsContent value="reels">
-        <div className="text-center py-8 text-gray-500">
-          Reels coming soon...
-        </div>
+      <TabsContent value="reels" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredItems
+          .filter(item => item.content_type === 'reel' || item.content_type === 'both')
+          .map((item) => (
+            <PortfolioItemCard key={item.id} item={item} isReel={true} />
+          ))}
       </TabsContent>
 
-      <TabsContent value="tagged">
-        <div className="text-center py-8 text-gray-500">
-          Tagged content coming soon...
-        </div>
+      <TabsContent value="links" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredItems
+          .filter(item => item.project_url)
+          .map((item) => (
+            <PortfolioItemCard key={item.id} item={item} />
+          ))}
       </TabsContent>
     </Tabs>
   );
@@ -108,22 +114,25 @@ export const PortfolioTabsWithLightbox = ({
 
   return (
     <>
-      <Tabs defaultValue="posts" className="w-full mt-6" onValueChange={onTabChange}>
+      <Tabs defaultValue="images" className="w-full mt-6" onValueChange={onTabChange}>
         <TabsList className="grid w-full grid-cols-3 mb-6">
-          <TabsTrigger value="posts">Posts</TabsTrigger>
+          <TabsTrigger value="images">Images</TabsTrigger>
           <TabsTrigger value="reels">Reels</TabsTrigger>
-          <TabsTrigger value="tagged">Tagged</TabsTrigger>
+          <TabsTrigger value="links">Links</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="posts" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <TabsContent value="images" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-[300px] w-full" />
             ))
           ) : (
             filteredItems
-              .filter(item => item.content_type === 'post' || item.content_type === 'both')
-              .map((item) => (
+              .filter(item => (!item.content_type || item.content_type === 'post' || item.content_type === 'both') && !item.project_url)
+              .map((item) => {
+                // Debug item status
+                console.log('Rendering item:', item.id, 'Status:', item.status, 'Content type:', item.content_type);
+                return (
                 <div key={item.id} onClick={() => handleItemClick(item)} className="cursor-pointer relative">
                   {/* Error indicator for items with missing or invalid media */}
                   {((!item.media_url && (!item.media_urls || item.media_urls.length === 0)) ||
@@ -143,7 +152,8 @@ export const PortfolioTabsWithLightbox = ({
                     isOwner={isOwner}
                   />
                 </div>
-              ))
+              );
+              })
           )}
         </TabsContent>
 
@@ -207,10 +217,42 @@ export const PortfolioTabsWithLightbox = ({
           )}
         </TabsContent>
 
-        <TabsContent value="tagged">
-          <div className="text-center py-8 text-gray-500">
-            Tagged content coming soon...
-          </div>
+        <TabsContent value="links">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-[300px] w-full" />
+              ))}
+            </div>
+          ) : (
+            <>
+              {filteredItems.filter(item => item.project_url).length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredItems
+                    .filter(item => item.project_url)
+                    .map((item) => (
+                      <div key={item.id} onClick={() => handleItemClick(item)} className="cursor-pointer relative">
+                        <PortfolioItemCard
+                          item={item}
+                          onEdit={onEdit}
+                          onDelete={onDelete}
+                          onArchive={onArchive}
+                          onRestore={onRestore}
+                          isOwner={isOwner}
+                        />
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-sortmy-gray/10 rounded-lg border border-sortmy-gray/20">
+                  <h3 className="text-lg font-medium mb-2">No Linked Projects Found</h3>
+                  <p className="text-gray-400 max-w-md mx-auto mb-6">
+                    Add a project URL when creating a post to have it appear in this section.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
         </TabsContent>
       </Tabs>
 

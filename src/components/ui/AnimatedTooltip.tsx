@@ -21,9 +21,8 @@ const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({
   animation = 'fade',
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
-  
+
   // Position styles
   const positionStyles = {
     top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
@@ -31,7 +30,7 @@ const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({
     left: 'right-full top-1/2 -translate-y-1/2 mr-2',
     right: 'left-full top-1/2 -translate-y-1/2 ml-2',
   };
-  
+
   // Arrow styles
   const arrowStyles = {
     top: 'bottom-[-6px] left-1/2 -translate-x-1/2 border-l-transparent border-r-transparent border-b-transparent',
@@ -39,7 +38,7 @@ const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({
     left: 'right-[-6px] top-1/2 -translate-y-1/2 border-t-transparent border-b-transparent border-r-transparent',
     right: 'left-[-6px] top-1/2 -translate-y-1/2 border-t-transparent border-b-transparent border-l-transparent',
   };
-  
+
   // Animation styles
   const animationStyles = {
     fade: {
@@ -65,64 +64,66 @@ const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({
       },
     },
   };
-  
+
   // Get animation classes
   const getAnimationClasses = () => {
     if (animation === 'slide') {
-      return isVisible 
-        ? animationStyles.slide.animate[position] 
+      return isVisible
+        ? animationStyles.slide.animate[position]
         : animationStyles.slide.initial[position];
     }
-    
-    return isVisible 
-      ? animationStyles[animation].animate 
+
+    return isVisible
+      ? animationStyles[animation].animate
       : animationStyles[animation].initial;
   };
-  
+
   // Handle mouse enter
   const handleMouseEnter = () => {
-    setIsHovering(true);
-    
     if (timeoutId) {
       clearTimeout(timeoutId);
       setTimeoutId(null);
     }
-    
+
     const id = setTimeout(() => {
       setIsVisible(true);
     }, delay);
-    
+
     setTimeoutId(id);
   };
-  
+
   // Handle mouse leave
   const handleMouseLeave = () => {
-    setIsHovering(false);
-    
     if (timeoutId) {
       clearTimeout(timeoutId);
       setTimeoutId(null);
     }
-    
-    const id = setTimeout(() => {
-      if (!isHovering) {
-        setIsVisible(false);
-      }
-    }, 100);
-    
-    setTimeoutId(id);
+
+    // Immediately hide the tooltip when mouse leaves
+    setIsVisible(false);
   };
-  
+
+  // Auto-hide tooltip after a few seconds
+  React.useEffect(() => {
+    if (isVisible) {
+      const hideTimer = setTimeout(() => {
+        setIsVisible(false);
+      }, 3000); // Hide after 3 seconds
+
+      return () => clearTimeout(hideTimer);
+    }
+  }, [isVisible]);
+
   return (
-    <div 
+    <div
       className={cn("relative inline-block", className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {children}
-      
+
       {/* Tooltip */}
-      <div 
+      <div
         className={cn(
           "absolute z-50 whitespace-nowrap transition-all duration-200",
           positionStyles[position],
@@ -135,9 +136,9 @@ const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({
         <div className="bg-sortmy-darker text-white text-sm py-1.5 px-3 rounded shadow-lg border border-sortmy-gray/30 backdrop-blur-sm">
           {content}
         </div>
-        
+
         {/* Tooltip arrow */}
-        <div 
+        <div
           className={cn(
             "absolute w-0 h-0 border-4 border-sortmy-darker",
             arrowStyles[position]

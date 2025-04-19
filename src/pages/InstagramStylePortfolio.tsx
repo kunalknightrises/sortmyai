@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useBackground } from '@/contexts/BackgroundContext';
 import { useParams, Link } from 'react-router-dom';
 import { fetchUserProfile, fetchPortfolioItems } from '@/services/portfolioService';
@@ -8,15 +9,15 @@ import { PortfolioItem, User } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import CreatorProfileHeader from '@/components/CreatorProfileHeader';
 import { PortfolioFilterTools } from '@/components/portfolio/PortfolioFilterTools';
-import { PortfolioTabs } from '@/components/portfolio/PortfolioTabs';
+import PortfolioTabsWithLightbox from '@/components/portfolio/PortfolioTabs';
 import { useAuth } from '@/contexts/AuthContext';
-import ThemeToggle from '@/components/ui/ThemeToggle';
+
 import { Button } from '@/components/ui/button';
 import NeonButton from '@/components/ui/NeonButton';
 import ClickEffect from '@/components/ui/ClickEffect';
 import { NavLink } from 'react-router-dom';
-import SynthwaveBackground from '@/components/ui/SynthwaveBackground';
 import AuroraBackground from '@/components/ui/AuroraBackground';
+
 import {
   LayoutDashboard,
   Briefcase,
@@ -38,6 +39,10 @@ const InstagramStylePortfolio = () => {
   const { backgroundType, cycleBackgroundType } = useBackground();
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
+  const location = useLocation();
+
+  // Check if we're in the dashboard layout
+  const isInDashboard = location.pathname.includes('/dashboard');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,9 +62,21 @@ const InstagramStylePortfolio = () => {
           email: userData.email || undefined
         });
 
-        // Fetch portfolio items
+        // Fetch portfolio items, including deleted ones for debugging
         if (userData) {
-          const items = await fetchPortfolioItems(userData.id);
+          const items = await fetchPortfolioItems(userData.id, true);
+          console.log('Portfolio items fetched (including deleted):', items);
+          console.log('Published items:', items.filter(item => item.status === 'published' || !item.status));
+          console.log('Deleted items:', items.filter(item => item.status === 'deleted'));
+          console.log('Archived items:', items.filter(item => item.status === 'archived'));
+          console.log('Draft items:', items.filter(item => item.status === 'draft'));
+
+          // Log items with media errors to help identify problematic posts
+          console.log('Items with media errors:', items.filter(item =>
+            (!item.media_url && (!item.media_urls || item.media_urls.length === 0)) ||
+            (item.media_url && item.media_url.includes('drive.google.com') &&
+             !item.media_url.includes('/d/') && !item.media_url.includes('id='))
+          ));
           setPortfolioItems(items);
         }
       } catch (error: any) {
@@ -126,13 +143,9 @@ const InstagramStylePortfolio = () => {
     <div className="flex min-h-screen bg-sortmy-dark relative">
       {/* Background */}
       <div className="fixed inset-0 z-0">
-        {backgroundType === 'aurora' && (
+        {backgroundType === 'aurora' ? (
           <AuroraBackground intensity={50} className="z-0" />
-        )}
-        {backgroundType === 'synthwave' && (
-          <SynthwaveBackground intensity="low" className="z-0" />
-        )}
-        {backgroundType === 'simple' && (
+        ) : (
           <div className="absolute inset-0 bg-sortmy-dark">
             <div className="absolute inset-0 bg-gradient-to-b from-[#0d001a] to-[#0a0a2e] opacity-80"></div>
             <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
@@ -143,19 +156,20 @@ const InstagramStylePortfolio = () => {
       {/* Sidebar for authenticated users */}
       {currentUser && <Sidebar />}
 
-      {/* Theme toggle */}
-      <div className="absolute top-4 right-4 z-20 flex gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
-          onClick={cycleBackgroundType}
-          title="Toggle Background Style"
-        >
-          <Sparkles className="h-4 w-4" />
-        </Button>
-        <ThemeToggle />
-      </div>
+      {/* Background toggle button at bottom right - only show when not in dashboard */}
+      {!isInDashboard && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
+            onClick={cycleBackgroundType}
+            title="Toggle Background Style"
+          >
+            <Sparkles className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       <div className={`flex-1 p-4 overflow-y-auto z-10 relative ${currentUser ? 'ml-0' : ''}`}>
         <div className="max-w-screen-lg mx-auto px-4 relative z-10">
@@ -223,9 +237,9 @@ const InstagramStylePortfolio = () => {
           )}
 
           {/* Content Tabs */}
-          <PortfolioTabs
+          <PortfolioTabsWithLightbox
             loading={loading}
-            filteredItems={portfolioItems}
+            filteredItems={portfolioItems.filter(item => item.status !== 'deleted' && item.status !== 'archived' && item.status !== 'draft')}
             onTabChange={() => {}}
             isOwner={currentUser?.username === user?.username}
           />

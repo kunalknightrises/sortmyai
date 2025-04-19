@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Briefcase, Library, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Library, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 // import NeuCard from '@/components/ui/NeuCard';
 import NeonButton from '@/components/ui/NeonButton';
@@ -218,11 +218,7 @@ const ToolTracker = () => {
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center">
-              <Briefcase className="w-8 h-8 mr-2 text-sortmy-blue" />
-              Tool Tracker
-            </h1>
-            <p className="text-gray-400 mt-1">
+            <p className="text-gray-400">
               Manage and organize your AI tools in one place
             </p>
           </div>

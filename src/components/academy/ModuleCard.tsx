@@ -1,6 +1,6 @@
 
 import { PlayCircle, Zap, FileText, CheckCircle } from "lucide-react";
-import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import GlassCard from "@/components/ui/GlassCard";
 import NeonButton from "@/components/ui/NeonButton";
 import ClickEffect from "@/components/ui/ClickEffect";
@@ -30,8 +30,7 @@ const ModuleCard = ({ module, onStartModule, tierId }: ModuleCardProps) => {
           </div>
         )}
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{module.title}</CardTitle>
-          <CardDescription>{module.description}</CardDescription>
+          <CardTitle className="text-lg text-white">{module.title}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <AnimatedTooltip content="Complete this module to earn XP" position="top">

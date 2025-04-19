@@ -13,14 +13,25 @@ import {
   ShieldCheck,
   Users,
   Heart,
-  BarChart2
+  BarChart2,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMessageNotifications } from '@/contexts/MessageNotificationContext';
+
+interface SidebarItem {
+  icon: React.ReactNode;
+  label: string;
+  path: string;
+  adminBadge?: boolean;
+  badge?: number;
+}
 
 const Sidebar = () => {
   const { isAdmin } = useAuth();
+  const { totalUnreadMessages, pendingRequestsCount } = useMessageNotifications();
 
-  const sidebarItems = [
+  const sidebarItems: SidebarItem[] = [
     {
       icon: <LayoutDashboard size={20} />,
       label: "Dashboard",
@@ -55,6 +66,13 @@ const Sidebar = () => {
       icon: <Heart size={20} />,
       label: "My Interactions",
       path: "/dashboard/interactions",
+    },
+    {
+      icon: <MessageSquare size={20} />,
+      label: "Messages",
+      path: "/dashboard/messages",
+      badge: totalUnreadMessages > 0 || pendingRequestsCount > 0 ?
+        (totalUnreadMessages + pendingRequestsCount) : undefined
     },
     {
       icon: <BarChart2 size={20} />,
@@ -109,6 +127,11 @@ const Sidebar = () => {
               <div className="bg-red-500/20 text-red-400 text-xs px-1.5 py-0.5 rounded flex items-center">
                 <ShieldCheck size={10} className="mr-1" />
                 Admin
+              </div>
+            )}
+            {item.badge && (
+              <div className="bg-sortmy-blue text-white text-xs rounded-full h-5 min-w-5 flex items-center justify-center px-1">
+                {item.badge}
               </div>
             )}
           </NavLink>

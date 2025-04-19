@@ -8,6 +8,7 @@ import { MessagePreview } from '@/types/message';
 interface MessageNotificationContextType {
   unreadCount: number;
   totalUnreadMessages: number;
+  pendingRequestsCount: number;
   refreshUnreadCount: () => Promise<void>;
   messageNotifications: MessagePreview[];
   clearNotificationsForConversation: (conversationId: string) => void;
@@ -28,6 +29,7 @@ export const MessageNotificationProvider: React.FC<{ children: React.ReactNode }
   const [unreadCount, setUnreadCount] = useState(0);
   const [messageNotifications, setMessageNotifications] = useState<MessagePreview[]>([]);
   const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
   // Function to refresh unread count
   const refreshUnreadCount = async () => {
@@ -41,12 +43,14 @@ export const MessageNotificationProvider: React.FC<{ children: React.ReactNode }
     try {
       const previews = await getMessagePreviews(user.uid);
       const unreadPreviews = previews.filter(preview => preview.unreadCount > 0);
-      
+      const pendingRequests = previews.filter(preview => preview.status === 'pending' && !preview.isRequester);
+
       setMessageNotifications(unreadPreviews);
       setUnreadCount(unreadPreviews.length);
       setTotalUnreadMessages(
         unreadPreviews.reduce((total, preview) => total + preview.unreadCount, 0)
       );
+      setPendingRequestsCount(pendingRequests.length);
     } catch (error) {
       console.error('Error refreshing unread count:', error);
     }
@@ -54,15 +58,15 @@ export const MessageNotificationProvider: React.FC<{ children: React.ReactNode }
 
   // Clear notifications for a specific conversation
   const clearNotificationsForConversation = (conversationId: string) => {
-    setMessageNotifications(prev => 
+    setMessageNotifications(prev =>
       prev.filter(notification => notification.conversationId !== conversationId)
     );
-    
+
     // Recalculate counts
     const updatedNotifications = messageNotifications.filter(
       notification => notification.conversationId !== conversationId
     );
-    
+
     setUnreadCount(updatedNotifications.length);
     setTotalUnreadMessages(
       updatedNotifications.reduce((total, preview) => total + preview.unreadCount, 0)
@@ -95,6 +99,7 @@ export const MessageNotificationProvider: React.FC<{ children: React.ReactNode }
       value={{
         unreadCount,
         totalUnreadMessages,
+        pendingRequestsCount,
         refreshUnreadCount,
         messageNotifications,
         clearNotificationsForConversation

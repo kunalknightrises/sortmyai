@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Settings, Edit, ExternalLink, UserCheck, Loader2 } from 'lucide-react';
+import { Users, Settings, Edit, ExternalLink, UserCheck, Loader2, Share2, PlusCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { User, PortfolioItem } from '@/types';
@@ -16,9 +16,10 @@ interface CreatorProfileHeaderProps {
   portfolio: PortfolioItem[];
   isCurrentUser?: boolean;
   onEditClick?: () => void;
+  onAddProject?: () => void;
 }
 
-const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditClick }: CreatorProfileHeaderProps) => {
+const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditClick, onAddProject }: CreatorProfileHeaderProps) => {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const [isFollowing, setIsFollowing] = useState(false);
@@ -94,16 +95,9 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
   return (
     <div className="py-8 border-b border-sortmy-gray/30">
       <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-        {/* Avatar */}
-        <Avatar className="h-24 w-24 md:h-36 md:w-36 border-2 border-sortmy-blue/20">
-          <AvatarImage src={user.avatar_url} />
-          <AvatarFallback className="text-xl bg-sortmy-blue/20 text-sortmy-blue">
-            {getInitials()}
-          </AvatarFallback>
-        </Avatar>
-
         {/* Profile Info */}
-        <div className="flex-1 space-y-4 text-center md:text-left">
+        <div className="flex-1 space-y-4 text-center md:text-left order-2 md:order-1">
+
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <h1 className="text-2xl font-bold">
               {user.username}
@@ -116,15 +110,59 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
 
             <div className="flex gap-2">
               {isCurrentUser ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => onEditClick && onEditClick()}
-                >
-                  <Edit className="w-4 h-4" />
-                  Edit Profile
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => onEditClick && onEditClick()}
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit Profile
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => {
+                      const url = window.location.href;
+                      const title = `${user.username}'s SortMyAI Profile`;
+                      const text = `Check out ${user.username}'s AI portfolio on SortMyAI!`;
+
+                      // Use Web Share API if available
+                      if (navigator.share) {
+                        navigator.share({
+                          title,
+                          text,
+                          url
+                        }).catch(err => {
+                          console.error('Error sharing:', err);
+                          // Fallback to clipboard
+                          navigator.clipboard.writeText(url);
+                          alert('Profile link copied to clipboard!');
+                        });
+                      } else {
+                        // Fallback for browsers that don't support Web Share API
+                        navigator.clipboard.writeText(url);
+                        alert('Profile link copied to clipboard!');
+                      }
+                    }}
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share Profile
+                  </Button>
+                  {onAddProject && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={onAddProject}
+                    >
+                      <PlusCircle className="w-4 h-4" />
+                      Add Project
+                    </Button>
+                  )}
+                </>
               ) : (
                 <>
                   <MessageButton
@@ -204,6 +242,16 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
               sortmy.ai/{user.username}
             </a>
           </div>
+        </div>
+
+        {/* Avatar - Moved to right side */}
+        <div className="order-1 md:order-2">
+          <Avatar className="h-24 w-24 md:h-36 md:w-36 border-2 border-sortmy-blue/20">
+            <AvatarImage src={user.avatar_url} />
+            <AvatarFallback className="text-xl bg-sortmy-blue/20 text-sortmy-blue">
+              {getInitials()}
+            </AvatarFallback>
+          </Avatar>
         </div>
       </div>
 

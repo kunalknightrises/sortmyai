@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button} from '@/components/ui/button';
-import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Crown, Activity, Award, Target, Zap, Image, Video, BarChart2 } from 'lucide-react';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Activity, Award, Target, Zap, Image, Video, BarChart2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
 import XPProgress from './gamification/XPProgress';
 import StreakCounter from './gamification/StreakCounter';
 import BadgeDisplay from './gamification/BadgeDisplay';
@@ -150,9 +148,7 @@ const Dashboard = () => {
     <div className="flex h-screen text-white overflow-hidden">
         <div className="flex-1 p-4 overflow-y-auto">
             <div className="space-y-8 max-w-7xl mx-auto">
-              <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">Dashboard</h1>
-
+              <div className="flex justify-end items-center mb-4">
                 <ClickEffect effect="ripple" color="blue">
                   <Link to="/dashboard/tools/add">
                     <NeonButton variant="gradient">
@@ -195,45 +191,7 @@ const Dashboard = () => {
                     icon={<BarChart2 className="w-5 h-5 text-sortmy-blue" />}
                     link="/dashboard/analytics"
                   />
-                  {false && user?.is_premium ? (
-                    <Card className="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-sortmy-gray/30">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          <Crown className="w-5 h-5 text-yellow-400" />
-                          SortMyAI+
-                        </CardTitle>
-                        <CardDescription>Premium Features</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Claude 3.5 Sonnet</span>
-                          <Badge variant={user?.claude_enabled ? "default" : "outline"} className={user?.claude_enabled ? "bg-green-500/20 text-green-400" : ""}>
-                            {user?.claude_enabled ? "Enabled" : "Disabled"}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Analytics</span>
-                          <Link to="/dashboard/analytics">
-                            <Badge variant="default" className="bg-sortmy-blue/20 text-sortmy-blue hover:bg-sortmy-blue/30 cursor-pointer">View</Badge>
-                          </Link>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <Card className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 border-sortmy-gray/30">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          <Crown className="w-5 h-5 text-gray-400" />
-                          SortMyAI+
-                        </CardTitle>
-                        <CardDescription>Upgrade your experience</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm mb-4">Get access to Claude 3.5 Sonnet AI, analytics, and more premium features.</p>
-                        <Button size="sm" className="w-full">Upgrade Now</Button>
-                      </CardContent>
-                    </Card>
-                  )}
+
                 </div>
               </div>
 
@@ -291,7 +249,7 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="bg-sortmy-gray/10 rounded-lg p-4 mb-4 border border-sortmy-blue/10">
-                      <h3 className="font-medium mb-2 text-sortmy-blue">Add Your First Tool</h3>
+                      <h3 className="font-medium mb-2 text-white">Add Your First Tool</h3>
                       <p className="text-sm text-gray-300 mb-4">Track an AI tool you use regularly and earn 50 XP!</p>
                       <div className="flex items-center text-sm mb-3">
                         <AnimatedTooltip content="Complete this to earn XP" position="top">
@@ -313,7 +271,7 @@ const Dashboard = () => {
                 </NeuCard>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 <NeuCard variant="flat" color="dark" className="border border-sortmy-blue/10">
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-center">

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -28,7 +27,7 @@ import { User, Award, Zap } from 'lucide-react';
 import StreakCounter from '@/components/gamification/StreakCounter';
 import BadgeDisplay from '@/components/gamification/BadgeDisplay';
 import { Badge as BadgeType } from '@/types/gamification';
-import { GoogleDriveStorage } from '@/components/storage/GoogleDriveStorage';
+
 
 const mockBadges: BadgeType[] = [
   {
@@ -98,18 +97,11 @@ const Profile = () => {
     return null;
   }
 
-  const handleFileUpload = async (fileUrl: string) => {
-    // Handle the uploaded file URL
-    console.log('File uploaded:', fileUrl);
-  };
 
   return (
     <div className="min-h-screen">
       <div className="container mx-auto p-4 max-w-5xl">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">Your Profile</h1>
-          <p className="text-gray-400">Manage your personal information and preferences</p>
-        </div>
+
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="md:col-span-1 space-y-6">
@@ -151,26 +143,15 @@ const Profile = () => {
               </CardContent>
             </GlassCard>
 
-            {/* Add Google Drive Storage Card */}
-            {user && (
-              <div className="overflow-hidden">
-                <GoogleDriveStorage
-                  userId={user.id}
-                  onFileUpload={handleFileUpload}
-                  buttonText="Upload Profile Image"
-                  acceptedFileTypes="image/*"
-                />
-              </div>
-            )}
+
 
             <NeuCard variant="flat" color="dark" className="border-sortmy-blue/10">
               <CardHeader>
-                <CardTitle>Account Management</CardTitle>
-                <CardDescription>Manage your account settings</CardDescription>
+                <CardTitle className="text-white">Account Management</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ClickEffect effect="ripple" color="blue">
-                  <NeonButton variant="magenta" className="w-full" onClick={handleLogout}>
+                <ClickEffect effect="ripple" color="red">
+                  <NeonButton variant="destructive" className="w-full bg-red-600 hover:bg-red-700 text-white" onClick={handleLogout}>
                     Logout
                   </NeonButton>
                 </ClickEffect>
@@ -194,8 +175,7 @@ const Profile = () => {
               <TabsContent value="profile" className="space-y-4">
                 <GlassCard variant="glowing" intensity="low" className="border-sortmy-blue/20">
                   <CardHeader>
-                    <CardTitle>Personal Information</CardTitle>
-                    <CardDescription>Update your personal details</CardDescription>
+                    <CardTitle className="text-white">Personal Information</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -239,8 +219,7 @@ const Profile = () => {
 
                 <NeuCard variant="elevated" color="purple" className="border-sortmy-blue/20">
                   <CardHeader>
-                    <CardTitle>Portfolio Stats</CardTitle>
-                    <CardDescription>Your portfolio performance</CardDescription>
+                    <CardTitle className="text-white">Portfolio Stats</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -265,8 +244,7 @@ const Profile = () => {
               <TabsContent value="achievements" className="space-y-4">
                 <GlassCard variant="glowing" intensity="medium" className="border-sortmy-blue/20">
                   <CardHeader>
-                    <CardTitle>Your Achievements</CardTitle>
-                    <CardDescription>Track your progress and badges</CardDescription>
+                    <CardTitle className="text-white">Your Achievements</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -13,6 +13,8 @@ export interface Message {
 export interface Conversation {
   id: string;
   participants: string[]; // Array of user IDs
+  status?: 'pending' | 'accepted' | 'rejected'; // Status of the conversation request
+  requesterId?: string; // User who initiated the conversation
   lastMessage?: {
     content: string;
     timestamp: string;
@@ -30,4 +32,6 @@ export interface MessagePreview {
   lastMessage: string;
   timestamp: string;
   unreadCount: number;
+  status?: 'pending' | 'accepted' | 'rejected'; // Status of the conversation request
+  isRequester?: boolean; // Whether the current user is the requester
 }

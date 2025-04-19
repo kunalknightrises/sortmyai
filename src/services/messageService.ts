@@ -17,10 +17,12 @@ import { Message, Conversation, MessagePreview } from '@/types/message';
 import { User } from '@/types';
 
 // Create a new conversation
-export const createConversation = async (participants: string[]): Promise<string> => {
+export const createConversation = async (participants: string[], requesterId: string): Promise<string> => {
   try {
     const conversationRef = await addDoc(collection(db, 'conversations'), {
       participants,
+      status: 'pending', // Start as a pending conversation
+      requesterId, // Store who initiated the conversation
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
@@ -44,21 +46,23 @@ export const getOrCreateConversation = async (userId1: string, userId2: string):
 
     // Find conversation with both participants
     let conversationId: string | null = null;
+    let conversationStatus: string | null = null;
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       if (data.participants.includes(userId2)) {
         conversationId = doc.id;
+        conversationStatus = data.status;
       }
     });
 
-    // If conversation exists, return its ID
-    if (conversationId) {
+    // If conversation exists and is not rejected, return its ID
+    if (conversationId && conversationStatus !== 'rejected') {
       return conversationId;
     }
 
     // Otherwise, create a new conversation
-    return await createConversation([userId1, userId2]);
+    return await createConversation([userId1, userId2], userId1);
   } catch (error) {
     console.error('Error getting or creating conversation:', error);
     // Create a more descriptive error message
@@ -83,6 +87,11 @@ export const sendMessage = async (
     const timestamp = new Date().toISOString();
     const serverTime = serverTimestamp();
 
+    // Get conversation to check if this is the first message
+    const conversationDoc = await getDoc(doc(db, 'conversations', conversationId));
+    const conversationData = conversationDoc.data();
+    const isFirstMessage = !conversationData?.lastMessage;
+
     // Create message
     const messageRef = await addDoc(
       collection(db, 'conversations', conversationId, 'messages'),
@@ -100,15 +109,33 @@ export const sendMessage = async (
     );
 
     // Update conversation with last message
-    await updateDoc(doc(db, 'conversations', conversationId), {
-      lastMessage: {
-        content,
-        timestamp,
-        senderId
-      },
-      updatedAt: timestamp,
-      serverTime: serverTime
-    });
+    const conversationRef = doc(db, 'conversations', conversationId);
+
+    // If this is the first message, set status to pending and store requester
+    if (isFirstMessage) {
+      await updateDoc(conversationRef, {
+        lastMessage: {
+          content,
+          timestamp,
+          senderId
+        },
+        status: 'pending',
+        requesterId: senderId,
+        updatedAt: timestamp,
+        serverTime: serverTime
+      });
+    } else {
+      // Regular message update
+      await updateDoc(conversationRef, {
+        lastMessage: {
+          content,
+          timestamp,
+          senderId
+        },
+        updatedAt: timestamp,
+        serverTime: serverTime
+      });
+    }
 
     try {
       // Get sender information for notification
@@ -280,14 +307,31 @@ export const getMessagePreviews = async (userId: string): Promise<MessagePreview
         );
         const unreadSnapshot = await getDocs(messagesQuery);
 
+        // Get last message content
+        let lastMessageContent = '';
+        if (conversation.lastMessage?.content) {
+          lastMessageContent = conversation.lastMessage.content;
+        } else {
+          // If no last message, check if it's a pending request
+          if (conversation.status === 'pending') {
+            lastMessageContent = conversation.requesterId === userId
+              ? 'You sent a message request'
+              : 'Sent you a message request';
+          } else {
+            lastMessageContent = 'No messages yet';
+          }
+        }
+
         return {
           conversationId: conversation.id,
           participantId,
-          participantName: userData?.username || 'Unknown User',
-          participantAvatar: userData?.avatar_url,
-          lastMessage: conversation.lastMessage?.content || '',
+          participantName: userData?.username || userData?.displayName || 'User',
+          participantAvatar: userData?.avatar_url || userData?.photoURL,
+          lastMessage: lastMessageContent,
           timestamp: conversation.lastMessage?.timestamp || conversation.updatedAt,
-          unreadCount: unreadSnapshot.size
+          unreadCount: unreadSnapshot.size,
+          status: conversation.status || 'accepted', // Default to accepted for backward compatibility
+          isRequester: conversation.requesterId === userId
         };
       })
     );
@@ -298,6 +342,34 @@ export const getMessagePreviews = async (userId: string): Promise<MessagePreview
     );
   } catch (error) {
     console.error('Error getting message previews:', error);
+    throw error;
+  }
+};
+
+// Accept a conversation request
+export const acceptConversationRequest = async (conversationId: string): Promise<void> => {
+  try {
+    const conversationRef = doc(db, 'conversations', conversationId);
+    await updateDoc(conversationRef, {
+      status: 'accepted',
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error accepting conversation request:', error);
+    throw error;
+  }
+};
+
+// Reject a conversation request
+export const rejectConversationRequest = async (conversationId: string): Promise<void> => {
+  try {
+    const conversationRef = doc(db, 'conversations', conversationId);
+    await updateDoc(conversationRef, {
+      status: 'rejected',
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error rejecting conversation request:', error);
     throw error;
   }
 };

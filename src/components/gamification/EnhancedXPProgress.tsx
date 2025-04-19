@@ -88,11 +88,11 @@ const EnhancedXPProgress: React.FC<EnhancedXPProgressProps> = ({
   return (
     <div className={cn("relative w-full", className)}>
       {/* XP Bar Background */}
-      <div className="h-2 bg-[#0d001a] rounded-full overflow-hidden border border-[#2a003f]">
+      <div className="h-2 bg-sortmy-darker rounded-full overflow-hidden border border-sortmy-blue/20">
         {/* XP Progress */}
         <div
           ref={progressRef}
-          className="h-full bg-gradient-to-r from-[#00ffff] to-[#ff00cc] rounded-full relative overflow-hidden transition-all duration-300 ease-out"
+          className="h-full bg-gradient-to-r from-[#0066ff] to-[#4d94ff] rounded-full relative overflow-hidden transition-all duration-300 ease-out"
           style={{ width: `${displayPercentage}%` }}
         >
           {/* Glow effect */}
@@ -119,12 +119,12 @@ const EnhancedXPProgress: React.FC<EnhancedXPProgressProps> = ({
       {/* XP Text */}
       <div className="flex justify-between items-center mt-1 text-xs text-gray-400">
         <div className="flex items-center">
-          <Sparkles className="w-3 h-3 mr-1 text-[#00ffff]" />
+          <Sparkles className="w-3 h-3 mr-1 text-sortmy-blue" />
           <span>{displayXP} / {xpForNextLevel} XP</span>
         </div>
 
         {showLevel && (
-          <div className="px-2 py-0.5 bg-[#2a003f] rounded text-[#ff00cc] text-xs font-medium">
+          <div className="px-2 py-0.5 bg-sortmy-blue/20 rounded text-white text-xs font-medium">
             Level {level}
           </div>
         )}

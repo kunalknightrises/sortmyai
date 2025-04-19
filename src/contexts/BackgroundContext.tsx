@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Define the types of backgrounds available
-export type BackgroundType = 'aurora' | 'synthwave' | 'simple';
+export type BackgroundType = 'aurora' | 'simple';
 export type BackgroundIntensity = 'low' | 'medium' | 'high';
 
 interface BackgroundContextType {
@@ -26,9 +26,11 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Initialize state from localStorage or default to 'simple'
   const [backgroundType, setBackgroundTypeState] = useState<BackgroundType>(() => {
     const saved = localStorage.getItem('backgroundType');
+    // Convert 'synthwave' to 'simple' if it was previously saved
+    if (saved === 'synthwave') return 'simple';
     return (saved as BackgroundType) || 'simple';
   });
-  
+
   const [backgroundIntensity, setBackgroundIntensityState] = useState<BackgroundIntensity>(() => {
     const saved = localStorage.getItem('backgroundIntensity');
     return (saved as BackgroundIntensity) || 'medium';
@@ -57,18 +59,17 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Function to cycle through background types
   const cycleBackgroundType = () => {
     setBackgroundTypeState(prev => {
-      if (prev === 'simple') return 'synthwave';
-      if (prev === 'synthwave') return 'aurora';
+      if (prev === 'simple') return 'aurora';
       return 'simple';
     });
   };
 
   return (
-    <BackgroundContext.Provider 
-      value={{ 
-        backgroundType, 
-        backgroundIntensity, 
-        setBackgroundType, 
+    <BackgroundContext.Provider
+      value={{
+        backgroundType,
+        backgroundIntensity,
+        setBackgroundType,
         setBackgroundIntensity,
         cycleBackgroundType
       }}

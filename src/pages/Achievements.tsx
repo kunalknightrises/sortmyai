@@ -212,10 +212,7 @@ const Achievements = () => {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center">
-        <Trophy className="w-8 h-8 mr-2 text-sortmy-blue" />
-        Achievements
-      </h1>
+
 
       <GlassCard variant="bordered" className="border-sortmy-blue/20">
         <CardContent className="p-6">

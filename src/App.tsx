@@ -13,12 +13,12 @@ import EmailLogin from '@/pages/EmailLogin';
 import Signup from '@/pages/Signup';
 import Profile from '@/pages/Profile';
 import Settings from '@/pages/Settings';
-import ToolTracker from '@/components/dashboard/ToolTracker';
 import AddTool from '@/components/dashboard/AddTool';
-import AIToolsLibrary from '@/components/dashboard/AIToolsLibrary';
+import CombinedToolTracker from '@/components/dashboard/CombinedToolTracker';
 import Portfolio from '@/components/dashboard/Portfolio';
 import AddPortfolio from '@/components/dashboard/AddPortfolio';
 import ExploreCreators from '@/components/dashboard/ExploreCreators';
+import ExplorePosts from '@/components/dashboard/ExplorePosts';
 import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
 import Index from '@/pages/Index';
 import Dashboard from '@/components/Dashboard';
@@ -26,7 +26,7 @@ import Achievements from '@/pages/Achievements';
 import { useEffect } from 'react';
 import Academy from '@/pages/Academy';
 import AIToolsUpload from '@/pages/AIToolsUpload';
-import SynthwaveDemo from '@/pages/SynthwaveDemo';
+
 import Messages from '@/pages/Messages';
 import UserInteractions from '@/pages/UserInteractions';
 import Analytics from '@/pages/Analytics';
@@ -61,6 +61,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/portfolio/:username" element={<InstagramStylePortfolio />} />
         <Route path="/explore" element={<ExploreCreators />} />
+        <Route path="/explore/posts" element={<ExplorePosts />} />
 
         {/* Dashboard and related routes */}
         <Route path="/dashboard" element={
@@ -90,7 +91,7 @@ function App() {
         <Route path="/dashboard/tools" element={
           <ProtectedRoute>
             <DashboardLayout>
-              <ToolTracker />
+              <CombinedToolTracker />
             </DashboardLayout>
           </ProtectedRoute>
         } />
@@ -103,12 +104,9 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* Redirect old library path to the combined tool tracker */}
         <Route path="/dashboard/tools/library" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <AIToolsLibrary />
-            </DashboardLayout>
-          </ProtectedRoute>
+          <Navigate to="/dashboard/tools" replace />
         } />
 
         <Route path="/dashboard/portfolio" element={
@@ -119,9 +117,7 @@ function App() {
           </ProtectedRoute>
         } />
 
-        <Route path="/portfolio/:username" element={
-          <Portfolio />
-        } />
+        {/* This route is redundant - using InstagramStylePortfolio instead */}
 
         <Route path="/dashboard/portfolio/add" element={
           <ProtectedRoute>
@@ -135,6 +131,14 @@ function App() {
           <ProtectedRoute>
             <DashboardLayout>
               <ExploreCreators />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/explore-posts" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ExplorePosts />
             </DashboardLayout>
           </ProtectedRoute>
         } />
@@ -192,8 +196,7 @@ function App() {
           </ProtectedRoute>
         } />
 
-        {/* Synthwave UI Demo route */}
-        <Route path="/synthwave-demo" element={<SynthwaveDemo />} />
+
 
         <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

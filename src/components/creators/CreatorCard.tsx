@@ -44,7 +44,10 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
     return creator.username.substring(0, 2).toUpperCase();
   };
 
-  const handleFollowClick = async () => {
+  const handleFollowClick = async (e: React.MouseEvent) => {
+    // Prevent the click from navigating to the portfolio page
+    e.stopPropagation();
+    e.preventDefault();
     if (!user) {
       toast({
         title: "Sign in required",
@@ -93,7 +96,8 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
 
   return (
     <HoverEffect effect="lift" className="h-full">
-      <Card className="bg-sortmy-dark/50 border-sortmy-blue/20 backdrop-blur-md h-full flex flex-col">
+      <Link to={`/portfolio/${creator.username}`} className="block h-full">
+        <Card className="bg-sortmy-dark/50 border-sortmy-blue/20 backdrop-blur-md h-full flex flex-col cursor-pointer hover:border-sortmy-blue/40 transition-colors">
         <CardContent className="pt-6 flex flex-col items-center text-center">
           <Avatar className="h-24 w-24 mb-4 border-2 border-sortmy-blue/20">
             <AvatarImage src={creator.avatar_url} />
@@ -119,27 +123,10 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
             {creator.bio || 'Creating the future with AI.'}
           </p>
 
-          <div className="flex justify-center gap-6 mb-4">
-            <div className="text-center">
-              <div className="font-bold">{followerCount}</div>
-              <div className="text-xs text-gray-400">followers</div>
-            </div>
-            <div className="text-center">
-              <div className="font-bold">{creator.following_count || 0}</div>
-              <div className="text-xs text-gray-400">following</div>
-            </div>
-          </div>
+
         </CardContent>
 
         <CardFooter className="flex justify-center gap-2 mt-auto">
-          <ClickEffect effect="ripple" color="blue">
-            <Link to={`/portfolio/${creator.username}`}>
-              <NeonButton variant="cyan" size="sm">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                View Portfolio
-              </NeonButton>
-            </Link>
-          </ClickEffect>
           <ClickEffect effect="ripple" color="blue">
             <NeonButton
               variant={isFollowing ? "outline" : "magenta"}
@@ -161,6 +148,7 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
           </ClickEffect>
         </CardFooter>
       </Card>
+      </Link>
     </HoverEffect>
   );
 };

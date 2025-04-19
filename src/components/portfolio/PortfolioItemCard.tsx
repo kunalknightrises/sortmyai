@@ -21,9 +21,11 @@ interface PortfolioItemCardProps {
   onRestore?: (item: PortfolioItem) => void;
   isOwner?: boolean;
   isReel?: boolean;
+  showUsername?: boolean;
+  username?: string;
 }
 
-export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore, isOwner = false, isReel = false }: PortfolioItemCardProps) {
+export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore, isOwner = false, isReel = false, showUsername = false, username }: PortfolioItemCardProps) {
   const [showActions, setShowActions] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -496,6 +498,16 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
       </div>
 
       <div className="p-4">
+        {showUsername && username && (
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-5 h-5 rounded-full bg-sortmy-blue/20 flex items-center justify-center text-xs text-white">
+              {username.charAt(0).toUpperCase()}
+            </div>
+            <span className="text-sm text-gray-300 hover:text-sortmy-blue transition-colors">
+              {username}
+            </span>
+          </div>
+        )}
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold text-white truncate">{item.title}</h3>
           {isOwner && (
