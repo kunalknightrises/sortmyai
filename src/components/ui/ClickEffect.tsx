@@ -6,7 +6,7 @@ type ClickEffectType = 'flash' | 'bounce' | 'particles' | 'ripple';
 interface ClickEffectProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   effect: ClickEffectType;
-  color?: 'blue' | 'gray' | 'white';
+  color?: 'blue' | 'gray' | 'white' | 'red';
   intensity?: 'low' | 'medium' | 'high';
   className?: string;
 }
@@ -23,10 +23,10 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, size: number, angle: number, speed: number}>>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // Base styles
   const baseStyles = 'relative overflow-hidden';
-  
+
   // Color styles
   const colorMap = {
     blue: {
@@ -44,8 +44,13 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
       medium: 'rgba(255, 255, 255, 0.2)',
       high: 'rgba(255, 255, 255, 0.3)',
     },
+    red: {
+      low: 'rgba(220, 38, 38, 0.2)',
+      medium: 'rgba(220, 38, 38, 0.4)',
+      high: 'rgba(220, 38, 38, 0.6)',
+    },
   };
-  
+
   // Effect styles
   const effectStyles = {
     flash: 'click-flash',
@@ -53,7 +58,7 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
     particles: '',
     ripple: 'click-ripple',
   };
-  
+
   // Add keyframes for effects
   useEffect(() => {
     const styleId = 'click-effect-keyframes';
@@ -66,21 +71,21 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
           50% { background-color: ${colorMap[color][intensity]}; }
           100% { background-color: transparent; }
         }
-        
+
         .click-flash.animating {
           animation: flash 0.3s ease-out;
         }
-        
+
         @keyframes bounce {
           0% { transform: scale(1); }
           50% { transform: scale(0.95); }
           100% { transform: scale(1); }
         }
-        
+
         .click-bounce.animating {
           animation: bounce 0.3s ease-out;
         }
-        
+
         @keyframes ripple {
           0% {
             transform: translate(-50%, -50%) scale(0);
@@ -91,7 +96,7 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
             opacity: 0;
           }
         }
-        
+
         .click-ripple-circle {
           position: absolute;
           background: ${colorMap[color][intensity]};
@@ -104,18 +109,18 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
       document.head.appendChild(styleEl);
     }
   }, [color, intensity]);
-  
+
   // Handle click
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Trigger animation
     setIsAnimating(true);
-    
+
     // For ripple effect
     if (effect === 'ripple' && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      
+
       // Create ripple element
       const ripple = document.createElement('div');
       ripple.className = 'click-ripple-circle';
@@ -123,9 +128,9 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
       ripple.style.height = `${Math.max(rect.width, rect.height) * 2}px`;
       ripple.style.left = `${x}px`;
       ripple.style.top = `${y}px`;
-      
+
       containerRef.current.appendChild(ripple);
-      
+
       // Remove ripple after animation
       setTimeout(() => {
         if (containerRef.current && containerRef.current.contains(ripple)) {
@@ -133,14 +138,14 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
         }
       }, 600);
     }
-    
+
     // For particles effect
     if (effect === 'particles') {
       const rect = containerRef.current?.getBoundingClientRect();
       if (rect) {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        
+
         // Create particles
         const newParticles = Array.from({ length: 10 }, (_, i) => ({
           id: Date.now() + i,
@@ -150,27 +155,27 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
           angle: Math.random() * Math.PI * 2,
           speed: Math.random() * 3 + 1,
         }));
-        
+
         setParticles(prev => [...prev, ...newParticles]);
-        
+
         // Remove particles after animation
         setTimeout(() => {
           setParticles(prev => prev.filter(p => !newParticles.includes(p)));
         }, 1000);
       }
     }
-    
+
     // Reset animation state
     setTimeout(() => {
       setIsAnimating(false);
     }, 300);
-    
+
     // Call original onClick handler
     if (onClick) {
       onClick(e);
     }
   };
-  
+
   return (
     <div
       ref={containerRef}
@@ -184,7 +189,7 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
       {...props}
     >
       {children}
-      
+
       {/* Particles */}
       {effect === 'particles' && particles.map(particle => (
         <div
@@ -201,7 +206,7 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
           }}
         />
       ))}
-      
+
       {/* Add keyframes for each particle */}
       {effect === 'particles' && (
         <style>
@@ -212,11 +217,11 @@ const ClickEffect: React.FC<ClickEffectProps> = ({
                 opacity: 1;
               }
               100% {
-                transform: 
+                transform:
                   translate(
-                    calc(-50% + ${Math.cos(particle.angle) * 50 * particle.speed}px), 
+                    calc(-50% + ${Math.cos(particle.angle) * 50 * particle.speed}px),
                     calc(-50% + ${Math.sin(particle.angle) * 50 * particle.speed}px)
-                  ) 
+                  )
                   scale(0);
                 opacity: 0;
               }

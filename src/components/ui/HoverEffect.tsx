@@ -6,7 +6,7 @@ type HoverEffectType = 'pulse' | 'lift' | 'glow' | 'ripple' | 'gradient';
 interface HoverEffectProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   effect: HoverEffectType;
-  color?: 'blue' | 'gray' | 'white';
+  color?: 'blue' | 'gray' | 'white' | 'red';
   intensity?: 'low' | 'medium' | 'high';
   className?: string;
 }
@@ -38,6 +38,11 @@ const HoverEffect: React.FC<HoverEffectProps> = ({
       low: 'rgba(255, 255, 255, 0.1)',
       medium: 'rgba(255, 255, 255, 0.2)',
       high: 'rgba(255, 255, 255, 0.3)',
+    },
+    red: {
+      low: 'rgba(220, 38, 38, 0.2)',
+      medium: 'rgba(220, 38, 38, 0.4)',
+      high: 'rgba(220, 38, 38, 0.6)',
     },
   };
 
