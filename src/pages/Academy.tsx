@@ -6,7 +6,7 @@ import GlassCard from "@/components/ui/GlassCard";
 import NeonButton from "@/components/ui/NeonButton";
 import HoverEffect from "@/components/ui/HoverEffect";
 import AISuggestion from "@/components/ui/AISuggestion";
-import { GraduationCap, Sparkles, Brain } from "lucide-react";
+import { Brain } from "lucide-react";
 import { Tier } from "@/types/academy";
 
 const Academy = () => {

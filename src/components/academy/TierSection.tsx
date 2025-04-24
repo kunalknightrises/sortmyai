@@ -1,5 +1,5 @@
 
-import { Book, Lock, Sparkles, Brain } from "lucide-react";
+import { Book, Lock, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import NeuCard from "@/components/ui/NeuCard";

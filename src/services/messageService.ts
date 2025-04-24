@@ -325,8 +325,8 @@ export const getMessagePreviews = async (userId: string): Promise<MessagePreview
         return {
           conversationId: conversation.id,
           participantId,
-          participantName: userData?.username || userData?.displayName || 'User',
-          participantAvatar: userData?.avatar_url || userData?.photoURL,
+          participantName: userData?.username || 'User',
+          participantAvatar: userData?.avatar_url,
           lastMessage: lastMessageContent,
           timestamp: conversation.lastMessage?.timestamp || conversation.updatedAt,
           unreadCount: unreadSnapshot.size,

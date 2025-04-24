@@ -40,7 +40,7 @@ export function ProfileEditForm({ user, onSubmit, onCancel }: ProfileEditFormPro
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      username: user.username || user.displayName || '',
+      username: user.username || '',
       bio: user.bio || '',
       avatar_url: user.avatar_url || '',
       profession: user.profession || '',

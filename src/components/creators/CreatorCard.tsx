@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { User } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ExternalLink, Users, Lock, UserCheck, Loader2 } from 'lucide-react';
+import { Users, Lock, UserCheck, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import HoverEffect from '@/components/ui/HoverEffect';
 import NeonButton from '@/components/ui/NeonButton';
@@ -21,7 +21,8 @@ export const CreatorCard = ({ creator }: CreatorCardProps) => {
   const { toast } = useToast();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [followerCount, setFollowerCount] = useState(creator.followers_count || 0);
+  // We're updating follower count but not displaying it as per user request
+  const [, setFollowerCount] = useState(creator.followers_count || 0);
 
   // Check if the user is following this creator
   useEffect(() => {

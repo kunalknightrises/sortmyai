@@ -71,6 +71,10 @@ const MessageButton: React.FC<MessageButtonProps> = ({
       setIsLoading(true);
 
       // Create or get conversation
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const conversationId = await getOrCreateConversation(user.uid, userId);
 
       // Send the first message

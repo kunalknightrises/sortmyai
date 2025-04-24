@@ -145,8 +145,8 @@ const CombinedToolTracker = () => {
     // Add tags from user tools
     if (userTools && userTools.length > 0) {
       userTools.forEach(tool => {
-        if (tool.tags && Array.isArray(tool.tags)) {
-          tool.tags.forEach(tag => tagsSet.add(tag));
+        if ((tool as any).tags && Array.isArray((tool as any).tags)) {
+          (tool as any).tags.forEach((tag: string) => tagsSet.add(tag));
         }
       });
     }
@@ -168,18 +168,18 @@ const CombinedToolTracker = () => {
     // Filter by search query
     const searchLower = searchQuery.toLowerCase();
     const matchesSearch = (
-      tool.name.toLowerCase().includes(searchLower) ||
-      tool.description.toLowerCase().includes(searchLower) ||
-      (tool.tags && Array.isArray(tool.tags) && tool.tags.some(tag =>
+      (tool as any).name?.toLowerCase().includes(searchLower) ||
+      (tool as any).description?.toLowerCase().includes(searchLower) ||
+      ((tool as any).tags && Array.isArray((tool as any).tags) && (tool as any).tags.some((tag: string) =>
         typeof tag === 'string' && tag.toLowerCase().includes(searchLower)
       ))
     );
 
     // Filter by selected tags
     const matchesTags = selectedTags.length === 0 || (
-      tool.tags &&
-      Array.isArray(tool.tags) &&
-      selectedTags.every(tag => tool.tags.includes(tag))
+      (tool as any).tags &&
+      Array.isArray((tool as any).tags) &&
+      selectedTags.every(tag => (tool as any).tags.includes(tag))
     );
 
     return matchesSearch && matchesTags;
@@ -212,7 +212,7 @@ const CombinedToolTracker = () => {
   const isToolInUserTools = (libraryTool: AITool) => {
     return userTools?.some(userTool =>
       userTool.id === libraryTool.id ||
-      userTool.name.toLowerCase() === libraryTool.name.toLowerCase()
+      ((userTool as any).name?.toLowerCase() === libraryTool.name.toLowerCase())
     );
   };
 
@@ -226,8 +226,8 @@ const CombinedToolTracker = () => {
   };
 
   // Handle deleting a user tool
-  const handleDeleteClick = (tool: Tool) => {
-    setToolToDelete(tool);
+  const handleDeleteClick = (tool: any) => {
+    setToolToDelete(tool as Tool);
     setShowDeleteDialog(true);
   };
 
@@ -238,10 +238,10 @@ const CombinedToolTracker = () => {
     setIsDeleting(true);
     try {
       // Check the source of the tool to determine how to delete it
-      if (toolToDelete.source === 'tools_collection') {
+      if ((toolToDelete as any).source === 'tools_collection') {
         // Delete from tools collection
         await deleteDoc(doc(db, 'tools', toolToDelete.id));
-      } else if (toolToDelete.source === 'user_tooltracker') {
+      } else if ((toolToDelete as any).source === 'user_tooltracker') {
         // Delete from user's toolTracker array
         const userRef = doc(db, 'users', user!.uid);
 
@@ -465,16 +465,16 @@ const CombinedToolTracker = () => {
                   <CardHeader className="pb-2">
                     <div className="flex justify-between">
                       <div className="space-y-1">
-                        <CardTitle className="text-xl bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{tool.name}</CardTitle>
+                        <CardTitle className="text-xl bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{(tool as any).name}</CardTitle>
                         <CardDescription className="line-clamp-2">
-                          {tool.description}
+                          {(tool as any).description}
                         </CardDescription>
                       </div>
-                      {tool.logo_url && (
+                      {(tool as any).logo_url && (
                         <div className="w-10 h-10 rounded-md overflow-hidden bg-white p-1">
                           <img
-                            src={tool.logo_url}
-                            alt={`${tool.name} logo`}
+                            src={(tool as any).logo_url}
+                            alt={`${(tool as any).name} logo`}
                             className="w-full h-full object-contain"
                             onError={() => handleImageError(tool.id)}
                           />
@@ -484,9 +484,9 @@ const CombinedToolTracker = () => {
                   </CardHeader>
                   <CardContent>
                     {/* Tags */}
-                    {tool.tags && tool.tags.length > 0 && (
+                    {(tool as any).tags && Array.isArray((tool as any).tags) && (tool as any).tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
-                        {tool.tags.map((tag, index) => (
+                        {(tool as any).tags.map((tag: string, index: number) => (
                           <Badge
                             key={index}
                             variant="outline"
@@ -522,13 +522,13 @@ const CombinedToolTracker = () => {
                           </Button>
                         </AnimatedTooltip>
                       </div>
-                      {tool.website && (
+                      {(tool as any).website && (
                         <AnimatedTooltip content="Visit Website">
                           <Button
                             size="sm"
                             variant="ghost"
                             className="text-sortmy-blue hover:bg-sortmy-blue/10"
-                            onClick={() => window.open(formatWebsiteUrl(tool.website), '_blank')}
+                            onClick={() => window.open(formatWebsiteUrl((tool as any).website), '_blank')}
                           >
                             <ExternalLink className="h-4 w-4 mr-1" />
                             Visit
@@ -609,17 +609,28 @@ const CombinedToolTracker = () => {
                   </CardHeader>
                   <CardContent>
                     {/* Tags */}
-                    {tool.tags && tool.tags.length > 0 && (
+                    {tool.tags && (
                       <div className="flex flex-wrap gap-1 mb-3">
-                        {tool.tags.map((tag, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="bg-sortmy-blue/10 border-sortmy-blue/20 text-xs"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
+                        {Array.isArray(tool.tags) ?
+                          tool.tags.map((tag: string, index: number) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="bg-sortmy-blue/10 border-sortmy-blue/20 text-xs"
+                            >
+                              {tag}
+                            </Badge>
+                          )) :
+                          typeof tool.tags === 'string' && tool.tags.split(',').map((tag: string, index: number) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="bg-sortmy-blue/10 border-sortmy-blue/20 text-xs"
+                            >
+                              {tag.trim()}
+                            </Badge>
+                          ))
+                        }
                       </div>
                     )}
 

@@ -151,7 +151,7 @@ const Profile = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <ClickEffect effect="ripple" color="red">
-                  <NeonButton variant="destructive" className="w-full bg-red-600 hover:bg-red-700 text-white" onClick={handleLogout}>
+                  <NeonButton variant="magenta" className="w-full bg-red-600 hover:bg-red-700 text-white" onClick={handleLogout}>
                     Logout
                   </NeonButton>
                 </ClickEffect>

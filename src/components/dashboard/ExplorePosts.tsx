@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { collection, query, where, orderBy, limit, getDocs, getDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { PortfolioItem, User } from '@/types';
@@ -17,7 +17,8 @@ import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Separator } from '@/components/ui/separator';
 
 const ExplorePosts = () => {
-  const { user: currentUser } = useAuth();
+  // We might need the user in the future
+  useAuth();
   const { backgroundType, cycleBackgroundType } = useBackground();
   const [loading, setLoading] = useState(true);
   const [sortMyAIPosts, setSortMyAIPosts] = useState<PortfolioItem[]>([]);
@@ -77,8 +78,8 @@ const ExplorePosts = () => {
         setUserCache(prev => ({ ...prev, [sortMyAIUserId]: userData }));
 
         // Get SortMyAI's portfolio items
-        if (userData.gdrive_portfolio_items) {
-          const items = userData.gdrive_portfolio_items
+        if ((userData as any).gdrive_portfolio_items) {
+          const items = (userData as any).gdrive_portfolio_items
             .filter((item: any) => item.status === 'published')
             .map((item: any) => ({
               ...item,
@@ -93,11 +94,28 @@ const ExplorePosts = () => {
         const postsSnapshot = await getDocs(postsRef);
 
         if (!postsSnapshot.empty) {
-          const posts = postsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            user_id: 'sortmyai'
-          })) as PortfolioItem[];
+          // Create minimal PortfolioItems with required fields
+          const posts = postsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              userId: 'sortmyai',
+              title: (data as any).title || 'Untitled',
+              description: (data as any).description || '',
+              media_url: (data as any).media_url || '',
+              media_type: ((data as any).media_type as 'image' | 'video' | 'audio') || 'image',
+              content_type: ((data as any).content_type as 'post' | 'reel' | 'both') || 'post',
+              tools_used: (data as any).tools_used || [],
+              categories: (data as any).categories || [],
+              likes: (data as any).likes || 0,
+              views: (data as any).views || 0,
+              is_public: true,
+              status: 'published' as 'published',
+              created_at: (data as any).created_at || new Date().toISOString(),
+              updated_at: (data as any).updated_at || new Date().toISOString(),
+              user_id: 'sortmyai' // Keep for compatibility
+            } as PortfolioItem;
+          });
 
           setSortMyAIPosts(posts);
         }
@@ -130,8 +148,8 @@ const ExplorePosts = () => {
         setUserCache(prev => ({ ...prev, [userId]: userData }));
 
         // Get user's portfolio items
-        if (userData.gdrive_portfolio_items) {
-          const items = userData.gdrive_portfolio_items
+        if ((userData as any).gdrive_portfolio_items) {
+          const items = (userData as any).gdrive_portfolio_items
             .filter((item: any) => item.status === 'published')
             .map((item: any) => ({
               ...item,
@@ -158,8 +176,8 @@ const ExplorePosts = () => {
         case 'popular':
           // Sort by likes count (if available)
           sortedPosts = posts.sort((a, b) => {
-            const likesA = a.likes_count || 0;
-            const likesB = b.likes_count || 0;
+            const likesA = (a as any).likes_count || a.likes || 0;
+            const likesB = (b as any).likes_count || b.likes || 0;
             return likesB - likesA;
           });
           break;
@@ -167,8 +185,8 @@ const ExplorePosts = () => {
         case 'trending':
           // Sort by recent engagement (combination of recent likes and views)
           sortedPosts = posts.sort((a, b) => {
-            const engagementA = (a.likes_count || 0) + (a.views_count || 0);
-            const engagementB = (b.likes_count || 0) + (b.views_count || 0);
+            const engagementA = ((a as any).likes_count || a.likes || 0) + ((a as any).views_count || a.views || 0);
+            const engagementB = ((b as any).likes_count || b.likes || 0) + ((b as any).views_count || b.views || 0);
             return engagementB - engagementA;
           });
           break;
@@ -252,7 +270,7 @@ const ExplorePosts = () => {
                   <PortfolioItemCard
                     item={item}
                     showUsername={true}
-                    username={getUserForPost(item.user_id)?.username || 'SortMyAI'}
+                    username={getUserForPost((item as any).user_id)?.username || 'SortMyAI'}
                   />
                 </div>
               ))}
@@ -287,7 +305,7 @@ const ExplorePosts = () => {
                   <PortfolioItemCard
                     item={item}
                     showUsername={true}
-                    username={getUserForPost(item.user_id)?.username || 'Unknown Creator'}
+                    username={getUserForPost((item as any).user_id)?.username || 'Unknown Creator'}
                   />
                 </div>
               ))}
@@ -305,7 +323,6 @@ const ExplorePosts = () => {
         item={selectedItem}
         isOpen={isLightboxOpen}
         onClose={closeLightbox}
-        creatorUsername={selectedItem ? getUserForPost(selectedItem.user_id)?.username : undefined}
       />
     </div>
   );
