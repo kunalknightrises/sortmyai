@@ -10,7 +10,7 @@ import { CardContent, CardDescription, CardHeader, CardTitle } from '@/component
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Briefcase, Plus, Loader2, X, ArrowUp, ArrowDown, Hash, FileText, Info, Bookmark } from 'lucide-react';
+import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Briefcase, Plus, Loader2, X, Hash, FileText, Info, Bookmark } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 import NeonButton from '@/components/ui/NeonButton';
 import HoverEffect from '@/components/ui/HoverEffect';
