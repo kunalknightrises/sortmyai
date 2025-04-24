@@ -16,6 +16,7 @@ const Index = () => {
         <HeroSection />
         <ToolTrackerPreview />
         <PortfolioFeatureSection />
+        
         <AudienceSection />
         <HowItWorksSection />
         <PricingComparison />

@@ -16,9 +16,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Link } from 'react-router-dom';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Library, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { PlusCircle, ExternalLink, Edit, Trash2, Tag, Library } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 // import NeuCard from '@/components/ui/NeuCard';
 import NeonButton from '@/components/ui/NeonButton';
@@ -26,6 +24,7 @@ import HoverEffect from '@/components/ui/HoverEffect';
 import ClickEffect from '@/components/ui/ClickEffect';
 import AnimatedTooltip from '@/components/ui/AnimatedTooltip';
 import AISuggestion from '@/components/ui/AISuggestion';
+import SearchableDropdown from './SearchableDropdown';
 
 const ToolTracker = () => {
   const { user } = useAuth();
@@ -35,7 +34,6 @@ const ToolTracker = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
-  const [filtersExpanded, setFiltersExpanded] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [toolToDelete, setToolToDelete] = useState<Tool | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -252,62 +250,15 @@ const ToolTracker = () => {
         />
 
         <GlassCard variant="bordered" className="border-sortmy-blue/20 p-4 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search input */}
-            <div className="w-full md:w-1/3">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-sortmy-blue" />
-                <Input
-                  placeholder="Search tools..."
-                  className="pl-8 bg-sortmy-darker/50 border-sortmy-blue/20"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Tags filter */}
-            <div className="w-full md:w-2/3">
-              <div className="flex items-center justify-between mb-2 cursor-pointer" onClick={() => setFiltersExpanded(!filtersExpanded)}>
-                <div className="flex items-center">
-                  <Filter className="w-4 h-4 mr-2 text-sortmy-blue" />
-                  <h3 className="font-medium">Filters</h3>
-                  {selectedTags.length > 0 && (
-                    <Badge className="ml-2 bg-sortmy-blue/20 text-sortmy-blue border-sortmy-blue/30">
-                      {selectedTags.length}
-                    </Badge>
-                  )}
-                </div>
-                <div className="p-1 rounded-full hover:bg-sortmy-blue/10 transition-colors">
-                  {filtersExpanded ? (
-                    <ChevronUp className="w-4 h-4 text-sortmy-blue" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-sortmy-blue" />
-                  )}
-                </div>
-              </div>
-
-              {filtersExpanded && (
-                <div className="mt-2 animate-in fade-in duration-300">
-                  <div className="flex flex-wrap gap-2">
-                    {allTags.map(tag => (
-                      <Badge
-                        key={tag}
-                        variant={selectedTags.includes(tag) ? "default" : "outline"}
-                        className={`cursor-pointer ${
-                          selectedTags.includes(tag)
-                            ? 'bg-sortmy-blue hover:bg-sortmy-blue/80'
-                            : 'hover:bg-sortmy-blue/10 border-sortmy-blue/20'
-                        }`}
-                        onClick={() => toggleTag(tag)}
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+          <div className="w-full">
+            <SearchableDropdown
+              placeholder="Search tools or select categories..."
+              options={allTags}
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+              onOptionSelect={toggleTag}
+              selectedOptions={selectedTags}
+            />
           </div>
 
           {/* Clear filters button - only shown when filters are applied */}

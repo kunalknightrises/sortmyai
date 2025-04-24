@@ -1,16 +1,18 @@
-import React from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addDoc, collection, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { PortfolioForm } from '@/components/portfolio/PortfolioForm';
+import PostTypeSelector from '@/components/portfolio/PostTypeSelector';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AddPortfolio() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [postType, setPostType] = useState<'image' | 'video' | 'link' | null>(null);
 
   const handleSubmit = async (data: any) => {
     if (!user) return;
@@ -76,17 +78,29 @@ export default function AddPortfolio() {
     return null;
   }
 
+  const handlePostTypeSelect = (type: 'image' | 'video' | 'link') => {
+    setPostType(type);
+  };
+
   return (
     <div className="min-h-screen bg-sortmy-dark p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold text-white mb-6">Add New Project</h1>
         <div className="bg-sortmy-darker rounded-lg p-6">
-          <PortfolioForm
-            user={user}
-            onSubmit={handleSubmit}
-            isLoading={isSubmitting}
-            skipFirebaseUpdate={true} // Skip the direct Firebase update in the form
-          />
+          {!postType ? (
+            <PostTypeSelector onSelect={handlePostTypeSelect} />
+          ) : (
+            <PortfolioForm
+              user={user}
+              onSubmit={handleSubmit}
+              isLoading={isSubmitting}
+              skipFirebaseUpdate={true} // Skip the direct Firebase update in the form
+              initialData={{
+                content_type: postType === 'video' ? 'reel' : 'post',
+                project_url: postType === 'link' ? '' : undefined,
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

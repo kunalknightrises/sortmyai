@@ -104,7 +104,10 @@ const Sidebar = () => {
     <div className="border-r border-sortmy-gray/30 bg-sortmy-darker w-64 flex-shrink-0 p-4 h-screen">
       <div className="flex items-center mb-8 py-2">
         <Brain className="w-8 h-8 mr-2" />
-        <span className="text-xl font-bold tracking-tight">SortMyAI</span>
+        <span className="text-xl font-bold tracking-tight">
+          <span className="text-white">SortMy</span>
+          <span className="text-sortmy-blue">AI</span>
+        </span>
       </div>
 
       <div className="flex-1 flex flex-col space-y-1">

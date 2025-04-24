@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Settings, Edit, ExternalLink, UserCheck, Loader2, Share2, PlusCircle } from 'lucide-react';
+import { Users, Edit, ExternalLink, UserCheck, Loader2, Share2, PlusCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { User, PortfolioItem } from '@/types';
@@ -173,7 +173,7 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
                   />
                   <Button
                     size="sm"
-                    className={`gap-2 ${isFollowing ? 'bg-sortmy-dark border border-sortmy-blue/50' : 'bg-sortmy-blue hover:bg-sortmy-blue/90'}`}
+                    className={`gap-2 ${isFollowing ? 'bg-sortmy-dark border border-[#03ABEE]/50' : 'bg-[#03ABEE] hover:bg-[#03ABEE]/90'}`}
                     onClick={handleFollowClick}
                     disabled={isLoading}
                   >
@@ -188,9 +188,7 @@ const CreatorProfileHeader = ({ user, portfolio, isCurrentUser = false, onEditCl
                   </Button>
                 </>
               )}
-              <Button variant="ghost" size="sm" className="text-gray-400">
-                <Settings className="w-4 h-4" />
-              </Button>
+
             </div>
           </div>
 

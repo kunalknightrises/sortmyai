@@ -134,8 +134,8 @@ const Profile = () => {
                 <div className="w-full pt-4">
                   <HoverEffect effect="lift" color="blue">
                     <a href={`/portfolio/${user?.username || ''}`}>
-                      <NeonButton variant="gradient" className="w-full">
-                        View Public Profile
+                      <NeonButton variant="cyan" className="w-full bg-[#03ABEE] hover:bg-[#03ABEE]/90">
+                        <span className="text-white">View Public Profile</span>
                       </NeonButton>
                     </a>
                   </HoverEffect>

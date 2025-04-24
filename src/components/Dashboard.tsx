@@ -230,7 +230,7 @@ const Dashboard = () => {
                     <div className="pt-2">
                       <Link to="/dashboard/achievements" className="w-full">
                         <NeonButton variant="magenta" size="sm" className="w-full">
-                          <span className="flex items-center justify-center">
+                          <span className="flex items-center justify-center text-white">
                             <Award className="w-4 h-4 mr-2" />
                             View All Achievements
                           </span>
@@ -281,7 +281,7 @@ const Dashboard = () => {
                       </CardTitle>
                       <Link to="/dashboard/tools">
                         <NeonButton variant="magenta" size="sm" className="text-xs">
-                          <span className="flex items-center">View All <ArrowRight className="w-4 h-4 ml-1" /></span>
+                          <span className="flex items-center text-white">View All <ArrowRight className="w-4 h-4 ml-1" /></span>
                         </NeonButton>
                       </Link>
                     </div>
@@ -315,14 +315,16 @@ const Dashboard = () => {
                       <div className="py-8 text-center text-gray-400">
                         <Briefcase className="mx-auto w-12 h-12 mb-3 opacity-30" />
                         <p>You haven't added any tools yet</p>
-                        <ClickEffect effect="bounce" color="blue">
-                          <Link to="/dashboard/tools/add">
-                            <NeonButton variant="magenta" size="sm" className="mt-4">
-                              <PlusCircle className="w-4 h-4 mr-2" />
-                              Add Your First Tool
-                            </NeonButton>
-                          </Link>
-                        </ClickEffect>
+                        <div className="flex justify-center mt-4">
+                          <ClickEffect effect="bounce" color="blue">
+                            <Link to="/dashboard/tools/add">
+                              <NeonButton variant="magenta" size="sm">
+                                <PlusCircle className="w-4 h-4 mr-2" />
+                                Add Your First Tool
+                              </NeonButton>
+                            </Link>
+                          </ClickEffect>
+                        </div>
                       </div>
                     )}
                   </CardContent>
@@ -337,7 +339,7 @@ const Dashboard = () => {
                       </CardTitle>
                       <Link to="/dashboard/portfolio">
                         <NeonButton variant="cyan" size="sm" className="text-xs">
-                          <span className="flex items-center">View All <ArrowRight className="w-4 h-4 ml-1" /></span>
+                          <span className="flex items-center text-white">View All <ArrowRight className="w-4 h-4 ml-1" /></span>
                         </NeonButton>
                       </Link>
                     </div>
@@ -375,14 +377,16 @@ const Dashboard = () => {
                       <div className="py-8 text-center text-gray-400">
                         <LayoutGrid className="mx-auto w-12 h-12 mb-3 opacity-30" />
                         <p>You haven't added any portfolio items yet</p>
-                        <ClickEffect effect="particles" color="blue">
-                          <Link to="/dashboard/portfolio/add">
-                            <NeonButton variant="cyan" size="sm" className="mt-4">
-                              <PlusCircle className="w-4 h-4 mr-2" />
-                              Create Your First Portfolio Item
-                            </NeonButton>
-                          </Link>
-                        </ClickEffect>
+                        <div className="flex justify-center mt-4">
+                          <ClickEffect effect="particles" color="blue">
+                            <Link to="/dashboard/portfolio/add">
+                              <NeonButton variant="cyan" size="sm">
+                                <PlusCircle className="w-4 h-4 mr-2" />
+                                Create Your First Portfolio Item
+                              </NeonButton>
+                            </Link>
+                          </ClickEffect>
+                        </div>
                       </div>
                     )}
                   </CardContent>

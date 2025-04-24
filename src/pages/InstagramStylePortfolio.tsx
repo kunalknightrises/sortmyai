@@ -115,7 +115,10 @@ const InstagramStylePortfolio = () => {
             <Brain className="w-8 h-8 mr-2 text-sortmy-blue" />
             <Sparkles className="w-3 h-3 absolute -top-1 -right-1 text-sortmy-blue animate-pulse" />
           </div>
-          <Link to="/dashboard" className="text-xl font-bold tracking-tight bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">SortMyAI</Link>
+          <Link to="/dashboard" className="text-xl font-bold tracking-tight">
+            <span className="text-white">SortMy</span>
+            <span className="text-sortmy-blue">AI</span>
+          </Link>
         </div>
 
         <div className="flex-1 flex flex-col space-y-1">

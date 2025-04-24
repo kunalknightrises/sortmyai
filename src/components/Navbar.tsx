@@ -22,7 +22,10 @@ const Navbar = () => {
               <SortMyAILogo className="w-8 h-8 text-sortmy-blue group-hover:scale-110 transition-transform" />
               <Sparkles className="w-3 h-3 absolute -top-1 -right-1 text-sortmy-blue animate-pulse" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-white">SortMyAI</span>
+            <span className="text-xl font-bold tracking-tight">
+              <span className="text-white">SortMy</span>
+              <span className="text-sortmy-blue">AI</span>
+            </span>
           </Link>
         </div>
 
