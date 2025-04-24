@@ -15,16 +15,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Link } from 'react-router-dom';
-import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, ExternalLink, Edit, Trash2, Tag, Library } from 'lucide-react';
-import GlassCard from '@/components/ui/GlassCard';
-// import NeuCard from '@/components/ui/NeuCard';
+import { PlusCircle, ExternalLink, Edit, Trash2, Tag, Search, X } from 'lucide-react';
 import NeonButton from '@/components/ui/NeonButton';
-import HoverEffect from '@/components/ui/HoverEffect';
 import ClickEffect from '@/components/ui/ClickEffect';
-import AnimatedTooltip from '@/components/ui/AnimatedTooltip';
-import AISuggestion from '@/components/ui/AISuggestion';
-import SearchableDropdown from './SearchableDropdown';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 const ToolTracker = () => {
   const { user } = useAuth();
@@ -101,7 +96,7 @@ const ToolTracker = () => {
   const isLoading = isLoadingTools || isLoadingUserTools;
   const error = toolsError || userToolsError;
 
-  // Extract all unique tags from tools
+  // Extract all unique tags and tool names from tools
   useEffect(() => {
     if (allTools.length > 0) {
       const tagsSet = new Set<string>();
@@ -214,23 +209,14 @@ const ToolTracker = () => {
   return (
     <>
       <div className="space-y-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <p className="text-gray-400">
-              Manage and organize your AI tools in one place
+              Track and organize your AI tools
             </p>
           </div>
 
-          <div className="flex gap-3">
-            <ClickEffect effect="ripple" color="blue">
-              <Link to="/dashboard/tools/library">
-                <NeonButton variant="cyan">
-                  <Library className="w-4 h-4 mr-2" />
-                  AI Tools Library
-                </NeonButton>
-              </Link>
-            </ClickEffect>
-
+          <div>
             <ClickEffect effect="ripple" color="blue">
               <Link to="/dashboard/tools/add">
                 <NeonButton variant="gradient">
@@ -242,40 +228,46 @@ const ToolTracker = () => {
           </div>
         </div>
 
-        <AISuggestion
-          suggestion="Explore our AI Tools Library to discover new tools for your workflow."
-          actionText="Explore Library"
-          onAction={() => navigate('/dashboard/tools/library')}
-          autoHide={true}
-        />
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+          <Input
+            placeholder="Search tools by name, description, or tag..."
+            className="pl-10 bg-sortmy-darker/50 border-[#01AAE9]/20 focus:border-[#01AAE9]/40 focus:ring-[#01AAE9]/10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-        <GlassCard variant="bordered" className="border-sortmy-blue/20 p-4 mb-6">
-          <div className="w-full">
-            <SearchableDropdown
-              placeholder="Search tools or select categories..."
-              options={allTags}
-              value={searchQuery}
-              onValueChange={setSearchQuery}
-              onOptionSelect={toggleTag}
-              selectedOptions={selectedTags}
-            />
+        <div className="flex flex-wrap gap-2">
+          <div className="flex items-center mr-2">
+            <Tag className="h-4 w-4 text-[#01AAE9] mr-1" />
+            <span className="text-sm font-medium text-white">Tags:</span>
           </div>
-
-          {/* Clear filters button - only shown when filters are applied */}
-          {(searchQuery || selectedTags.length > 0) && (
-            <div className="mt-4 flex justify-end">
-              <ClickEffect effect="ripple" color="blue">
-                <NeonButton
-                  variant="cyan"
-                  size="sm"
-                  onClick={clearFilters}
-                >
-                  Clear Filters
-                </NeonButton>
-              </ClickEffect>
-            </div>
+          {allTags.map(tag => (
+            <Badge
+              key={tag}
+              variant={selectedTags.includes(tag) ? "default" : "outline"}
+              className={`cursor-pointer ${
+                selectedTags.includes(tag)
+                  ? "bg-[#01AAE9] text-white hover:bg-[#01AAE9]/80"
+                  : "hover:bg-[#01AAE9]/10 border-[#01AAE9]/20"
+              }`}
+              onClick={() => toggleTag(tag)}
+            >
+              {tag}
+            </Badge>
+          ))}
+          {selectedTags.length > 0 && (
+            <Badge
+              variant="outline"
+              className="cursor-pointer hover:bg-red-500/10 border-red-500/20 text-red-400"
+              onClick={clearFilters}
+            >
+              Clear Filters
+              <X className="ml-1 h-3 w-3" />
+            </Badge>
           )}
-        </GlassCard>
+        </div>
 
         {isLoading ? (
           <div className="text-center py-12">Loading your tools...</div>
@@ -306,18 +298,12 @@ const ToolTracker = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {filteredTools?.map(tool => (
-              <HoverEffect effect="lift" key={tool.id} className="h-full">
-                <GlassCard variant="bordered" className="border-sortmy-blue/20 h-full">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="text-xl bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{tool.name}</CardTitle>
-                      <CardDescription className="line-clamp-2">
-                        {tool.description}
-                      </CardDescription>
-                    </div>
+              <div key={tool.id} className="bg-sortmy-darker border border-[#01AAE9]/20 rounded-lg overflow-hidden">
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-lg font-semibold text-[#01AAE9]">{tool.name}</h3>
                     {tool.logo_url && (
                       <div className="w-10 h-10 rounded-md overflow-hidden bg-white p-1">
                         <img
@@ -328,56 +314,60 @@ const ToolTracker = () => {
                       </div>
                     )}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2 mt-3 mb-4">
+
+                  <p className="text-sm text-gray-300 mb-4 line-clamp-2">{tool.description}</p>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
                     {tool.tags && Array.isArray(tool.tags) && tool.tags.length > 0 ? (
                       tool.tags.map((tag, i) => (
-                        <span
+                        <Badge
                           key={i}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sortmy-blue/20 text-sortmy-blue hover:bg-sortmy-blue/30 transition-colors cursor-pointer"
+                          variant="outline"
+                          className="bg-[#01AAE9]/10 text-[#01AAE9] border-[#01AAE9]/20 hover:bg-[#01AAE9]/20"
                         >
-                          <Tag className="w-3 h-3 mr-1" />
                           {tag}
-                        </span>
+                        </Badge>
                       ))
                     ) : (
                       <span className="text-xs text-gray-400">No tags</span>
                     )}
                   </div>
-                  <div className="flex items-center justify-between mt-4">
+
+                  <div className="flex items-center justify-between">
                     <div className="flex space-x-2">
-                      <AnimatedTooltip content="Visit website" position="top">
-                        <a href={tool.website || tool.website_url} target="_blank" rel="noopener noreferrer">
-                          <NeonButton variant="cyan" size="sm">
-                            <ExternalLink className="w-4 h-4 mr-1" />
-                            Visit
-                          </NeonButton>
-                        </a>
-                      </AnimatedTooltip>
-                      <AnimatedTooltip content="Edit tool" position="top">
-                        <NeonButton variant="magenta" size="sm" onClick={() => navigate(`/dashboard/tools/edit/${tool.id}`)}>
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
-                        </NeonButton>
-                      </AnimatedTooltip>
+                      <a
+                        href={tool.website || tool.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#01AAE9] hover:underline flex items-center text-sm"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                        Visit
+                      </a>
+                      <button
+                        onClick={() => navigate(`/dashboard/tools/edit/${tool.id}`)}
+                        className="text-[#01AAE9] hover:underline flex items-center text-sm"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </button>
                     </div>
-                    <AnimatedTooltip content="Delete tool" position="top">
-                      <NeonButton variant="magenta" size="sm" onClick={() => handleDeleteClick(tool)}>
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </NeonButton>
-                    </AnimatedTooltip>
+                    <button
+                      onClick={() => handleDeleteClick(tool)}
+                      className="text-red-400 hover:text-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                </CardContent>
-                </GlassCard>
-              </HoverEffect>
+                </div>
+              </div>
             ))}
           </div>
         )}
       </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-sortmy-dark border-sortmy-blue/20 backdrop-blur-md">
+        <AlertDialogContent className="bg-sortmy-dark border-[#01AAE9]/20 backdrop-blur-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Tool?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -385,21 +375,20 @@ const ToolTracker = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <ClickEffect effect="ripple" color="blue">
-              <NeonButton variant="cyan" disabled={isDeleting} onClick={() => setShowDeleteDialog(false)}>
-                Cancel
-              </NeonButton>
-            </ClickEffect>
-            <ClickEffect effect="ripple" color="blue">
-              <NeonButton
-                variant="magenta"
-                onClick={confirmDelete}
-                disabled={isDeleting}
-                className="bg-red-500 hover:bg-red-600 border-red-500/50"
-              >
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </NeonButton>
-            </ClickEffect>
+            <button
+              className="px-4 py-2 rounded-md bg-transparent border border-[#01AAE9]/20 text-white hover:bg-[#01AAE9]/10 transition-colors"
+              disabled={isDeleting}
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-4 py-2 rounded-md bg-red-500/80 text-white hover:bg-red-500 transition-colors"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { collection, query, where, getDocs, deleteDoc, doc, getDoc, updateDoc, arrayRemove, arrayUnion } from 'firebase/firestore';
@@ -10,7 +10,7 @@ import { CardContent, CardDescription, CardHeader, CardTitle } from '@/component
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Briefcase, Filter, ChevronDown, ChevronUp, Plus, Loader2 } from 'lucide-react';
+import { PlusCircle, Search, ExternalLink, Edit, Trash2, Tag, Briefcase, Plus, Loader2, X, ArrowUp, ArrowDown, Hash, FileText, Info, Bookmark } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 import NeonButton from '@/components/ui/NeonButton';
 import HoverEffect from '@/components/ui/HoverEffect';
@@ -38,7 +38,23 @@ const CombinedToolTracker = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
-  const [filtersExpanded, setFiltersExpanded] = useState(true);
+
+  // Search suggestions state
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Define types for search suggestions
+  type SuggestionType = 'name' | 'description' | 'category' | 'tag';
+
+  interface SearchSuggestion {
+    text: string;
+    type: SuggestionType;
+    source: 'user' | 'library' | 'both';
+    toolId?: string;
+  }
 
   // User tools state
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -163,6 +179,122 @@ const CombinedToolTracker = () => {
     setAllTags(Array.from(tagsSet));
   }, [userTools, libraryTools]);
 
+  // Generate search suggestions based on the search query
+  const generateSuggestions = (query: string) => {
+    if (!query || query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const queryLower = query.toLowerCase();
+    const newSuggestions: SearchSuggestion[] = [];
+    const addedSuggestions = new Set<string>(); // To avoid duplicates
+
+    // Helper function to add a suggestion if it's not already added
+    const addSuggestion = (text: string, type: SuggestionType, source: 'user' | 'library' | 'both', toolId?: string) => {
+      const key = `${text}-${type}`;
+      if (!addedSuggestions.has(key) && text.toLowerCase().includes(queryLower)) {
+        newSuggestions.push({ text, type, source, toolId });
+        addedSuggestions.add(key);
+      }
+    };
+
+    // Add suggestions from user tools
+    if (userTools && userTools.length > 0) {
+      userTools.forEach(tool => {
+        // Add name suggestions
+        if ((tool as any).name) {
+          addSuggestion((tool as any).name, 'name', 'user', tool.id);
+        }
+
+        // Add description suggestions
+        if ((tool as any).description) {
+          const desc = (tool as any).description;
+          // Only add if the description is not too long and contains the query
+          if (desc.length < 50) {
+            addSuggestion(desc, 'description', 'user', tool.id);
+          }
+        }
+
+        // Add category suggestions
+        if ((tool as any).category) {
+          addSuggestion((tool as any).category, 'category', 'user', tool.id);
+        }
+
+        // Add tag suggestions
+        if ((tool as any).tags && Array.isArray((tool as any).tags)) {
+          (tool as any).tags.forEach((tag: string) => {
+            addSuggestion(tag, 'tag', 'user', tool.id);
+          });
+        }
+      });
+    }
+
+    // Add suggestions from library tools
+    if (libraryTools && libraryTools.length > 0) {
+      libraryTools.forEach(tool => {
+        // Add name suggestions
+        addSuggestion(tool.name, 'name', 'library', tool.id);
+
+        // Add description/useCase suggestions
+        if (tool.description && tool.description.length < 50) {
+          addSuggestion(tool.description, 'description', 'library', tool.id);
+        }
+        if (tool.useCase && tool.useCase.length < 50) {
+          addSuggestion(tool.useCase, 'description', 'library', tool.id);
+        }
+
+        // Add tag suggestions
+        if (tool.tags) {
+          const tags = Array.isArray(tool.tags)
+            ? tool.tags
+            : typeof tool.tags === 'string'
+              ? tool.tags.split(',').map(t => t.trim())
+              : [];
+
+          tags.forEach(tag => {
+            // Check if this tag also exists in user tools
+            const existsInUserTools = userTools?.some(userTool =>
+              (userTool as any).tags &&
+              Array.isArray((userTool as any).tags) &&
+              (userTool as any).tags.includes(tag)
+            );
+
+            addSuggestion(tag, 'tag', existsInUserTools ? 'both' : 'library', tool.id);
+          });
+        }
+      });
+    }
+
+    // Limit the number of suggestions to avoid overwhelming the UI
+    setSuggestions(newSuggestions.slice(0, 10));
+  };
+
+  // Update suggestions when search query changes
+  useEffect(() => {
+    generateSuggestions(searchQuery);
+  }, [searchQuery, userTools, libraryTools]);
+
+  // Handle clicks outside the suggestions dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        showSuggestions &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target as Node) &&
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSuggestions]);
+
   // Filter user tools
   const filteredUserTools = userTools?.filter(tool => {
     // Filter by search query
@@ -223,6 +355,63 @@ const CombinedToolTracker = () => {
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
     );
+  };
+
+  // Handle selecting a suggestion
+  const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
+    // If it's a tag, add it to selected tags
+    if (suggestion.type === 'tag') {
+      if (!selectedTags.includes(suggestion.text)) {
+        toggleTag(suggestion.text);
+      }
+      // Clear the search query if it was used to find this tag
+      if (searchQuery.toLowerCase().includes(suggestion.text.toLowerCase())) {
+        setSearchQuery('');
+      }
+    } else {
+      // For other types, set the search query to the suggestion text
+      setSearchQuery(suggestion.text);
+    }
+
+    // Hide suggestions after selection
+    setShowSuggestions(false);
+    setSelectedSuggestionIndex(-1);
+
+    // Focus back on the input
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  };
+
+  // Handle keyboard navigation for suggestions
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev =>
+          prev < suggestions.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => prev > 0 ? prev - 1 : 0);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < suggestions.length) {
+          handleSelectSuggestion(suggestions[selectedSuggestionIndex]);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setShowSuggestions(false);
+        setSelectedSuggestionIndex(-1);
+        break;
+      default:
+        break;
+    }
   };
 
   // Handle deleting a user tool
@@ -367,195 +556,237 @@ const CombinedToolTracker = () => {
         </div>
       </div>
 
-      {/* Search and Filters */}
-      <GlassCard variant="bordered" className="border-sortmy-blue/20">
-        <CardContent className="p-4">
-          <div className="space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search tools by name, description, or tag..."
-                className="pl-10 bg-sortmy-darker/50 border-sortmy-blue/20"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+      {/* Search */}
+      <div className="relative w-full">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+        <Input
+          ref={searchInputRef}
+          placeholder="Search tools by name, description, or tag..."
+          className="pl-10 bg-sortmy-darker/50 border-[#01AAE9]/20 focus:border-[#01AAE9]/40 focus:ring-[#01AAE9]/10"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onFocus={() => setShowSuggestions(true)}
+          onKeyDown={handleKeyDown}
+        />
 
-            {/* Filters Toggle */}
-            <div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2 text-gray-400 hover:text-white"
-                onClick={() => setFiltersExpanded(!filtersExpanded)}
-              >
-                <Filter className="h-4 w-4" />
-                Filters
-                {filtersExpanded ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
+        {/* Suggestions Dropdown */}
+        {showSuggestions && searchQuery.length >= 2 && (
+          <div
+            ref={suggestionsRef}
+            className="absolute z-50 w-full mt-1 bg-sortmy-darker border border-[#01AAE9]/20 rounded-md shadow-lg max-h-60 overflow-auto"
+            style={{ boxShadow: '0 4px 20px rgba(1, 170, 233, 0.2)' }}
+          >
+            <div className="p-2">
+              {suggestions.length > 0 ? (
+                suggestions.map((suggestion, index) => (
+                  <div
+                    key={`${suggestion.text}-${suggestion.type}-${index}`}
+                    className={`
+                      flex items-center p-2 rounded-md cursor-pointer
+                      ${selectedSuggestionIndex === index ? 'bg-[#01AAE9]/20' : 'hover:bg-[#01AAE9]/10'}
+                    `}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSelectSuggestion(suggestion);
+                    }}
+                  >
+                    {/* Icon based on suggestion type */}
+                    {suggestion.type === 'name' && (
+                      <Search className="h-4 w-4 mr-2 text-[#01AAE9]" />
+                    )}
+                    {suggestion.type === 'description' && (
+                      <FileText className="h-4 w-4 mr-2 text-[#01AAE9]" />
+                    )}
+                    {suggestion.type === 'category' && (
+                      <Bookmark className="h-4 w-4 mr-2 text-[#01AAE9]" />
+                    )}
+                    {suggestion.type === 'tag' && (
+                      <Hash className="h-4 w-4 mr-2 text-[#01AAE9]" />
+                    )}
 
-            {/* Tags Filter */}
-            {filtersExpanded && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-sortmy-blue" />
-                  <span className="text-sm font-medium">Tags</span>
+                    {/* Suggestion text */}
+                    <div className="flex-1">
+                      <span className="text-sm text-white">{suggestion.text}</span>
+                      <span className="ml-2 text-xs text-gray-400">
+                        {suggestion.type === 'name' ? 'Tool' :
+                         suggestion.type === 'description' ? 'Description' :
+                         suggestion.type === 'category' ? 'Category' : 'Tag'}
+                      </span>
+                    </div>
+
+                    {/* Source indicator */}
+                    <div className="ml-2">
+                      <Badge
+                        variant="outline"
+                        className={`
+                          text-xs
+                          ${suggestion.source === 'user' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                            suggestion.source === 'library' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                            'bg-purple-500/10 text-purple-400 border-purple-500/20'}
+                        `}
+                      >
+                        {suggestion.source === 'user' ? 'Your Tool' :
+                         suggestion.source === 'library' ? 'Library' :
+                         'Both'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-3 text-center text-gray-400">
+                  <Info className="h-4 w-4 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No suggestions found for "{searchQuery}"</p>
+                  <p className="text-xs mt-1">Try a different search term or browse by tags</p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {allTags.map(tag => (
-                    <Badge
-                      key={tag}
-                      variant={selectedTags.includes(tag) ? "default" : "outline"}
-                      className={`cursor-pointer ${
-                        selectedTags.includes(tag)
-                          ? "bg-sortmy-blue/20 text-sortmy-blue hover:bg-sortmy-blue/30"
-                          : "hover:bg-sortmy-gray/20"
-                      }`}
-                      onClick={() => toggleTag(tag)}
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                  {allTags.length === 0 && (
-                    <span className="text-sm text-gray-400">No tags available</span>
-                  )}
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </CardContent>
-      </GlassCard>
+        )}
+      </div>
+
+      {/* Tags Filter */}
+      <div className="flex flex-wrap gap-2">
+        <div className="flex items-center mr-2">
+          <Tag className="h-4 w-4 text-[#01AAE9] mr-1" />
+          <span className="text-sm font-medium text-white">Tags:</span>
+        </div>
+        {allTags.map(tag => (
+          <Badge
+            key={tag}
+            variant={selectedTags.includes(tag) ? "default" : "outline"}
+            className={`cursor-pointer ${
+              selectedTags.includes(tag)
+                ? "bg-[#01AAE9] text-white hover:bg-[#01AAE9]/80"
+                : "hover:bg-[#01AAE9]/10 border-[#01AAE9]/20"
+            }`}
+            onClick={() => toggleTag(tag)}
+          >
+            {tag}
+          </Badge>
+        ))}
+        {selectedTags.length > 0 && (
+          <Badge
+            variant="outline"
+            className="cursor-pointer hover:bg-red-500/10 border-red-500/20 text-red-400"
+            onClick={() => setSelectedTags([])}
+          >
+            Clear Filters
+            <X className="ml-1 h-3 w-3" />
+          </Badge>
+        )}
+      </div>
 
       {/* User's Tools Section */}
       <div className="space-y-4">
         <h3 className="text-xl font-semibold text-white">Your Tools</h3>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
-              <GlassCard key={i} variant="bordered" className="border-sortmy-blue/20">
-                <CardHeader className="pb-2 animate-pulse">
-                  <div className="h-6 bg-sortmy-blue/20 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-sortmy-blue/10 rounded w-1/2"></div>
-                </CardHeader>
-                <CardContent className="animate-pulse">
-                  <div className="h-4 bg-sortmy-blue/10 rounded w-full mb-2"></div>
-                  <div className="h-4 bg-sortmy-blue/10 rounded w-3/4"></div>
-                </CardContent>
-              </GlassCard>
+              <div key={i} className="bg-sortmy-darker border border-[#01AAE9]/20 rounded-lg overflow-hidden">
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-3 animate-pulse">
+                    <div className="h-6 bg-[#01AAE9]/20 rounded w-3/4 mb-2"></div>
+                    <div className="h-10 w-10 bg-[#01AAE9]/10 rounded"></div>
+                  </div>
+                  <div className="h-4 bg-[#01AAE9]/10 rounded w-full mb-4 animate-pulse"></div>
+                  <div className="flex flex-wrap gap-2 mb-4 animate-pulse">
+                    <div className="h-6 bg-[#01AAE9]/10 rounded w-16"></div>
+                    <div className="h-6 bg-[#01AAE9]/10 rounded w-20"></div>
+                  </div>
+                  <div className="flex justify-between items-center animate-pulse">
+                    <div className="h-4 bg-[#01AAE9]/10 rounded w-24"></div>
+                    <div className="h-4 bg-[#01AAE9]/10 rounded w-8"></div>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : error ? (
-          <GlassCard variant="bordered" className="border-sortmy-blue/20">
-            <CardContent className="p-6 text-center">
-              <p className="text-red-400">Error loading your tools. Please try again later.</p>
-            </CardContent>
-          </GlassCard>
+          <div className="bg-sortmy-darker border border-red-500/20 rounded-lg p-6 text-center">
+            <p className="text-red-400">Error loading your tools. Please try again later.</p>
+          </div>
         ) : filteredUserTools && filteredUserTools.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {filteredUserTools.map(tool => (
-              <HoverEffect effect="lift" key={tool.id} className="h-full">
-                <GlassCard variant="bordered" className="border-sortmy-blue/20 h-full">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="text-xl bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{(tool as any).name}</CardTitle>
-                        <CardDescription className="line-clamp-2">
-                          {(tool as any).description}
-                        </CardDescription>
-                      </div>
-                      {(tool as any).logo_url && (
-                        <div className="w-10 h-10 rounded-md overflow-hidden bg-white p-1">
-                          <img
-                            src={(tool as any).logo_url}
-                            alt={`${(tool as any).name} logo`}
-                            className="w-full h-full object-contain"
-                            onError={() => handleImageError(tool.id)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {/* Tags */}
-                    {(tool as any).tags && Array.isArray((tool as any).tags) && (tool as any).tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {(tool as any).tags.map((tag: string, index: number) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="bg-sortmy-blue/10 border-sortmy-blue/20 text-xs"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
+              <div key={tool.id} className="bg-sortmy-darker border border-[#01AAE9]/20 rounded-lg overflow-hidden">
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-lg font-semibold text-[#01AAE9]">{(tool as any).name}</h3>
+                    {(tool as any).logo_url && (
+                      <div className="w-10 h-10 rounded-md overflow-hidden bg-white p-1">
+                        <img
+                          src={(tool as any).logo_url}
+                          alt={`${(tool as any).name} logo`}
+                          className="w-full h-full object-contain"
+                          onError={() => handleImageError(tool.id)}
+                        />
                       </div>
                     )}
+                  </div>
 
-                    {/* Actions */}
-                    <div className="flex justify-between items-center mt-4">
-                      <div className="flex gap-2">
-                        <AnimatedTooltip content="Edit Tool">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-gray-400 hover:text-white hover:bg-sortmy-blue/10"
-                            onClick={() => navigate(`/dashboard/tools/edit/${tool.id}`)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </AnimatedTooltip>
-                        <AnimatedTooltip content="Delete Tool">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-gray-400 hover:text-red-400 hover:bg-red-500/10"
-                            onClick={() => handleDeleteClick(tool)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AnimatedTooltip>
-                      </div>
-                      {(tool as any).website && (
-                        <AnimatedTooltip content="Visit Website">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-sortmy-blue hover:bg-sortmy-blue/10"
-                            onClick={() => window.open(formatWebsiteUrl((tool as any).website), '_blank')}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            Visit
-                          </Button>
-                        </AnimatedTooltip>
-                      )}
+                  <p className="text-sm text-gray-300 mb-4 line-clamp-2">{(tool as any).description}</p>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {(tool as any).tags && Array.isArray((tool as any).tags) && (tool as any).tags.length > 0 ? (
+                      (tool as any).tags.map((tag: string, index: number) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="bg-[#01AAE9]/10 text-[#01AAE9] border-[#01AAE9]/20 hover:bg-[#01AAE9]/20"
+                        >
+                          {tag}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-xs text-gray-400">No tags</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex space-x-2">
+                      <a
+                        href={(tool as any).website || (tool as any).website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#01AAE9] hover:underline flex items-center text-sm"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                        Visit
+                      </a>
+                      <button
+                        onClick={() => navigate(`/dashboard/tools/edit/${tool.id}`)}
+                        className="text-[#01AAE9] hover:underline flex items-center text-sm"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </button>
                     </div>
-                  </CardContent>
-                </GlassCard>
-              </HoverEffect>
+                    <button
+                      onClick={() => handleDeleteClick(tool)}
+                      className="text-red-400 hover:text-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
-          <GlassCard variant="bordered" className="border-sortmy-blue/20">
-            <CardContent className="p-6 text-center">
-              <Briefcase className="mx-auto w-12 h-12 mb-3 opacity-30" />
-              <p className="text-gray-400">You haven't added any tools yet</p>
-              <ClickEffect effect="bounce" color="blue">
-                <Link to="/dashboard/tools/add">
-                  <NeonButton variant="magenta" size="sm" className="mt-4">
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Add Your First Tool
-                  </NeonButton>
-                </Link>
-              </ClickEffect>
-            </CardContent>
-          </GlassCard>
+          <div className="bg-sortmy-darker border border-[#01AAE9]/20 rounded-lg p-6 text-center">
+            <Briefcase className="mx-auto w-12 h-12 mb-3 opacity-30" />
+            <p className="text-gray-400">You haven't added any tools yet</p>
+            <div className="flex justify-center mt-4">
+              <Link to="/dashboard/tools/add">
+                <button className="px-4 py-2 bg-[#01AAE9] text-white rounded-md flex items-center hover:bg-[#01AAE9]/90 transition-colors">
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  Add Your First Tool
+                </button>
+              </Link>
+            </div>
+          </div>
         )}
       </div>
 
@@ -697,36 +928,35 @@ const CombinedToolTracker = () => {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-sortmy-darker border-sortmy-blue/20">
+        <AlertDialogContent className="bg-sortmy-dark border-[#01AAE9]/20 backdrop-blur-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Tool</AlertDialogTitle>
+            <AlertDialogTitle>Delete Tool?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this tool? This action cannot be undone.
+              Are you sure you want to delete "{(toolToDelete as any)?.name}"? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteDialog(false)}
+            <button
+              className="px-4 py-2 rounded-md bg-transparent border border-[#01AAE9]/20 text-white hover:bg-[#01AAE9]/10 transition-colors"
               disabled={isDeleting}
+              onClick={() => setShowDeleteDialog(false)}
             >
               Cancel
-            </Button>
-            <Button
-              variant="destructive"
+            </button>
+            <button
+              className="px-4 py-2 rounded-md bg-red-500/80 text-white hover:bg-red-500 transition-colors"
               onClick={confirmDelete}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
             >
               {isDeleting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 inline animate-spin" />
                   Deleting...
                 </>
               ) : (
                 'Delete'
               )}
-            </Button>
+            </button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -244,7 +244,7 @@ const Dashboard = () => {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center">
                       <Target className="w-5 h-5 mr-2 text-sortmy-blue" />
-                      <span className="bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text font-bold">Daily Challenge</span>
+                      <span className="text-white font-bold">Daily Challenge</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -255,7 +255,7 @@ const Dashboard = () => {
                         <AnimatedTooltip content="Complete this to earn XP" position="top">
                           <div className="flex items-center">
                             <Zap className="w-4 h-4 mr-1 text-sortmy-blue" />
-                            <span className="text-sortmy-blue">50 XP Reward</span>
+                            <span className="text-[#03ABEE]">50 XP Reward</span>
                           </div>
                         </AnimatedTooltip>
                       </div>
@@ -415,7 +415,7 @@ const StatsCard = ({ title, value, description, icon, link }: {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text">{value}</div>
+          <div className="text-3xl font-bold text-[#03ABEE]">{value}</div>
           <p className="text-xs text-gray-300 mt-1">{description}</p>
         </CardContent>
       </Link>
