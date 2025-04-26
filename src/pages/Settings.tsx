@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CardContent, CardDescription } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import NeonButton from "@/components/ui/NeonButton";
@@ -92,25 +92,26 @@ const Settings = () => {
         {/* Sidebar */}
         <div className="lg:w-64 flex-shrink-0">
           <div className="bg-sortmy-darker/70 backdrop-blur-md rounded-lg border border-sortmy-blue/20 p-2">
-            <TabsList className="flex flex-col w-full space-y-1">
-              {settingsCategories.map((category) => (
-                <TabsTrigger
-                  key={category.id}
-                  value={category.id}
-                  className={`justify-start px-4 py-2.5 w-full text-left ${
-                    activeTab === category.id
-                      ? 'bg-sortmy-blue/10 text-sortmy-blue border-l-2 border-sortmy-blue'
-                      : 'text-gray-400 hover:text-white hover:bg-sortmy-blue/5'
-                  }`}
-                  onClick={() => setActiveTab(category.id)}
-                >
-                  <span className="flex items-center gap-3">
-                    {category.icon}
-                    {category.label}
-                  </span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical">
+              <TabsList className="flex flex-col w-full space-y-1">
+                {settingsCategories.map((category) => (
+                  <TabsTrigger
+                    key={category.id}
+                    value={category.id}
+                    className={`justify-start px-4 py-2.5 w-full text-left ${
+                      activeTab === category.id
+                        ? 'bg-sortmy-blue/10 text-sortmy-blue border-l-2 border-sortmy-blue'
+                        : 'text-gray-400 hover:text-white hover:bg-sortmy-blue/5'
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      {category.icon}
+                      {category.label}
+                    </span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
         </div>
 
@@ -246,6 +247,54 @@ const Settings = () => {
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete Account
                     </NeonButton>
+                  </div>
+                </CardContent>
+              </TabsContent>
+              
+              <TabsContent value="connected">
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-lg font-medium">Connected Accounts</h3>
+                      <p className="text-sm text-gray-400">
+                        Manage your connected accounts and services
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-3 border border-sortmy-blue/20 rounded-md">
+                        <div className="flex items-center">
+                          <Github className="w-5 h-5 mr-3 text-white" />
+                          <div>
+                            <p className="text-sm font-medium">GitHub</p>
+                            <p className="text-xs text-gray-400">Not connected</p>
+                          </div>
+                        </div>
+                        <NeonButton variant="outline" size="sm">Connect</NeonButton>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </TabsContent>
+              
+              <TabsContent value="academy">
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-lg font-medium">Academy Progress</h3>
+                      <p className="text-sm text-gray-400">
+                        Track your learning progress and achievements
+                      </p>
+                    </div>
+                    <div className="bg-sortmy-darker rounded-md p-4 border border-sortmy-blue/20">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm">Current Tier:</span>
+                        <span className="text-sm font-medium text-sortmy-blue">Explorer</span>
+                      </div>
+                      <div className="w-full bg-sortmy-gray/20 rounded-full h-2.5">
+                        <div className="bg-sortmy-blue h-2.5 rounded-full" style={{ width: "45%" }}></div>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">9/20 modules completed</p>
+                    </div>
                   </div>
                 </CardContent>
               </TabsContent>
