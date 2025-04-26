@@ -5,7 +5,7 @@ import { AITool } from '@/types';
 const COLLECTION_NAME = 'aiTools';
 
 // Add a single AI tool
-export const addAITool = async (tool: Omit<AITool, 'id'>): Promise<string> => {
+export const addAITool = async (tool: AITool): Promise<string> => {
   try {
     const toolWithTimestamp = {
       ...tool,
@@ -22,7 +22,7 @@ export const addAITool = async (tool: Omit<AITool, 'id'>): Promise<string> => {
 };
 
 // Bulk add AI tools
-export const bulkAddAITools = async (tools: Omit<AITool, 'id'>[]): Promise<string[]> => {
+export const bulkAddAITools = async (tools: AITool[]): Promise<string[]> => {
   try {
     const ids: string[] = [];
 
@@ -72,13 +72,7 @@ export const getAIToolsByTag = async (tag: string): Promise<AITool[]> => {
         id: doc.id,
         ...doc.data()
       } as AITool))
-      .filter(tool => {
-        if (!tool.tags) return false;
-        if (Array.isArray(tool.tags)) {
-          return tool.tags.some(t => t.toLowerCase().includes(tag.toLowerCase()));
-        }
-        return false;
-      });
+      .filter(tool => tool.tags.toLowerCase().includes(tag.toLowerCase()));
   } catch (error) {
     console.error('Error getting AI tools by tag:', error);
     throw error;

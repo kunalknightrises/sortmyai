@@ -10,13 +10,12 @@ import PricingComparison from '@/components/PricingComparision';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-sortmy-dark relative">
+    <div className="min-h-screen">
       <Navbar />
       <main>
         <HeroSection />
         <ToolTrackerPreview />
         <PortfolioFeatureSection />
-        
         <AudienceSection />
         <HowItWorksSection />
         <PricingComparison />

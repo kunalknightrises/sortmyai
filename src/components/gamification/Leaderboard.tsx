@@ -14,7 +14,7 @@ interface LeaderboardProps {
 const Leaderboard = ({ users, currentUserId, className }: LeaderboardProps) => {
   // Sort users by XP (highest first)
   const sortedUsers = [...users].sort((a, b) => b.xp - a.xp);
-
+  
   return (
     <div className={className}>
       <div className="flex items-center justify-between mb-4">
@@ -23,96 +23,84 @@ const Leaderboard = ({ users, currentUserId, className }: LeaderboardProps) => {
           Leaderboard
         </h3>
       </div>
-
-      <div className="rounded-lg border border-sortmy-gray/30 overflow-hidden relative">
-        {/* Blurred content */}
-        <div className="filter blur-sm pointer-events-none">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-sortmy-gray/10 hover:bg-sortmy-gray/10">
-                <TableHead className="w-12 text-center">Rank</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead className="text-right">Level</TableHead>
-                <TableHead className="text-right">XP</TableHead>
-                <TableHead className="text-right">Streak</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedUsers.map((user, index) => {
-                const isCurrentUser = user.userId === currentUserId;
-
-                return (
-                  <TableRow
-                    key={user.userId}
-                    className={`
-                      ${isCurrentUser ? 'bg-sortmy-blue/10 hover:bg-sortmy-blue/10' : ''}
-                      ${index < 3 ? 'font-medium' : ''}
-                    `}
-                  >
-                    <TableCell className="text-center">
-                      {index === 0 && <Medal className="w-5 h-5 text-yellow-400 mx-auto" />}
-                      {index === 1 && <Medal className="w-5 h-5 text-gray-400 mx-auto" />}
-                      {index === 2 && <Medal className="w-5 h-5 text-amber-700 mx-auto" />}
-                      {index > 2 && index + 1}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={user.avatarUrl} />
-                          <AvatarFallback className="bg-sortmy-gray/20 text-xs">
-                            {user.username.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="flex items-center">
-                            <span className="font-medium">{user.username}</span>
-                            {user.isPremium && (
-                              <Badge variant="outline" className="ml-2 text-xs border-yellow-400/30 text-yellow-400">
-                                PREMIUM
-                              </Badge>
-                            )}
-                            {isCurrentUser && (
-                              <Badge variant="outline" className="ml-2 text-xs border-sortmy-blue/30 text-sortmy-blue">
-                                YOU
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="text-xs text-gray-400">{user.badges} badges</div>
+      
+      <div className="rounded-lg border border-sortmy-gray/30 overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-sortmy-gray/10 hover:bg-sortmy-gray/10">
+              <TableHead className="w-12 text-center">Rank</TableHead>
+              <TableHead>User</TableHead>
+              <TableHead className="text-right">Level</TableHead>
+              <TableHead className="text-right">XP</TableHead>
+              <TableHead className="text-right">Streak</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedUsers.map((user, index) => {
+              const isCurrentUser = user.userId === currentUserId;
+              
+              return (
+                <TableRow 
+                  key={user.userId}
+                  className={`
+                    ${isCurrentUser ? 'bg-sortmy-blue/10 hover:bg-sortmy-blue/10' : ''}
+                    ${index < 3 ? 'font-medium' : ''}
+                  `}
+                >
+                  <TableCell className="text-center">
+                    {index === 0 && <Medal className="w-5 h-5 text-yellow-400 mx-auto" />}
+                    {index === 1 && <Medal className="w-5 h-5 text-gray-400 mx-auto" />}
+                    {index === 2 && <Medal className="w-5 h-5 text-amber-700 mx-auto" />}
+                    {index > 2 && index + 1}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={user.avatarUrl} />
+                        <AvatarFallback className="bg-sortmy-gray/20 text-xs">
+                          {user.username.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="flex items-center">
+                          <span className="font-medium">{user.username}</span>
+                          {user.isPremium && (
+                            <Badge variant="outline" className="ml-2 text-xs border-yellow-400/30 text-yellow-400">
+                              PREMIUM
+                            </Badge>
+                          )}
+                          {isCurrentUser && (
+                            <Badge variant="outline" className="ml-2 text-xs border-sortmy-blue/30 text-sortmy-blue">
+                              YOU
+                            </Badge>
+                          )}
                         </div>
+                        <div className="text-xs text-gray-400">{user.badges} badges</div>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {user.level}
-                    </TableCell>
-                    <TableCell className="text-right">{user.xp}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end space-x-1">
-                        {user.streakDays > 0 && (
-                          <>
-                            <Flame className={`w-4 h-4 ${user.streakDays >= 7 ? 'text-red-500' : 'text-orange-400'}`} />
-                            <span>{user.streakDays}</span>
-                          </>
-                        )}
-                        {user.streakDays === 0 && (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Coming Soon Overlay */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-sortmy-dark/80 backdrop-blur-sm z-10">
-          <Trophy className="w-16 h-16 text-yellow-400 mb-4 animate-pulse" />
-          <h3 className="text-2xl font-bold text-white mb-2">Coming Soon!</h3>
-          <p className="text-gray-300 text-center max-w-md px-4">
-            The leaderboard feature is currently under development. Compete with other creators and earn your spot at the top!
-          </p>
-        </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    {user.level}
+                  </TableCell>
+                  <TableCell className="text-right">{user.xp}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end space-x-1">
+                      {user.streakDays > 0 && (
+                        <>
+                          <Flame className={`w-4 h-4 ${user.streakDays >= 7 ? 'text-red-500' : 'text-orange-400'}`} />
+                          <span>{user.streakDays}</span>
+                        </>
+                      )}
+                      {user.streakDays === 0 && (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

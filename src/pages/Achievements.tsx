@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, Medal, Target, Trophy, Users, Sparkles } from 'lucide-react';
-// import XPProgress from '@/components/gamification/XPProgress';
+import { Award, Zap, Medal, Target, Trophy, Users } from 'lucide-react';
+import XPProgress from '@/components/gamification/XPProgress';
 import ChallengeCard from '@/components/gamification/ChallengeCard';
 import Leaderboard from '@/components/gamification/Leaderboard';
 import { Badge as BadgeType, Challenge, LeaderboardUser } from '@/types/gamification';
-import GlassCard from '@/components/ui/GlassCard';
-// import NeuCard from '@/components/ui/NeuCard';
-// import NeonButton from '@/components/ui/NeonButton';
-import HoverEffect from '@/components/ui/HoverEffect';
-// import ClickEffect from '@/components/ui/ClickEffect';
-import EnhancedXPProgress from '@/components/gamification/EnhancedXPProgress';
 
 const mockBadges: BadgeType[] = [
   {
@@ -182,10 +176,10 @@ const mockLeaderboard: LeaderboardUser[] = [
 const Achievements = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('badges');
-
+  
   const enhancedUser = React.useMemo(() => {
     if (!user) return null;
-
+    
     return {
       ...user,
       email: user.email || undefined,
@@ -206,68 +200,68 @@ const Achievements = () => {
       }
     };
   }, [user]);
-
+  
   const earnedBadges = mockBadges.filter(badge => badge.isEarned);
   const unlockedBadges = mockBadges.filter(badge => !badge.isEarned);
-
+  
   return (
     <div className="space-y-8">
-
-
-      <GlassCard variant="bordered" className="border-sortmy-blue/20">
+      <h1 className="text-3xl font-bold">Achievements</h1>
+      
+      <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-4">
               <h3 className="text-lg font-medium flex items-center">
-                <Sparkles className="w-5 h-5 mr-2 text-sortmy-blue" />
+                <Zap className="w-5 h-5 mr-2 text-sortmy-blue" />
                 Experience
               </h3>
-              <EnhancedXPProgress xp={enhancedUser?.xp || 0} level={enhancedUser?.level || 1} xpForNextLevel={500} />
+              <XPProgress user={enhancedUser} />
             </div>
-
+            
             <div className="space-y-4">
               <h3 className="text-lg font-medium flex items-center">
                 <Award className="w-5 h-5 mr-2 text-yellow-400" />
                 Badges
               </h3>
               <div className="flex items-center gap-2">
-                <HoverEffect effect="lift" color="blue" className="bg-sortmy-blue/10 p-3 rounded-lg flex-1">
+                <div className="bg-sortmy-blue/10 p-3 rounded-lg flex-1">
                   <div className="text-2xl font-bold">{earnedBadges.length}</div>
                   <p className="text-xs text-gray-400">Earned</p>
-                </HoverEffect>
-                <HoverEffect effect="lift" color="blue" className="bg-sortmy-gray/20 p-3 rounded-lg flex-1">
+                </div>
+                <div className="bg-sortmy-gray/20 p-3 rounded-lg flex-1">
                   <div className="text-2xl font-bold">{unlockedBadges.length}</div>
                   <p className="text-xs text-gray-400">Locked</p>
-                </HoverEffect>
+                </div>
               </div>
             </div>
-
+            
             <div className="space-y-4">
               <h3 className="text-lg font-medium flex items-center">
                 <Trophy className="w-5 h-5 mr-2 text-orange-400" />
                 Challenges
               </h3>
               <div className="flex items-center gap-2">
-                <HoverEffect effect="lift" color="blue" className="bg-sortmy-blue/10 p-3 rounded-lg flex-1">
+                <div className="bg-sortmy-blue/10 p-3 rounded-lg flex-1">
                   <div className="text-2xl font-bold">
                     {mockChallenges.filter(c => c.isCompleted).length}
                   </div>
                   <p className="text-xs text-gray-400">Completed</p>
-                </HoverEffect>
-                <HoverEffect effect="lift" color="blue" className="bg-sortmy-gray/20 p-3 rounded-lg flex-1">
+                </div>
+                <div className="bg-sortmy-gray/20 p-3 rounded-lg flex-1">
                   <div className="text-2xl font-bold">
                     {mockChallenges.filter(c => !c.isCompleted).length}
                   </div>
                   <p className="text-xs text-gray-400">In Progress</p>
-                </HoverEffect>
+                </div>
               </div>
             </div>
           </div>
         </CardContent>
-      </GlassCard>
-
+      </Card>
+      
       <Tabs defaultValue="badges" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid grid-cols-3 w-full md:w-auto bg-sortmy-darker border border-sortmy-blue/20">
+        <TabsList className="grid grid-cols-3 w-full md:w-auto">
           <TabsTrigger value="badges" className="flex items-center">
             <Award className="w-4 h-4 mr-2" />
             Badges
@@ -281,14 +275,14 @@ const Achievements = () => {
             Leaderboard
           </TabsTrigger>
         </TabsList>
-
+        
         <TabsContent value="badges" className="space-y-6">
           <div>
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Medal className="w-5 h-5 mr-2 text-yellow-400" />
               Earned Badges
             </h2>
-
+            
             {earnedBadges.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {earnedBadges.map(badge => (
@@ -296,22 +290,22 @@ const Achievements = () => {
                 ))}
               </div>
             ) : (
-              <GlassCard variant="bordered" className="border-sortmy-blue/20 p-8 text-center">
+              <Card className="bg-sortmy-gray/10 border-sortmy-gray/30 p-8 text-center">
                 <Award className="w-12 h-12 mx-auto text-gray-400 mb-3" />
                 <h3 className="text-lg font-medium mb-2">No Badges Yet</h3>
                 <p className="text-sm text-gray-400">
                   Complete challenges and use the platform to earn your first badge!
                 </p>
-              </GlassCard>
+              </Card>
             )}
           </div>
-
+          
           <div>
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Award className="w-5 h-5 mr-2 text-gray-400" />
               Locked Badges
             </h2>
-
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {unlockedBadges.map(badge => (
                 <BadgeCard key={badge.id} badge={badge} />
@@ -319,41 +313,41 @@ const Achievements = () => {
             </div>
           </div>
         </TabsContent>
-
+        
         <TabsContent value="challenges" className="space-y-6">
           <div>
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Target className="w-5 h-5 mr-2 text-sortmy-blue" />
               Active Challenges
             </h2>
-
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockChallenges
                 .filter(challenge => !challenge.isCompleted)
                 .map(challenge => (
-                  <ChallengeCard
-                    key={challenge.id}
-                    challenge={challenge}
+                  <ChallengeCard 
+                    key={challenge.id} 
+                    challenge={challenge} 
                     onStart={() => console.log('Starting challenge:', challenge.id)}
                   />
                 ))
               }
             </div>
           </div>
-
+          
           {mockChallenges.some(c => c.isCompleted) && (
             <div>
               <h2 className="text-xl font-semibold mb-4 flex items-center">
                 <Target className="w-5 h-5 mr-2 text-green-400" />
                 Completed Challenges
               </h2>
-
+              
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {mockChallenges
                   .filter(challenge => challenge.isCompleted)
                   .map(challenge => (
-                    <ChallengeCard
-                      key={challenge.id}
+                    <ChallengeCard 
+                      key={challenge.id} 
                       challenge={challenge}
                     />
                   ))
@@ -362,10 +356,10 @@ const Achievements = () => {
             </div>
           )}
         </TabsContent>
-
+        
         <TabsContent value="leaderboard">
-          <Leaderboard
-            users={mockLeaderboard}
+          <Leaderboard 
+            users={mockLeaderboard} 
             currentUserId="current"
           />
         </TabsContent>
@@ -391,8 +385,7 @@ const BadgeCard = ({ badge }: { badge: BadgeType }) => {
   };
 
   return (
-    <div className="h-full">
-      <GlassCard variant="bordered" className={`border-sortmy-blue/20 ${!badge.isEarned ? 'opacity-70' : ''} hover:translate-y-[-5px] hover:shadow-lg transition-all duration-300`}>
+    <Card className={`border-sortmy-gray/30 bg-sortmy-gray/10 ${!badge.isEarned ? 'opacity-70' : ''}`}>
       <CardHeader className="text-center pb-2">
         <div className={`w-20 h-20 rounded-full mx-auto flex items-center justify-center ${getBadgeTierClass(badge.tier)} border`}>
           <span className="text-3xl">
@@ -410,8 +403,8 @@ const BadgeCard = ({ badge }: { badge: BadgeType }) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="text-center pt-2">
-        <Badge
-          variant="outline"
+        <Badge 
+          variant="outline" 
           className={`uppercase ${getBadgeTierClass(badge.tier)} border`}
         >
           {badge.tier}
@@ -427,8 +420,7 @@ const BadgeCard = ({ badge }: { badge: BadgeType }) => {
           </p>
         )}
       </CardContent>
-    </GlassCard>
-    </div>
+    </Card>
   );
 };
 

@@ -1,313 +1,101 @@
 
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import NeonButton from "@/components/ui/NeonButton";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Settings2, 
-  Shield, 
-  UserCircle2, 
-  Lock,
-  GraduationCap,
-  Trash2,
-  Github
-} from "lucide-react";
-
-// Create categories for our settings
-const settingsCategories = [
-  {
-    id: 'general',
-    label: 'General',
-    icon: <UserCircle2 className="w-4 h-4" />,
-  },
-  {
-    id: 'connected',
-    label: 'Connected Accounts',
-    icon: <Github className="w-4 h-4" />,
-  },
-  {
-    id: 'security',
-    label: 'Security & Privacy',
-    icon: <Shield className="w-4 h-4" />,
-  },
-  {
-    id: 'intern',
-    label: 'Intern Profile',
-    icon: <Lock className="w-4 h-4" />,
-  },
-  {
-    id: 'academy',
-    label: 'Academy Progress',
-    icon: <GraduationCap className="w-4 h-4" />,
-  },
-  {
-    id: 'danger',
-    label: 'Danger Zone',
-    icon: <Trash2 className="w-4 h-4" />,
-  }
-];
+import { isNativePlatform } from '@/lib/capacitor';
 
 const Settings = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('general');
-  const [formData, setFormData] = useState({
-    name: 'John Doe',
-    bio: 'AI enthusiast and developer',
-    username: 'johndoe',
-    email: 'john@example.com',
-    phone: '+1 234 567 8900',
-    showInternBadge: true,
-    isPublicProfile: true
-  });
+  const [darkMode, setDarkMode] = useState(true);
+  const [notifications, setNotifications] = useState(true);
+  const [saveChanges, setSaveChanges] = useState(false);
+  const [offlineMode, setOfflineMode] = useState(false);
+  const isNative = isNativePlatform();
 
   const handleSaveSettings = () => {
     toast({
       title: "Settings saved",
-      description: "Your account settings have been updated successfully.",
+      description: "Your preferences have been updated successfully.",
     });
   };
-
-  const handleInputChange = (key: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
-  };
-
+  
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center">
-          <Settings2 className="w-8 h-8 mr-2 text-sortmy-blue" />
-          Account Settings
-        </h1>
-        <p className="text-gray-400 mt-1">
-          Manage your account preferences and profile settings
-        </p>
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-gray-400 mt-1">Manage your app preferences and account settings</p>
       </div>
-
-      {/* Main Content */}
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar */}
-        <div className="lg:w-64 flex-shrink-0">
-          <div className="bg-sortmy-darker/70 backdrop-blur-md rounded-lg border border-sortmy-blue/20 p-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical">
-              <TabsList className="flex flex-col w-full space-y-1">
-                {settingsCategories.map((category) => (
-                  <TabsTrigger
-                    key={category.id}
-                    value={category.id}
-                    className={`justify-start px-4 py-2.5 w-full text-left ${
-                      activeTab === category.id
-                        ? 'bg-sortmy-blue/10 text-sortmy-blue border-l-2 border-sortmy-blue'
-                        : 'text-gray-400 hover:text-white hover:bg-sortmy-blue/5'
-                    }`}
-                  >
-                    <span className="flex items-center gap-3">
-                      {category.icon}
-                      {category.label}
-                    </span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1">
-          <div className="bg-sortmy-darker/70 backdrop-blur-md rounded-lg border border-sortmy-blue/20 p-6">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsContent value="general">
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Display Name</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        className="bg-sortmy-gray/20"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="bio">Bio</Label>
-                      <textarea
-                        id="bio"
-                        value={formData.bio}
-                        onChange={(e) => handleInputChange('bio', e.target.value)}
-                        className="w-full min-h-[100px] bg-sortmy-gray/20 rounded-md border border-input px-3 py-2 text-sm"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="username">Username</Label>
-                      <Input
-                        id="username"
-                        value={formData.username}
-                        onChange={(e) => handleInputChange('username', e.target.value)}
-                        className="bg-sortmy-gray/20"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        value={formData.email}
-                        readOnly
-                        className="bg-sortmy-gray/20 opacity-50 cursor-not-allowed"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        value={formData.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
-                        className="bg-sortmy-gray/20"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </TabsContent>
-
-              <TabsContent value="security">
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-lg font-medium">Profile Visibility</h3>
-                        <p className="text-sm text-gray-400">
-                          Control who can see your profile
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Label htmlFor="public-profile">Public</Label>
-                        <input
-                          type="checkbox"
-                          id="public-profile"
-                          checked={formData.isPublicProfile}
-                          onChange={(e) => handleInputChange('isPublicProfile', e.target.checked)}
-                          className="toggle"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <NeonButton variant="outline" className="w-full">
-                        Change Password
-                      </NeonButton>
-                    </div>
-                  </div>
-                </CardContent>
-              </TabsContent>
-
-              <TabsContent value="intern">
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-lg font-medium">Intern Badge</h3>
-                        <p className="text-sm text-gray-400">
-                          Show your First Wave Intern badge on your profile
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Label htmlFor="intern-badge">Show Badge</Label>
-                        <input
-                          type="checkbox"
-                          id="intern-badge"
-                          checked={formData.showInternBadge}
-                          onChange={(e) => handleInputChange('showInternBadge', e.target.checked)}
-                          className="toggle"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </TabsContent>
-
-              <TabsContent value="danger">
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-lg font-medium text-red-500">Delete Account</h3>
-                      <p className="text-sm text-gray-400">
-                        Once you delete your account, there is no going back. Please be certain.
-                      </p>
-                    </div>
-                    <NeonButton 
-                      variant="outline" 
-                      className="w-full bg-red-500/10 border-red-500/50 text-red-500 hover:bg-red-500/20"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete Account
-                    </NeonButton>
-                  </div>
-                </CardContent>
-              </TabsContent>
-              
-              <TabsContent value="connected">
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-lg font-medium">Connected Accounts</h3>
-                      <p className="text-sm text-gray-400">
-                        Manage your connected accounts and services
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between p-3 border border-sortmy-blue/20 rounded-md">
-                        <div className="flex items-center">
-                          <Github className="w-5 h-5 mr-3 text-white" />
-                          <div>
-                            <p className="text-sm font-medium">GitHub</p>
-                            <p className="text-xs text-gray-400">Not connected</p>
-                          </div>
-                        </div>
-                        <NeonButton variant="outline" size="sm">Connect</NeonButton>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </TabsContent>
-              
-              <TabsContent value="academy">
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-lg font-medium">Academy Progress</h3>
-                      <p className="text-sm text-gray-400">
-                        Track your learning progress and achievements
-                      </p>
-                    </div>
-                    <div className="bg-sortmy-darker rounded-md p-4 border border-sortmy-blue/20">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm">Current Tier:</span>
-                        <span className="text-sm font-medium text-sortmy-blue">Explorer</span>
-                      </div>
-                      <div className="w-full bg-sortmy-gray/20 rounded-full h-2.5">
-                        <div className="bg-sortmy-blue h-2.5 rounded-full" style={{ width: "45%" }}></div>
-                      </div>
-                      <p className="text-xs text-gray-400 mt-2">9/20 modules completed</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </TabsContent>
-            </Tabs>
-
-            <div className="mt-6 flex justify-end">
-              <NeonButton onClick={handleSaveSettings}>
-                Save Changes
-              </NeonButton>
+      
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Appearance</CardTitle>
+            <CardDescription>Customize how the app looks</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="dark-mode">Dark Mode</Label>
+              <Switch 
+                id="dark-mode" 
+                checked={darkMode} 
+                onCheckedChange={setDarkMode} 
+              />
             </div>
-          </div>
-        </div>
+            
+            <div className="flex items-center justify-between">
+              <Label htmlFor="save-changes">Auto-save Changes</Label>
+              <Switch 
+                id="save-changes" 
+                checked={saveChanges} 
+                onCheckedChange={setSaveChanges} 
+              />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Notifications</CardTitle>
+            <CardDescription>Control when and how you get notified</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="notifications">Enable Notifications</Label>
+              <Switch 
+                id="notifications" 
+                checked={notifications} 
+                onCheckedChange={setNotifications} 
+              />
+            </div>
+          </CardContent>
+        </Card>
+        
+        {isNative && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Mobile Settings</CardTitle>
+              <CardDescription>Configure mobile-specific settings</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="offline-mode">Offline Mode</Label>
+                <Switch 
+                  id="offline-mode" 
+                  checked={offlineMode} 
+                  onCheckedChange={setOfflineMode} 
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
+      
+      <Button onClick={handleSaveSettings} className="w-full sm:w-auto">
+        Save Settings
+      </Button>
     </div>
   );
 };

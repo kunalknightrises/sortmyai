@@ -21,12 +21,11 @@ const SidebarHeader = ({ isCollapsed, toggleCollapsed }: SidebarHeaderProps) => 
             exit={{ opacity: 0 }}
             className="text-lg font-bold"
           >
-            <span className="text-white">SortMy</span>
-            <span className="text-sortmy-blue">AI</span>
+            SortMyAI
           </motion.span>
         )}
       </div>
-
+      
       <Collapsible open={true}>
         <CollapsibleTrigger asChild>
           <Button

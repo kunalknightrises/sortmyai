@@ -52,11 +52,7 @@
 
   body {
     @apply bg-sortmy-dark text-foreground antialiased;
-    /* Background image moved to a class so it can be toggled */
-  }
-
-  .default-bg {
-    background-image:
+    background-image: 
       radial-gradient(circle at 40% 20%, rgba(14, 165, 233, 0.05) 0%, transparent 35%),
       radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.03) 0%, transparent 25%);
   }
@@ -97,7 +93,7 @@
   .gradient-text {
     @apply text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-500;
   }
-
+  
   .card-glow {
     @apply hover:shadow-[0_0_20px_rgba(14,165,233,0.3)] transition-shadow duration-300;
   }

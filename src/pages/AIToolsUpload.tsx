@@ -17,15 +17,15 @@ const AIToolsUpload: React.FC = () => {
   const [jsonInput, setJsonInput] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadedCount, setUploadedCount] = useState<number>(0);
-  const [singleTool, setSingleTool] = useState<Omit<AITool, 'id'>>({
+  const [singleTool, setSingleTool] = useState<AITool>({
     name: '',
     useCase: '',
     description: '',
-    tags: [],
+    tags: '',
     pricing: '',
     excelsAt: '',
-    website: '',
-    logoUrl: ''
+    websiteLink: '',
+    logoLink: ''
   });
 
   // Handle JSON input change
@@ -38,7 +38,7 @@ const AIToolsUpload: React.FC = () => {
     const { name, value } = e.target;
     setSingleTool(prev => ({
       ...prev,
-      [name]: name === 'tags' ? value.split(',').map(tag => tag.trim()) : value
+      [name]: value
     }));
   };
 
@@ -57,7 +57,7 @@ const AIToolsUpload: React.FC = () => {
       setIsUploading(true);
 
       // Parse JSON input
-      let tools: Omit<AITool, 'id'>[] = [];
+      let tools: AITool[] = [];
       try {
         const parsed = JSON.parse(jsonInput);
 
@@ -67,13 +67,11 @@ const AIToolsUpload: React.FC = () => {
             name: tool.Name || tool.name,
             useCase: tool["Use Case"] || tool.useCase,
             description: tool.Description || tool.description,
-            tags: typeof (tool.Tags || tool.tags) === 'string'
-              ? (tool.Tags || tool.tags).split(',').map((tag: string) => tag.trim())
-              : (tool.Tags || tool.tags || []),
+            tags: tool.Tags || tool.tags,
             pricing: tool.Pricing || tool.pricing,
             excelsAt: tool["Excels At"] || tool.excelsAt,
-            website: tool["Website Link"] || tool.websiteLink || tool.website,
-            logoUrl: tool["Logo Link"] || tool.logoLink || tool.logoUrl
+            websiteLink: tool["Website Link"] || tool.websiteLink,
+            logoLink: tool["Logo Link"] || tool.logoLink
           }));
         } else if (typeof parsed === 'object') {
           // Single object
@@ -81,13 +79,11 @@ const AIToolsUpload: React.FC = () => {
             name: parsed.Name || parsed.name,
             useCase: parsed["Use Case"] || parsed.useCase,
             description: parsed.Description || parsed.description,
-            tags: typeof (parsed.Tags || parsed.tags) === 'string'
-              ? (parsed.Tags || parsed.tags).split(',').map((tag: string) => tag.trim())
-              : (parsed.Tags || parsed.tags || []),
+            tags: parsed.Tags || parsed.tags,
             pricing: parsed.Pricing || parsed.pricing,
             excelsAt: parsed["Excels At"] || parsed.excelsAt,
-            website: parsed["Website Link"] || parsed.websiteLink || parsed.website,
-            logoUrl: parsed["Logo Link"] || parsed.logoLink || parsed.logoUrl
+            websiteLink: parsed["Website Link"] || parsed.websiteLink,
+            logoLink: parsed["Logo Link"] || parsed.logoLink
           }];
         }
       } catch (error) {
@@ -174,11 +170,11 @@ const AIToolsUpload: React.FC = () => {
         name: '',
         useCase: '',
         description: '',
-        tags: [],
+        tags: '',
         pricing: '',
         excelsAt: '',
-        website: '',
-        logoUrl: ''
+        websiteLink: '',
+        logoLink: ''
       });
     } catch (error) {
       console.error('Error uploading AI tool:', error);
@@ -326,7 +322,7 @@ const AIToolsUpload: React.FC = () => {
                     name="tags"
                     placeholder="AI, Productivity, etc."
                     className="bg-sortmy-darker border-sortmy-gray"
-                    value={Array.isArray(singleTool.tags) ? singleTool.tags.join(', ') : ''}
+                    value={singleTool.tags}
                     onChange={handleSingleToolChange}
                   />
                   <p className="text-xs text-gray-400">Separate tags with commas</p>
@@ -359,11 +355,11 @@ const AIToolsUpload: React.FC = () => {
                 <div className="space-y-2">
                   <Label htmlFor="websiteLink">Website Link</Label>
                   <Input
-                    id="website"
-                    name="website"
+                    id="websiteLink"
+                    name="websiteLink"
                     placeholder="example.com"
                     className="bg-sortmy-darker border-sortmy-gray"
-                    value={singleTool.website}
+                    value={singleTool.websiteLink}
                     onChange={handleSingleToolChange}
                   />
                 </div>
@@ -371,11 +367,11 @@ const AIToolsUpload: React.FC = () => {
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="logoLink">Logo URL</Label>
                   <Input
-                    id="logoUrl"
-                    name="logoUrl"
+                    id="logoLink"
+                    name="logoLink"
                     placeholder="https://example.com/logo.png"
                     className="bg-sortmy-darker border-sortmy-gray"
-                    value={singleTool.logoUrl}
+                    value={singleTool.logoLink}
                     onChange={handleSingleToolChange}
                   />
                 </div>

@@ -2,16 +2,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { PortfolioItem } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
-import { MoreVertical, Lock, ChevronLeft, ChevronRight, Edit, Archive, Trash2, AlertCircle, Play, Pause, Volume2, VolumeX, AlertTriangle, MessageSquare } from 'lucide-react';
+import { MoreVertical, Heart, Lock, ChevronLeft, ChevronRight, Edit, Archive, Trash2, AlertCircle, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { ImageItem } from '../ui/ImageItem';
 import { useToast } from '@/hooks/use-toast';
-import GlassCard from '@/components/ui/GlassCard';
-// import HoverEffect from '@/components/ui/HoverEffect';
-import AnimatedTooltip from '@/components/ui/AnimatedTooltip';
-import LikeButton from '@/components/interactions/LikeButton';
-import { getPostInteractionStats } from '@/services/interactionService';
-import { trackView } from '@/services/analyticsService';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface PortfolioItemCardProps {
   item: PortfolioItem;
@@ -21,57 +14,15 @@ interface PortfolioItemCardProps {
   onRestore?: (item: PortfolioItem) => void;
   isOwner?: boolean;
   isReel?: boolean;
-  showUsername?: boolean;
-  username?: string;
 }
 
-export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore, isOwner = false, isReel = false, showUsername = false, username }: PortfolioItemCardProps) {
+export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore, isOwner = false, isReel = false }: PortfolioItemCardProps) {
   const [showActions, setShowActions] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
-  const { user } = useAuth();
-  const [likeCount, setLikeCount] = useState(item.likes || 0);
-  const [commentCount, setCommentCount] = useState(item.comments || 0);
-  const [userHasLiked, setUserHasLiked] = useState(false);
-
-  // Fetch interaction stats and track view when component mounts
-  useEffect(() => {
-    const fetchInteractionStats = async () => {
-      try {
-        // Use default values if item.id is not defined
-        if (!item.id) {
-          console.warn('Portfolio item has no ID, using default interaction values');
-          return;
-        }
-
-        const stats = await getPostInteractionStats(item.id, user?.uid);
-        setLikeCount(stats.likes);
-        setCommentCount(stats.comments);
-        setUserHasLiked(stats.userHasLiked);
-
-        // Track view for analytics
-        if (!isOwner) { // Don't track views from the owner
-          try {
-            await trackView(item.id, 'portfolio', user);
-          } catch (viewError) {
-            console.error('Error tracking view:', viewError);
-            // Continue anyway, this is just analytics
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching interaction stats:', error);
-        // Use default values on error
-        setLikeCount(item.likes || 0);
-        setCommentCount(item.comments || 0);
-        setUserHasLiked(false);
-      }
-    };
-
-    fetchInteractionStats();
-  }, [item.id, user, isOwner, item.likes, item.comments]);
 
   // Extract Google Drive file ID if present
   const getGoogleDriveFileId = (url: string): string | null => {
@@ -111,22 +62,15 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
     if (isReel && videoRef.current && !isPlaying) {
       videoRef.current.muted = true; // Always mute on auto-play
       setIsMuted(true);
-      // Add a small delay to make the hover effect more intentional
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.play().catch(err => {
-            console.error('Error auto-playing video:', err);
-          });
-          setIsPlaying(true);
-        }
-      }, 300);
+      videoRef.current.play().catch(err => {
+        console.error('Error auto-playing video:', err);
+      });
     }
   };
 
   const handleCardMouseLeave = () => {
     if (isReel && videoRef.current && isPlaying) {
       videoRef.current.pause();
-      setIsPlaying(false);
     }
   };
 
@@ -152,30 +96,15 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
     ? item.media_urls
     : item.media_url ? [item.media_url] : [];
 
-  // Check if the item has media errors
-  const hasMediaError = (!item.media_url && (!item.media_urls || item.media_urls.length === 0)) ||
-    (item.media_url && item.media_url.includes('drive.google.com') &&
-     !item.media_url.includes('/d/') && !item.media_url.includes('id='));
-
   // Handle status-specific actions
-  const handleEdit = (e: React.MouseEvent) => {
-    // Stop event propagation to prevent lightbox from opening
-    e.stopPropagation();
-
+  const handleEdit = () => {
     if (onEdit) {
       onEdit(item);
     }
     setShowActions(false);
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
-    // Stop event propagation to prevent lightbox from opening
-    e.stopPropagation();
-
-    // Dispatch a custom event to notify that delete was clicked
-    // This will be used to close the lightbox if it's open
-    window.dispatchEvent(new CustomEvent('portfolio:delete-action'));
-
+  const handleDelete = () => {
     if (onDelete) {
       onDelete(item);
     } else {
@@ -188,10 +117,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
     setShowActions(false);
   };
 
-  const handleArchive = (e: React.MouseEvent) => {
-    // Stop event propagation to prevent lightbox from opening
-    e.stopPropagation();
-
+  const handleArchive = () => {
     if (onArchive) {
       onArchive(item);
     } else {
@@ -204,10 +130,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
     setShowActions(false);
   };
 
-  const handleRestore = (e: React.MouseEvent) => {
-    // Stop event propagation to prevent lightbox from opening
-    e.stopPropagation();
-
+  const handleRestore = () => {
     if (onRestore) {
       onRestore(item);
     } else {
@@ -232,17 +155,11 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
   const isDeleted = item.status === 'deleted';
 
   return (
-    <div className="h-full">
-      <GlassCard
-        variant="bordered"
-        className={`border-sortmy-blue/20 overflow-hidden transition-all duration-300 hover:translate-y-[-5px] hover:shadow-lg
-          ${isArchived ? 'opacity-70' : ''}
-          ${isDraft ? 'border-yellow-500/30' : ''}
-          ${isDeleted ? 'opacity-50 grayscale' : ''}
-          ${isReel ? 'border-l-4 border-l-blue-500' : ''}`}
-        onMouseEnter={handleCardMouseEnter}
-        onMouseLeave={handleCardMouseLeave}
-      >
+    <div
+      className={`group bg-sortmy-darker rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:shadow-sortmy-blue/20 ${isArchived ? 'opacity-70' : ''} ${isDraft ? 'border border-yellow-500/30' : ''} ${isDeleted ? 'opacity-50 grayscale' : ''} ${isReel ? 'border-l-4 border-l-blue-500' : ''}`}
+      onMouseEnter={handleCardMouseEnter}
+      onMouseLeave={handleCardMouseLeave}
+    >
       <div className="relative aspect-square">
         {/* Status indicators */}
         {isDraft && (
@@ -265,29 +182,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
             Reel
           </div>
         )}
-        {/* Show media error placeholder if there's an issue with the media */}
-        {hasMediaError && (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-sortmy-gray/20 p-4 text-center">
-            <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-2">
-              <AlertTriangle className="w-6 h-6 text-red-400" />
-            </div>
-            <p className="text-sm text-gray-400 mb-1">Media Error</p>
-            <p className="text-xs text-gray-500">This item has invalid or missing media</p>
-            {isOwner && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onDelete) onDelete(item);
-                }}
-                className="mt-3 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded flex items-center gap-1 transition-colors"
-              >
-                <Trash2 className="w-3 h-3" />
-                Delete Item
-              </button>
-            )}
-          </div>
-        )}
-        {item.media_type === 'image' && images.length > 0 && !hasMediaError && (
+        {item.media_type === 'image' && images.length > 0 && (
           <>
             {/* Image navigation controls if multiple images */}
             {images.length > 1 && (
@@ -295,28 +190,24 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
                 <div className="absolute top-2 right-2 z-10 bg-black/50 rounded-md px-2 py-1 text-xs text-white">
                   {currentImageIndex + 1} / {images.length}
                 </div>
-                <AnimatedTooltip content="Previous image" position="left">
-                  <button
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-black/50 hover:bg-sortmy-blue/30 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentImageIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
-                    }}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                </AnimatedTooltip>
-                <AnimatedTooltip content="Next image" position="right">
-                  <button
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-black/50 hover:bg-sortmy-blue/30 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentImageIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
-                    }}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </AnimatedTooltip>
+                <button
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
+                  }}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
+                  }}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </>
             )}
 
@@ -380,7 +271,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
             )}
           </>
         )}
-        {item.media_type === 'video' && !hasMediaError && (
+        {item.media_type === 'video' && (
           <div className="relative w-full h-full">
             {/* Option A: Google Drive Embed */}
             {item.media_url && item.media_url.includes('drive.google.com') && (
@@ -388,44 +279,21 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
                 {(() => {
                   const fileId = getGoogleDriveFileId(item.media_url);
                   if (fileId) {
-                    // For reels, use a thumbnail with play button instead of iframe
-                    if (isReel) {
-                      return (
-                        <div className="relative w-full h-full bg-sortmy-gray/10">
-                          <img
-                            src={`https://lh3.googleusercontent.com/d/${fileId}`}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
-                            }}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            <div className="bg-blue-500/80 rounded-full p-3">
-                              <Play className="w-8 h-8 text-white" fill="white" />
-                            </div>
+                    return (
+                      <>
+                        <iframe
+                          src={`https://drive.google.com/file/d/${fileId}/preview`}
+                          allow="autoplay"
+                          className="w-full h-full border-0"
+                        />
+                        {/* Play button overlay for better UX */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="bg-black/30 rounded-full p-3 backdrop-blur-sm">
+                            <Play className="w-8 h-8 text-white" />
                           </div>
                         </div>
-                      );
-                    } else {
-                      // For regular videos, use iframe
-                      return (
-                        <>
-                          <iframe
-                            src={`https://drive.google.com/file/d/${fileId}/preview`}
-                            allow="autoplay"
-                            className="w-full h-full border-0"
-                          />
-                          {/* Play button overlay for better UX */}
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="bg-black/30 rounded-full p-3 backdrop-blur-sm">
-                              <Play className="w-8 h-8 text-white" />
-                            </div>
-                          </div>
-                        </>
-                      );
-                    }
+                      </>
+                    );
                   }
                   return (
                     <div className="w-full h-full flex items-center justify-center bg-sortmy-gray/20">
@@ -452,32 +320,19 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
 
                 {/* Video controls overlay */}
                 <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between bg-black/50 rounded-md px-2 py-1 z-10">
-                  <AnimatedTooltip content={isPlaying ? "Pause" : "Play"} position="top">
-                    <button
-                      onClick={togglePlay}
-                      className="p-1 hover:bg-sortmy-blue/20 rounded-full transition-colors"
-                    >
-                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    </button>
-                  </AnimatedTooltip>
-                  <AnimatedTooltip content={isMuted ? "Unmute" : "Mute"} position="top">
-                    <button
-                      onClick={toggleMute}
-                      className="p-1 hover:bg-sortmy-blue/20 rounded-full transition-colors"
-                    >
-                      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                    </button>
-                  </AnimatedTooltip>
+                  <button
+                    onClick={togglePlay}
+                    className="p-1 hover:bg-sortmy-gray/20 rounded-full transition-colors"
+                  >
+                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                  </button>
+                  <button
+                    onClick={toggleMute}
+                    className="p-1 hover:bg-sortmy-gray/20 rounded-full transition-colors"
+                  >
+                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </button>
                 </div>
-
-                {/* Play button overlay for better UX when paused */}
-                {!isPlaying && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="bg-black/30 rounded-full p-3 backdrop-blur-sm">
-                      <Play className="w-8 h-8 text-white" />
-                    </div>
-                  </div>
-                )}
               </>
             )}
 
@@ -498,34 +353,22 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
       </div>
 
       <div className="p-4">
-        {showUsername && username && (
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-5 h-5 rounded-full bg-sortmy-blue/20 flex items-center justify-center text-xs text-white">
-              {username.charAt(0).toUpperCase()}
-            </div>
-            <span className="text-sm text-gray-300 hover:text-sortmy-blue transition-colors">
-              {username}
-            </span>
-          </div>
-        )}
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold text-white truncate">{item.title}</h3>
           {isOwner && (
             <div className="relative">
-              <AnimatedTooltip content="Actions" position="left">
-                <button
-                  onClick={toggleActions}
-                  className="p-1 hover:bg-sortmy-blue/20 rounded-full transition-colors"
-                >
-                  <MoreVertical className="w-5 h-5 text-slate-400" />
-                </button>
-              </AnimatedTooltip>
+              <button
+                onClick={toggleActions}
+                className="p-1 hover:bg-sortmy-gray/20 rounded-full transition-colors"
+              >
+                <MoreVertical className="w-5 h-5 text-slate-400" />
+              </button>
               {showActions && (
-                <div className="absolute right-0 mt-1 w-48 bg-sortmy-darker border border-sortmy-blue/20 rounded-lg shadow-lg overflow-hidden z-10 backdrop-blur-sm">
+                <div className="absolute right-0 mt-1 w-48 bg-sortmy-darker border border-sortmy-gray rounded-lg shadow-lg overflow-hidden z-10">
                   {!isDeleted && (
                     <button
-                      onClick={(e) => handleEdit(e)}
-                      className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
+                      onClick={handleEdit}
+                      className="w-full px-4 py-2 text-left hover:bg-sortmy-gray/20 transition-colors flex items-center gap-2"
                     >
                       <Edit className="w-4 h-4" />
                       Edit Project
@@ -534,8 +377,8 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
 
                   {!isArchived && !isDeleted && (
                     <button
-                      onClick={(e) => handleArchive(e)}
-                      className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
+                      onClick={handleArchive}
+                      className="w-full px-4 py-2 text-left hover:bg-sortmy-gray/20 transition-colors flex items-center gap-2"
                     >
                       <Archive className="w-4 h-4" />
                       Archive Project
@@ -544,8 +387,8 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
 
                   {(isArchived || isDraft) && !isDeleted && (
                     <button
-                      onClick={(e) => handleRestore(e)}
-                      className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
+                      onClick={handleRestore}
+                      className="w-full px-4 py-2 text-left hover:bg-sortmy-gray/20 transition-colors flex items-center gap-2"
                     >
                       <AlertCircle className="w-4 h-4" />
                       Restore Project
@@ -553,7 +396,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
                   )}
 
                   <button
-                    onClick={(e) => handleDelete(e)}
+                    onClick={handleDelete}
                     className="w-full px-4 py-2 text-left text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -571,7 +414,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
           {item.tools_used?.map((tool: string, index: number) => (
             <span
               key={`${item.id}-tool-${index}`}
-              className="px-2 py-1 text-xs bg-sortmy-blue/10 text-slate-300 rounded-full hover:bg-sortmy-blue/20 transition-colors cursor-pointer"
+              className="px-2 py-1 text-xs bg-sortmy-gray/30 text-slate-300 rounded-full"
             >
               {tool}
             </span>
@@ -579,28 +422,15 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
         </div>
 
         <div className="flex justify-between items-center text-sm text-slate-400">
-          <div className="flex items-center gap-4">
-            <LikeButton
-              postId={item.id}
-              initialLikeCount={likeCount}
-              initialLiked={userHasLiked}
-              onLikeChange={(liked, newCount) => {
-                setUserHasLiked(liked);
-                setLikeCount(newCount);
-              }}
-              size="sm"
-            />
-            <div className="flex items-center gap-1">
-              <MessageSquare className="w-4 h-4" />
-              <span>{commentCount}</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <Heart className="w-4 h-4" />
+            <span>{item.likes}</span>
           </div>
           <span title={new Date(item.created_at).toLocaleString()}>
             {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
           </span>
         </div>
       </div>
-    </GlassCard>
     </div>
   );
 }

@@ -13,9 +13,6 @@ export interface User {
   profession?: string;
   website?: string;
   role?: 'admin' | 'intern' | 'basic';
-  followers_count?: number;
-  following_count?: number;
-  following?: string[];
   // Gamification related properties
   xp: number;
   level: number;
@@ -41,7 +38,6 @@ export interface PortfolioItem {
   tools_used: string[];
   categories: string[];
   likes: number;
-  comments?: number;
   views: number;
   project_url?: string;
   is_public: boolean;
@@ -51,10 +47,6 @@ export interface PortfolioItem {
   deleted_at?: string;
   archived_at?: string;
   onClick?: () => void; // For handling click events in components
-  // Author information (for display purposes)
-  authorId?: string;
-  authorName?: string;
-  authorAvatar?: string;
 }
 
 export interface Tool {
@@ -78,17 +70,15 @@ export interface Tool {
 }
 
 export interface AITool {
-  id: string;
+  id?: string;
   name: string;
   useCase: string;
   description: string;
-  tags: string[] | string;
+  tags: string;
   pricing: string;
   excelsAt: string;
-  website?: string;
-  websiteLink?: string;
-  logoUrl?: string;
-  logoLink?: string;
+  websiteLink: string;
+  logoLink: string;
   createdAt?: string;
   updatedAt?: string;
 }

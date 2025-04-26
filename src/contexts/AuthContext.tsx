@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         uid: firebaseUser.uid,
         id: firebaseUser.uid,
         email: firebaseUser.email,
-        username: firebaseUser.displayName || firebaseUser.email?.split('@')[0],
+        username: firebaseUser.displayName,
         avatar_url: firebaseUser.photoURL,
         is_premium: false,
         claude_enabled: false,
@@ -62,10 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         level: 1,
         streak_days: 0,
         last_login: new Date().toISOString(),
-        badges: [],
-        followers_count: 0,
-        following_count: 0,
-        following: []
+        badges: []
       };
 
       // If user not found, create new user
@@ -81,21 +78,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } as AuthUser;
       }
 
-      // If user exists, update last login and sync username with displayName if needed
+      // If user exists, update last login
       const userData = userDoc.data();
-      const updateData: any = {
+      await setDoc(userRef, {
         ...userData,
         last_login: serverTimestamp()
-      };
-
-      // If displayName exists and is different from username, update username
-      if (firebaseUser.displayName &&
-          firebaseUser.displayName !== userData.username) {
-        updateData.username = firebaseUser.displayName;
-        console.log('Syncing username with displayName:', firebaseUser.displayName);
-      }
-
-      await setDoc(userRef, updateData, { merge: true });
+      }, { merge: true });
 
       // Return user data with AuthUser type
       return {
@@ -128,10 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         level: 1,
         streak_days: 0,
         last_login: new Date().toISOString(),
-        badges: [],
-        followers_count: 0,
-        following_count: 0,
-        following: []
+        badges: []
       } as AuthUser;
     }
   };

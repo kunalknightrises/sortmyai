@@ -9,10 +9,7 @@ const Footer = () => {
           <div className="mb-8 md:mb-0">
             <div className="flex items-center mb-4">
               <LogoIcon className="w-6 h-6 mr-2" />
-              <span className="text-lg font-bold">
-                <span className="text-white">SortMy</span>
-                <span className="text-sortmy-blue">AI</span>
-              </span>
+              <span className="text-lg font-bold">SortMyAI</span>
             </div>
             <p className="text-gray-400 text-sm max-w-xs">
               A sleek, fast, no-nonsense digital tool to help organize your AI outputs and digital chaos.
@@ -23,39 +20,39 @@ const Footer = () => {
               <SocialLink icon={<Github size={18} />} href="#" />
             </div>
           </div>
-
+          
           <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-            <FooterLinkGroup
-              title="Product"
+            <FooterLinkGroup 
+              title="Product" 
               links={[
                 { text: "Features", href: "#features" },
                 { text: "How It Works", href: "#how-it-works" },
                 { text: "Pricing", href: "#" },
                 { text: "FAQ", href: "#" }
-              ]}
+              ]} 
             />
-
-            <FooterLinkGroup
-              title="Company"
+            
+            <FooterLinkGroup 
+              title="Company" 
               links={[
                 { text: "About Us", href: "#" },
                 { text: "Careers", href: "#" },
                 { text: "Blog", href: "#" },
                 { text: "Contact", href: "#" }
-              ]}
+              ]} 
             />
-
-            <FooterLinkGroup
-              title="Legal"
+            
+            <FooterLinkGroup 
+              title="Legal" 
               links={[
                 { text: "Privacy Policy", href: "#" },
                 { text: "Terms of Service", href: "#" },
                 { text: "Cookie Policy", href: "#" }
-              ]}
+              ]} 
             />
           </div>
         </div>
-
+        
         <div className="text-center pt-8 border-t border-sortmy-gray/20">
           <p className="text-gray-500 text-sm">
             © {new Date().getFullYear()} SortMyAI. All rights reserved.
@@ -68,8 +65,8 @@ const Footer = () => {
 
 const SocialLink = ({ icon, href }: { icon: React.ReactNode, href: string }) => {
   return (
-    <a
-      href={href}
+    <a 
+      href={href} 
       className="w-8 h-8 rounded-full bg-sortmy-gray/10 flex items-center justify-center text-gray-400 hover:bg-sortmy-blue/10 hover:text-sortmy-blue transition-colors"
     >
       {icon}
@@ -100,9 +97,9 @@ const FooterLinkGroup = ({ title, links }: { title: string; links: LinkItem[] })
 };
 
 const LogoIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="none" 
     xmlns="http://www.w3.org/2000/svg"
     className={className}
   >

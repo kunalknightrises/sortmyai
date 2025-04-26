@@ -3,7 +3,7 @@ import { Cpu, Briefcase, FileText, PenTool } from "lucide-react";
 
 const AudienceSection = () => {
   return (
-    <section id="audience" className="py-16 md:py-24 px-4 bg-sortmy-dark">
+    <section id="audience" className="py-16 md:py-24 px-4">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Who It's For</h2>
@@ -11,27 +11,27 @@ const AudienceSection = () => {
             Designed for those who create, manage, and organize digital content at scale
           </p>
         </div>
-
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <AudienceCard
+          <AudienceCard 
             icon={<Cpu />}
             title="AI Creators"
             description="For those building with and generating massive amounts of AI content"
           />
-
-          <AudienceCard
+          
+          <AudienceCard 
             icon={<Briefcase />}
             title="Founders"
             description="Entrepreneurs managing complex information ecosystems"
           />
-
-          <AudienceCard
+          
+          <AudienceCard 
             icon={<FileText />}
             title="Content Marketers"
             description="Teams producing and organizing multi-channel content"
           />
-
-          <AudienceCard
+          
+          <AudienceCard 
             icon={<PenTool />}
             title="Knowledge Workers"
             description="Professionals who live in documents, research, and digital assets"
