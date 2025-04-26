@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 // Define the schema for profile editing
 const profileSchema = z.object({
+  username: z.string().min(2, 'Username must be at least 2 characters').max(30, 'Username must be less than 30 characters'),
   bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
   avatar_url: z.string().optional(),
   profession: z.string().max(100, 'Profession must be less than 100 characters').optional(),
@@ -39,6 +40,7 @@ export function ProfileEditForm({ user, onSubmit, onCancel }: ProfileEditFormPro
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
+      username: user.username || '',
       bio: user.bio || '',
       avatar_url: user.avatar_url || '',
       profession: user.profession || '',
@@ -75,6 +77,7 @@ export function ProfileEditForm({ user, onSubmit, onCancel }: ProfileEditFormPro
       // Update user profile in Firestore
       const userRef = doc(db, 'users', user.id);
       await updateDoc(userRef, {
+        username: formData.username,
         bio: formData.bio,
         avatar_url: formData.avatar_url,
         profession: formData.profession,
@@ -120,6 +123,21 @@ export function ProfileEditForm({ user, onSubmit, onCancel }: ProfileEditFormPro
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Edit Profile</h2>
+
+        {/* Username */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-white">
+            Username
+          </label>
+          <input
+            {...register('username')}
+            className="w-full px-3 py-2 bg-sortmy-darker border border-sortmy-gray rounded-md focus:outline-none focus:ring-2 focus:ring-sortmy-blue"
+            placeholder="Your username"
+          />
+          {errors.username && (
+            <p className="text-red-500 text-xs mt-1">{errors.username.message}</p>
+          )}
+        </div>
 
         {/* Avatar Upload */}
         <div className="space-y-2">

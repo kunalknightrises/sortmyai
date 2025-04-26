@@ -2,6 +2,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
+import PushNotificationInitializer from './components/PushNotificationInitializer';
+import PortfolioProvider from './contexts/PortfolioContext';
+import BackgroundProvider from './contexts/BackgroundContext';
 
 // Pages
 import Login from '@/pages/Login';
@@ -10,10 +13,12 @@ import EmailLogin from '@/pages/EmailLogin';
 import Signup from '@/pages/Signup';
 import Profile from '@/pages/Profile';
 import Settings from '@/pages/Settings';
-import ToolTracker from '@/components/dashboard/ToolTracker';
 import AddTool from '@/components/dashboard/AddTool';
+import CombinedToolTracker from '@/components/dashboard/CombinedToolTracker';
 import Portfolio from '@/components/dashboard/Portfolio';
 import AddPortfolio from '@/components/dashboard/AddPortfolio';
+import ExploreCreators from '@/components/dashboard/ExploreCreators';
+import ExplorePosts from '@/components/dashboard/ExplorePosts';
 import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
 import Index from '@/pages/Index';
 import Dashboard from '@/components/Dashboard';
@@ -21,6 +26,10 @@ import Achievements from '@/pages/Achievements';
 import { useEffect } from 'react';
 import Academy from '@/pages/Academy';
 import AIToolsUpload from '@/pages/AIToolsUpload';
+
+import Messages from '@/pages/Messages';
+import UserInteractions from '@/pages/UserInteractions';
+import Analytics from '@/pages/Analytics';
 import { initializeCapacitor } from '@/lib/capacitor';
 import '@/lib/debug-utils'; // Import debug utilities
 
@@ -41,13 +50,18 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Routes>
+      <BackgroundProvider>
+        <PortfolioProvider>
+          <PushNotificationInitializer />
+          <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<EmailLogin />} />
         <Route path="/popup-login" element={<SimpleLogin />} />
         <Route path="/old-login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/portfolio/:username" element={<InstagramStylePortfolio />} />
+        <Route path="/explore" element={<ExploreCreators />} />
+        <Route path="/explore/posts" element={<ExplorePosts />} />
 
         {/* Dashboard and related routes */}
         <Route path="/dashboard" element={
@@ -77,7 +91,7 @@ function App() {
         <Route path="/dashboard/tools" element={
           <ProtectedRoute>
             <DashboardLayout>
-              <ToolTracker />
+              <CombinedToolTracker />
             </DashboardLayout>
           </ProtectedRoute>
         } />
@@ -90,6 +104,11 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* Redirect old library path to the combined tool tracker */}
+        <Route path="/dashboard/tools/library" element={
+          <Navigate to="/dashboard/tools" replace />
+        } />
+
         <Route path="/dashboard/portfolio" element={
           <ProtectedRoute>
             <DashboardLayout>
@@ -98,10 +117,28 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* This route is redundant - using InstagramStylePortfolio instead */}
+
         <Route path="/dashboard/portfolio/add" element={
           <ProtectedRoute>
             <DashboardLayout>
               <AddPortfolio />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/explore-creators" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ExploreCreators />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/dashboard/explore-posts" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ExplorePosts />
             </DashboardLayout>
           </ProtectedRoute>
         } />
@@ -132,8 +169,39 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* Messages route */}
+        <Route path="/dashboard/messages" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Messages />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* User Interactions route */}
+        <Route path="/dashboard/interactions" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <UserInteractions />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* Analytics route */}
+        <Route path="/dashboard/analytics" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Analytics />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+
+
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          </Routes>
+        </PortfolioProvider>
+      </BackgroundProvider>
     </QueryClientProvider>
   );
 }

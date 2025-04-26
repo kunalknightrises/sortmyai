@@ -1,7 +1,7 @@
 /// <reference path="../types/google.d.ts" />
 
 // Get API key and client ID from environment variables or use hardcoded values as fallback
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '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';
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || 'AIzaSyCSSBKFkrnBoK0b1Y3RmA97WdwcY9YLKcA';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '220186510992-5oa2tojm2o51qh4324ao7fe0mmfkh021.apps.googleusercontent.com';
 
 // Define authorized redirect URIs

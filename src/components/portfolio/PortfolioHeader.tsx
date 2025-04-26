@@ -23,7 +23,6 @@ export function PortfolioHeader({
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 border-b border-sortmy-gray">
       <div>
-        <h2 className="text-2xl font-bold mb-1">My Portfolio</h2>
         <p className="text-slate-400">
           {totalItems} {totalItems === 1 ? 'project' : 'projects'} showcasing your AI content creation
         </p>

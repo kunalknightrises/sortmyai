@@ -10,7 +10,7 @@ const HeroSection = () => {
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-10 md:mb-0">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6">
-              Turn <span className="gradient-text">chaos</span> into <span className="gradient-text">control</span>.<br /> 
+              Turn <span className="gradient-text">chaos</span> into <span className="gradient-text">control</span>.<br />
               Build your own <span className="relative">
                 AI brain
                 <span className="absolute bottom-0 left-0 w-full h-1 bg-sortmy-blue opacity-70"></span>

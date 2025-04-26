@@ -7,12 +7,15 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+// import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { X, Plus, ArrowLeft } from 'lucide-react';
+import { X, Plus, ArrowLeft, PlusCircle, Briefcase } from 'lucide-react';
+import GlassCard from '@/components/ui/GlassCard';
+import NeonButton from '@/components/ui/NeonButton';
+import ClickEffect from '@/components/ui/ClickEffect';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Tool name must be at least 2 characters" }),
@@ -96,14 +99,17 @@ const AddTool = () => {
 
   return (
     <div className="space-y-8">
-      <Button variant="ghost" className="mb-4" onClick={() => navigate('/dashboard/tools')}>
+      <NeonButton variant="cyan" className="mb-4" onClick={() => navigate('/dashboard/tools')}>
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Tools
-      </Button>
+      </NeonButton>
 
-      <Card className="bg-sortmy-gray/10 border-sortmy-gray/30">
+      <GlassCard variant="bordered" className="border-sortmy-blue/20">
         <CardHeader>
-          <CardTitle>Add a New Tool</CardTitle>
+          <CardTitle className="flex items-center">
+            <Briefcase className="w-5 h-5 mr-2 text-sortmy-blue" />
+            <span className="bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">Add a New Tool</span>
+          </CardTitle>
           <CardDescription>
             Add details about an AI tool you use in your workflow
           </CardDescription>
@@ -169,13 +175,13 @@ const AddTool = () => {
                             {form.getValues().tags.map((tag, i) => (
                               <div
                                 key={i}
-                                className="bg-sortmy-gray/20 text-white px-3 py-1 rounded-full flex items-center gap-1"
+                                className="bg-sortmy-blue/20 text-white px-3 py-1 rounded-full flex items-center gap-1 transition-colors hover:bg-sortmy-blue/30"
                               >
                                 {tag}
                                 <button
                                   type="button"
                                   onClick={() => removeTag(tag)}
-                                  className="w-4 h-4 rounded-full bg-sortmy-gray/50 flex items-center justify-center hover:bg-sortmy-gray/80"
+                                  className="w-4 h-4 rounded-full bg-sortmy-gray/50 flex items-center justify-center hover:bg-sortmy-blue/50 transition-colors"
                                 >
                                   <X className="w-3 h-3" />
                                 </button>
@@ -195,13 +201,15 @@ const AddTool = () => {
                                 }
                               }}
                             />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={addTag}
-                            >
-                              <Plus className="w-4 h-4 mr-1" /> Add
-                            </Button>
+                            <ClickEffect effect="ripple" color="blue">
+                              <NeonButton
+                                type="button"
+                                variant="cyan"
+                                onClick={addTag}
+                              >
+                                <Plus className="w-4 h-4 mr-1" /> Add
+                              </NeonButton>
+                            </ClickEffect>
                           </div>
                         </div>
                         <FormDescription>
@@ -235,18 +243,22 @@ const AddTool = () => {
               </div>
 
               <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full md:w-auto"
-                >
-                  {isSubmitting ? 'Saving...' : 'Add Tool'}
-                </Button>
+                <ClickEffect effect="particles" color="blue">
+                  <NeonButton
+                    type="submit"
+                    disabled={isSubmitting}
+                    variant="gradient"
+                    className="w-full md:w-auto"
+                  >
+                    <PlusCircle className="w-4 h-4 mr-2" />
+                    {isSubmitting ? 'Saving...' : 'Add Tool'}
+                  </NeonButton>
+                </ClickEffect>
               </div>
             </form>
           </Form>
         </CardContent>
-      </Card>
+      </GlassCard>
     </div>
   );
 };

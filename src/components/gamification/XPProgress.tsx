@@ -12,19 +12,19 @@ interface XPProgressProps {
 const XPProgress = ({ user, className, variant = 'default' }: XPProgressProps) => {
   // No user data yet
   if (!user) return null;
-  
+
   // Default values if not set
   const currentXP = user.xp || 0;
   const currentLevel = user.level || 1;
-  
+
   // Calculate XP needed for next level using a simple formula
   // Each level requires more XP than the previous
   const baseXP = 100;
   const nextLevelXP = baseXP * Math.pow(1.5, currentLevel - 1);
-  
+
   // Calculate progress percentage
   const levelProgress = Math.min(Math.floor((currentXP / nextLevelXP) * 100), 100);
-  
+
   if (variant === 'compact') {
     return (
       <div className={`flex items-center space-x-2 ${className}`}>
@@ -36,25 +36,28 @@ const XPProgress = ({ user, className, variant = 'default' }: XPProgressProps) =
       </div>
     );
   }
-  
+
   return (
     <div className={`space-y-2 ${className}`}>
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <div className="bg-sortmy-blue/20 p-2 rounded-full mr-2">
+      <div className="flex items-center">
+        <div className="mr-3">
+          <div className="bg-sortmy-blue/20 p-2 rounded-full">
             <Zap className="w-4 h-4 text-sortmy-blue" />
           </div>
-          <div>
-            <p className="text-sm font-medium">Level {currentLevel}</p>
-            <p className="text-xs text-gray-400">{currentXP} XP</p>
-          </div>
         </div>
-        <span className="text-xs text-gray-400">{levelProgress}% to Level {currentLevel + 1}</span>
+        <div className="flex-1">
+          <div className="flex justify-between items-center mb-1">
+            <p className="text-sm font-medium">Level {currentLevel}</p>
+            <span className="text-xs text-gray-400">{levelProgress}% to Level {currentLevel + 1}</span>
+          </div>
+          <p className="text-xs text-gray-400 mb-2">{currentXP} XP</p>
+          <Progress
+            value={levelProgress}
+            className="h-2 bg-sortmy-gray/30"
+            indicatorClassName="bg-sortmy-blue"
+          />
+        </div>
       </div>
-      <Progress
-        value={levelProgress}
-        className="h-2 bg-sortmy-gray/30"
-      />
     </div>
   );
 };
