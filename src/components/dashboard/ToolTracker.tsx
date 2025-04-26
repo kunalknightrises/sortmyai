@@ -1,13 +1,5 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-// import { Button } from '@/components/ui/button';
-import { Tool as BaseTool } from '@/types';
-
-// Extended Tool type with source information
-interface Tool extends BaseTool {
-  source?: string;
-}
 import { useNavigate } from 'react-router-dom';
 import { collection, query, where, getDocs, deleteDoc, doc, getDoc, updateDoc, arrayRemove } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -20,6 +12,8 @@ import NeonButton from '@/components/ui/NeonButton';
 import ClickEffect from '@/components/ui/ClickEffect';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Card } from "@/components/ui/card";
+import { Tool } from "@/types";
 
 const ToolTracker = () => {
   const { user } = useAuth();
@@ -48,7 +42,6 @@ const ToolTracker = () => {
     enabled: !!user?.uid
   });
 
-  // Fetch tools from user's toolTracker array
   const { data: userTools, isLoading: isLoadingUserTools, error: userToolsError } = useQuery({
     queryKey: ['userTools', user?.uid],
     queryFn: async () => {
@@ -62,9 +55,7 @@ const ToolTracker = () => {
       const userData = userDoc.data();
       const toolTracker = userData.toolTracker || [];
 
-      // Convert toolTracker items to Tool format
       return toolTracker.map((tool: any) => {
-        // Extract tags from the tool if available
         let tags: string[] = [];
         if (tool.tags) {
           tags = Array.isArray(tool.tags) ? tool.tags :
@@ -91,12 +82,10 @@ const ToolTracker = () => {
     enabled: !!user?.uid
   });
 
-  // Combine tools from both sources
   const allTools = [...(tools || []), ...(userTools || [])];
   const isLoading = isLoadingTools || isLoadingUserTools;
   const error = toolsError || userToolsError;
 
-  // Extract all unique tags and tool names from tools
   useEffect(() => {
     if (allTools.length > 0) {
       const tagsSet = new Set<string>();
@@ -121,34 +110,26 @@ const ToolTracker = () => {
 
     setIsDeleting(true);
     try {
-      // Check the source of the tool to determine how to delete it
       if (toolToDelete.source === 'tools_collection') {
-        // Delete from tools collection
         await deleteDoc(doc(db, 'tools', toolToDelete.id));
-        // Invalidate and refetch the tools query
         await queryClient.invalidateQueries({ queryKey: ['tools', user?.uid] });
       } else if (toolToDelete.source === 'user_tooltracker') {
-        // Delete from user's toolTracker array
         const userRef = doc(db, 'users', user!.uid);
 
-        // Get the current toolTracker array
         const userDoc = await getDoc(userRef);
         if (userDoc.exists()) {
           const userData = userDoc.data();
           const toolTracker = userData.toolTracker || [];
 
-          // Find the tool to remove
           const toolToRemove = toolTracker.find((tool: any) => tool.id === toolToDelete.id);
 
           if (toolToRemove) {
-            // Remove the tool from the array
             await updateDoc(userRef, {
               toolTracker: arrayRemove(toolToRemove)
             });
           }
         }
 
-        // Invalidate and refetch the userTools query
         await queryClient.invalidateQueries({ queryKey: ['userTools', user?.uid] });
       }
 
@@ -171,7 +152,6 @@ const ToolTracker = () => {
   };
 
   const filteredTools = allTools?.filter(tool => {
-    // Filter by search query
     const searchLower = searchQuery.toLowerCase();
     const matchesSearch = (
       tool.name.toLowerCase().includes(searchLower) ||
@@ -181,7 +161,6 @@ const ToolTracker = () => {
       ))
     );
 
-    // Filter by selected tags
     const matchesTags = selectedTags.length === 0 || (
       tool.tags &&
       Array.isArray(tool.tags) &&
@@ -191,7 +170,6 @@ const ToolTracker = () => {
     return matchesSearch && matchesTags;
   });
 
-  // Toggle tag selection
   const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
       prev.includes(tag)
@@ -200,7 +178,6 @@ const ToolTracker = () => {
     );
   };
 
-  // Clear all filters
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedTags([]);

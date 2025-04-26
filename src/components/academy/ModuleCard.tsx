@@ -1,21 +1,12 @@
+import { Module } from '@/types/academy';
 
-import { PlayCircle, Zap, FileText, CheckCircle } from "lucide-react";
-import { CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import GlassCard from "@/components/ui/GlassCard";
-import NeonButton from "@/components/ui/NeonButton";
-import ClickEffect from "@/components/ui/ClickEffect";
-import AnimatedTooltip from "@/components/ui/AnimatedTooltip";
-import { motion } from "framer-motion";
-import YoutubeShortEmbed from "@/components/academy/YoutubeShortEmbed";
-import { Module } from "@/types/academy";
-
-interface ModuleCardProps {
+export interface ModuleCardProps {
   module: Module;
-  onStartModule: (tierId: string, moduleId: string) => void;
   tierId: string;
+  onStartModule: (moduleId: string) => void;
 }
 
-const ModuleCard = ({ module, onStartModule, tierId }: ModuleCardProps) => {
+const ModuleCard = ({ module, tierId, onStartModule }: ModuleCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -55,7 +46,7 @@ const ModuleCard = ({ module, onStartModule, tierId }: ModuleCardProps) => {
             <NeonButton
               variant={module.isCompleted ? "cyan" : "gradient"}
               className="w-full gap-2"
-              onClick={() => onStartModule(tierId, module.id)}
+              onClick={() => onStartModule(module.id)}
             >
               {module.isCompleted ? (
                 <>
