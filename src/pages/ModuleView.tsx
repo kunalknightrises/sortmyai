@@ -1,28 +1,57 @@
 
 import { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Zap, BookOpen, FileText } from "lucide-react";
+import { Zap, Copy, Check } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import GlassCard from "@/components/ui/GlassCard";
 import { Module } from "@/types/academy";
 import YoutubeShortEmbed from "@/components/academy/YoutubeShortEmbed";
-import MissionChallenge from "@/components/academy/MissionChallenge";
 import { useToast } from "@/hooks/use-toast";
 import ModuleSidebar from "@/components/academy/ModuleSidebar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface ModuleViewProps {
   module: Module;
 }
 
+interface AITool {
+  name: string;
+  icon: string;
+  url: string;
+}
+
 const ModuleView = ({ module }: ModuleViewProps) => {
   const [videoProgress, setVideoProgress] = useState(0);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  
+  // Sample resources that would change as the video plays
+  const [currentPrompt, setCurrentPrompt] = useState(
+    "I want to create a video explaining [TOPIC] using AI voice generation."
+  );
+  
+  // Sample AI tools that are relevant to the module
+  const aiTools: AITool[] = [
+    { name: "ChatGPT", icon: "⚡", url: "https://chat.openai.com" },
+    { name: "HeyGen", icon: "🎬", url: "https://www.heygen.com" },
+    { name: "Midjourney", icon: "🖼️", url: "https://www.midjourney.com" },
+    { name: "ElevenLabs", icon: "🔊", url: "https://elevenlabs.io" }
+  ];
 
-  const handleChallengeComplete = () => {
+  const handleCopyPrompt = () => {
+    navigator.clipboard.writeText(currentPrompt);
+    setCopied(true);
+    
     toast({
-      title: "Challenge Completed! 🎉",
-      description: `You've earned +${module.xpReward} XP!`,
+      title: "Prompt Copied",
+      description: "The prompt has been copied to your clipboard",
     });
+    
+    setTimeout(() => setCopied(false), 2000);
+  };
+  
+  const handleToolClick = (url: string) => {
+    window.open(url, '_blank');
   };
 
   return (
@@ -53,43 +82,104 @@ const ModuleView = ({ module }: ModuleViewProps) => {
           </div>
         </GlassCard>
 
-        {/* Content Tabs */}
-        <Tabs defaultValue="learn" className="space-y-4">
-          <TabsList className="bg-sortmy-darker/50">
-            <TabsTrigger value="learn" className="data-[state=active]:bg-sortmy-blue/10">
-              <BookOpen className="w-4 h-4 mr-2" />
-              Learn
-            </TabsTrigger>
-            <TabsTrigger value="resources" className="data-[state=active]:bg-sortmy-blue/10">
-              <FileText className="w-4 h-4 mr-2" />
-              Resources
-            </TabsTrigger>
-          </TabsList>
+        {/* Main Layout: Side by Side Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[70vh]">
+          {/* Left Panel - YouTube Short */}
+          <GlassCard className="flex-1 overflow-hidden flex flex-col h-full">
+            <div className="bg-sortmy-blue/10 p-3 flex items-center">
+              <h3 className="text-md font-semibold text-white">Learn</h3>
+            </div>
+            <div className="flex-1 flex items-center justify-center p-4">
+              <div className="w-full max-w-[400px] mx-auto">
+                <YoutubeShortEmbed
+                  videoId={module.videoId || ""}
+                  title={module.title}
+                  onProgressChange={setVideoProgress}
+                />
+              </div>
+            </div>
+          </GlassCard>
 
-          <TabsContent value="learn" className="space-y-4">
-            <GlassCard className="aspect-video">
-              <YoutubeShortEmbed
-                videoId={module.videoId || ""}
-                title={module.title}
-                onProgressChange={setVideoProgress}
-              />
-            </GlassCard>
-          </TabsContent>
-
-          <TabsContent value="resources" className="space-y-4">
-            <GlassCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Module Resources</h3>
-              <div className="prose prose-invert max-w-none">
-                <p>Key takeaways and resources will be displayed here...</p>
+          {/* Right Panel - Resources & Tools */}
+          <div className="flex flex-col gap-6 h-full">
+            {/* Resources Section (Top) */}
+            <GlassCard className="flex-1 overflow-hidden flex flex-col">
+              <div className="bg-sortmy-blue/10 p-3 flex items-center">
+                <h3 className="text-md font-semibold text-white">Resources</h3>
+              </div>
+              <div className="flex-1 p-4 space-y-5 overflow-auto">
+                <div className="prose prose-invert max-w-none">
+                  <p className="text-gray-300">
+                    In this lesson, we'll learn how to create AI-powered videos with customized voices.
+                    Follow along with the tutorial and use the prompt below.
+                  </p>
+                </div>
+                
+                <div className="space-y-2 bg-sortmy-darker/50 p-4 rounded-lg border border-sortmy-blue/20">
+                  <label className="text-sm font-medium text-gray-300">Editable Prompt Template</label>
+                  <Input
+                    value={currentPrompt}
+                    onChange={(e) => setCurrentPrompt(e.target.value)}
+                    className="bg-sortmy-darker border-sortmy-blue/20 text-white"
+                  />
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleCopyPrompt}
+                      variant="outline"
+                      size="sm"
+                      className="border-sortmy-blue/30 text-sortmy-blue hover:bg-sortmy-blue/10"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-4 w-4 mr-1" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4 mr-1" />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="border-t border-sortmy-blue/10 pt-3 mt-3">
+                  <h4 className="text-sm font-medium mb-2 text-gray-300">Key Takeaways</h4>
+                  <ul className="list-disc list-inside text-sm text-gray-400 space-y-1">
+                    <li>Understand AI voice synthesis basics</li>
+                    <li>Learn prompt structure for voice generation</li>
+                    <li>Explore emotion and tone in AI voice</li>
+                  </ul>
+                </div>
               </div>
             </GlassCard>
-          </TabsContent>
-        </Tabs>
 
-        {/* Mission Challenge */}
-        <MissionChallenge
-          onComplete={handleChallengeComplete}
-        />
+            {/* AI Tools Section (Bottom) */}
+            <GlassCard className="flex-1 overflow-hidden flex flex-col">
+              <div className="bg-sortmy-blue/10 p-3 flex items-center">
+                <h3 className="text-md font-semibold text-white">AI Tools</h3>
+              </div>
+              <div className="flex-1 flex items-center p-4">
+                <div className="grid grid-cols-2 gap-2 w-full">
+                  {aiTools.map((tool, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      onClick={() => handleToolClick(tool.url)}
+                      className="bg-sortmy-darker/50 text-white border border-sortmy-blue/20 
+                              hover:bg-sortmy-blue/10 hover:border-sortmy-blue/40 hover:shadow-[0_0_8px_rgba(0,102,255,0.3)]
+                              transition-all duration-300 p-4 h-auto"
+                    >
+                      <span className="mr-2 text-lg">{tool.icon}</span>
+                      {tool.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+        </div>
       </div>
 
       {/* Sidebar */}

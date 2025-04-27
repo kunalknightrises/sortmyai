@@ -1,9 +1,8 @@
 
-// Define module and tier interfaces
 export interface Module {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   xpReward: number;
   isCompleted: boolean;
   videoId?: string;
