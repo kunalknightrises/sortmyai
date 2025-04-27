@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Zap, Copy, Check } from "lucide-react";
+import { Zap, Copy, Check, ArrowLeft } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import GlassCard from "@/components/ui/GlassCard";
 import { Module } from "@/types/academy";
@@ -9,9 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 import ModuleSidebar from "@/components/academy/ModuleSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 
 interface ModuleViewProps {
   module: Module;
+  onBack?: () => void;
 }
 
 interface AITool {
@@ -20,7 +22,8 @@ interface AITool {
   url: string;
 }
 
-const ModuleView = ({ module }: ModuleViewProps) => {
+const ModuleView = ({ module, onBack }: ModuleViewProps) => {
+  const navigate = useNavigate();
   const [videoProgress, setVideoProgress] = useState(0);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -54,22 +57,42 @@ const ModuleView = ({ module }: ModuleViewProps) => {
     window.open(url, '_blank');
   };
 
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/dashboard/academy');
+    }
+  };
+
   return (
     <div className="flex gap-6 p-4 min-h-screen">
       {/* Main Content */}
       <div className="flex-1 space-y-6">
-        {/* Mission Briefing */}
+        {/* Navigation and Mission Briefing */}
         <GlassCard className="p-6">
           <div className="space-y-4">
             <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-white mb-2">{module.title}</h1>
-                <p className="text-gray-400">{module.description}</p>
+              <div className="flex items-center space-x-2">
+                <Button 
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBack}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-1" />
+                  Back to Academy
+                </Button>
               </div>
               <div className="flex items-center bg-sortmy-blue/10 px-3 py-1.5 rounded-full">
                 <Zap className="w-4 h-4 text-sortmy-blue mr-1.5" />
                 <span className="text-sm font-medium text-sortmy-blue">+{module.xpReward} XP</span>
               </div>
+            </div>
+            
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-2">{module.title}</h1>
+              <p className="text-gray-400">{module.description}</p>
             </div>
             
             <div className="space-y-2">

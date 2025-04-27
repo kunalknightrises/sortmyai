@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import TierSection from "@/components/academy/TierSection";
@@ -107,18 +108,24 @@ const Academy = () => {
     
     if (module) {
       setSelectedModule(module);
+      console.log("Selected module:", module);
     }
+  };
+
+  const handleBackToAcademy = () => {
+    setSelectedModule(null);
   };
 
   // If a module is selected, show the module view
   if (selectedModule) {
-    return <ModuleView module={selectedModule} />;
+    return <ModuleView module={selectedModule} onBack={handleBackToAcademy} />;
   }
 
   // Otherwise show the academy overview
   return (
     <div className="space-y-6 p-1 md:p-4">
       <div className="flex flex-col gap-2">
+        <h1 className="text-2xl font-bold">SortMyAI Academy</h1>
         <p className="text-gray-400">
           Master AI skills and earn XP through structured learning paths
         </p>
