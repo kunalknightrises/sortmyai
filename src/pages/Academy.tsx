@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import TierSection from "@/components/academy/TierSection";
@@ -10,7 +9,7 @@ import { Brain } from "lucide-react";
 import { Tier } from "@/types/academy";
 
 const Academy = () => {
-  // Academy tiers and modules
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null);
   const [tiers] = useState<Tier[]>([
     {
       id: "tier1",
@@ -100,12 +99,22 @@ const Academy = () => {
     }
   ]);
 
-  const handleStartModule = (tierId: string, moduleId: string) => {
-    console.log(`Starting module ${moduleId} in tier ${tierId}`);
-    // In a real implementation, this would navigate to the module content
-    // and handle progress tracking
+  const handleStartModule = (moduleId: string) => {
+    // Find the module in all tiers
+    const module = tiers.flatMap(tier => tier.modules)
+      .find(m => m.id === moduleId);
+    
+    if (module) {
+      setSelectedModule(module);
+    }
   };
 
+  // If a module is selected, show the module view
+  if (selectedModule) {
+    return <ModuleView module={selectedModule} />;
+  }
+
+  // Otherwise show the academy overview
   return (
     <div className="space-y-6 p-1 md:p-4">
       <div className="flex flex-col gap-2">
