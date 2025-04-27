@@ -3,13 +3,19 @@ import { User } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import XPProgress from "@/components/gamification/XPProgress";
 import AIKnowledgeMeter from "@/components/gamification/AIKnowledgeMeter";
+import { User as UserType } from "@/types";
 
 // Mock user data for demonstration purposes
 // In a real application, this would come from a context or prop
-const mockUser = {
+const mockUser: UserType = {
+  id: 'mock-user-id',
+  uid: 'mock-user-uid',
+  email: 'user@example.com',
   xp: 150,
   level: 2,
   streak_days: 3,
+  last_login: new Date().toISOString(),
+  badges: [],
   ai_knowledge: {
     overall: 42,
     categories: {
@@ -30,7 +36,7 @@ const ModuleSidebar = () => {
           </div>
           <div>
             <p className="text-sm font-medium">Academy Rank</p>
-            <p className="text-xs text-gray-400">Explorer Level 2</p>
+            <p className="text-xs text-gray-400">Explorer Level {mockUser.level}</p>
           </div>
         </div>
 

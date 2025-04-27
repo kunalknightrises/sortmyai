@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -12,9 +13,9 @@ import NeonButton from '@/components/ui/NeonButton';
 import ClickEffect from '@/components/ui/ClickEffect';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card } from "@/components/ui/card";
 import { Tool } from "@/types";
 
+// Define an extended Tool type that includes source
 interface ExtendedTool extends Tool {
   source: 'tools_collection' | 'user_tooltracker';
 }
