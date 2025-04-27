@@ -4,6 +4,22 @@ import GlassCard from "@/components/ui/GlassCard";
 import XPProgress from "@/components/gamification/XPProgress";
 import AIKnowledgeMeter from "@/components/gamification/AIKnowledgeMeter";
 
+// Mock user data for demonstration purposes
+// In a real application, this would come from a context or prop
+const mockUser = {
+  xp: 150,
+  level: 2,
+  streak_days: 3,
+  ai_knowledge: {
+    overall: 42,
+    categories: {
+      'prompting': 65,
+      'tools': 35,
+      'techniques': 25
+    }
+  }
+};
+
 const ModuleSidebar = () => {
   return (
     <div className="w-80 space-y-4 flex-shrink-0">
@@ -18,8 +34,8 @@ const ModuleSidebar = () => {
           </div>
         </div>
 
-        <XPProgress variant="compact" />
-        <AIKnowledgeMeter />
+        <XPProgress variant="compact" user={mockUser} />
+        <AIKnowledgeMeter user={mockUser} />
       </GlassCard>
     </div>
   );

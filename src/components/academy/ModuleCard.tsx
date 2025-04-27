@@ -7,10 +7,11 @@ import { cn } from '@/lib/utils';
 
 interface ModuleCardProps {
   module: Module;
+  tierId?: string; // Make tierId optional
   onStartModule: (moduleId: string) => void;
 }
 
-const ModuleCard = ({ module, onStartModule }: ModuleCardProps) => {
+const ModuleCard = ({ module, onStartModule, tierId }: ModuleCardProps) => {
   return (
     <Card className="bg-sortmy-darker/70 border-sortmy-blue/20 hover:border-sortmy-blue/40 transition-colors">
       <CardHeader className="pb-2">

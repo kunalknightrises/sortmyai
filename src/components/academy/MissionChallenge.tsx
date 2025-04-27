@@ -6,11 +6,10 @@ import GlassCard from "@/components/ui/GlassCard";
 import { Star } from "lucide-react";
 
 interface MissionChallengeProps {
-  moduleId: string;
   onComplete: () => void;
 }
 
-const MissionChallenge = ({ moduleId, onComplete }: MissionChallengeProps) => {
+const MissionChallenge = ({ onComplete }: MissionChallengeProps) => {
   const [response, setResponse] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {

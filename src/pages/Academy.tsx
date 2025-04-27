@@ -6,7 +6,8 @@ import NeonButton from "@/components/ui/NeonButton";
 import HoverEffect from "@/components/ui/HoverEffect";
 import AISuggestion from "@/components/ui/AISuggestion";
 import { Brain } from "lucide-react";
-import { Tier } from "@/types/academy";
+import { Tier, Module } from "@/types/academy";
+import ModuleView from "@/pages/ModuleView";
 
 const Academy = () => {
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
@@ -143,7 +144,7 @@ const Academy = () => {
       <AISuggestion
         suggestion="Based on your interests, you might want to check out the 'Role-based Prompting' module next."
         actionText="Start Module"
-        onAction={() => handleStartModule('tier1', 'module5')}
+        onAction={() => handleStartModule('module5')}
       />
 
       <Separator className="bg-sortmy-blue/20" />

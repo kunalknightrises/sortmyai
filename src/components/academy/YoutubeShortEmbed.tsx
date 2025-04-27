@@ -6,9 +6,10 @@ import { Play } from 'lucide-react';
 interface YoutubeShortEmbedProps {
   videoId: string;
   title?: string;
+  onProgressChange?: (progress: number) => void;
 }
 
-const YoutubeShortEmbed = ({ videoId, title }: YoutubeShortEmbedProps) => {
+const YoutubeShortEmbed = ({ videoId, title, onProgressChange }: YoutubeShortEmbedProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   
@@ -18,6 +19,15 @@ const YoutubeShortEmbed = ({ videoId, title }: YoutubeShortEmbedProps) => {
 
   const handleLoad = () => {
     setIsLoaded(true);
+    // Simulate progress for demo purposes
+    if (onProgressChange) {
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        onProgressChange(Math.min(progress, 100));
+        if (progress >= 100) clearInterval(interval);
+      }, 3000);
+    }
   };
 
   const handleError = () => {

@@ -5,7 +5,6 @@ import { Zap, BookOpen, FileText } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import GlassCard from "@/components/ui/GlassCard";
 import { Module } from "@/types/academy";
-import XPProgress from "@/components/gamification/XPProgress";
 import YoutubeShortEmbed from "@/components/academy/YoutubeShortEmbed";
 import MissionChallenge from "@/components/academy/MissionChallenge";
 import { useToast } from "@/hooks/use-toast";
@@ -89,7 +88,6 @@ const ModuleView = ({ module }: ModuleViewProps) => {
 
         {/* Mission Challenge */}
         <MissionChallenge
-          moduleId={module.id}
           onComplete={handleChallengeComplete}
         />
       </div>

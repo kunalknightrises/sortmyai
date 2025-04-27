@@ -15,6 +15,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from "@/components/ui/card";
 import { Tool } from "@/types";
 
+interface ExtendedTool extends Tool {
+  source: 'tools_collection' | 'user_tooltracker';
+}
+
 const ToolTracker = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -24,7 +28,7 @@ const ToolTracker = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [toolToDelete, setToolToDelete] = useState<Tool | null>(null);
+  const [toolToDelete, setToolToDelete] = useState<ExtendedTool | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: tools, isLoading: isLoadingTools, error: toolsError } = useQuery({
@@ -37,7 +41,7 @@ const ToolTracker = () => {
         id: doc.id,
         ...doc.data(),
         source: 'tools_collection'
-      })) as (Tool & { source: string })[];
+      })) as ExtendedTool[];
     },
     enabled: !!user?.uid
   });
@@ -77,7 +81,7 @@ const ToolTracker = () => {
           notes: tool.excelsAt || '',
           source: 'user_tooltracker'
         };
-      }) as (Tool & { source: string })[];
+      }) as ExtendedTool[];
     },
     enabled: !!user?.uid
   });
@@ -100,7 +104,7 @@ const ToolTracker = () => {
     }
   }, [allTools]);
 
-  const handleDeleteClick = (tool: Tool) => {
+  const handleDeleteClick = (tool: ExtendedTool) => {
     setToolToDelete(tool);
     setShowDeleteDialog(true);
   };
