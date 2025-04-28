@@ -36,11 +36,14 @@ export const validateEnv = () => {
     window.location.hostname.includes('lovableproject.com') ||
     window.location.hostname === 'localhost' ||
     window.location.hostname === '127.0.0.1' ||
-    window.location.hostname.includes('netlify.app')
+    window.location.hostname.includes('netlify.app') ||
+    window.location.hostname.includes('sortmyai.com') ||
+    window.location.hostname.includes('sortmind.com') ||
+    window.location.hostname.includes('vercel.app')
   );
   // Use default values for known environments when env vars aren't available
   if (isKnownEnvironment && !hasEnvVars) {
-    console.log('Running in Lovable or development environment, using default Firebase config');
+    console.log('Running in known environment, using default Firebase config');
     return {
       VITE_FIREBASE_API_KEY: "AIzaSyCSSBKFkrnBoK0b1Y3RmA97WdwcY9YLKcA",
       VITE_FIREBASE_AUTH_DOMAIN: "smai-og.firebaseapp.com",
