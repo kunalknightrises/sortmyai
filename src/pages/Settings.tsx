@@ -1,19 +1,17 @@
 
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import NeonButton from "@/components/ui/NeonButton";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Settings2, 
-  Shield, 
-  UserCircle2, 
+  Shield,
+  UserCircle2,
   Lock,
   GraduationCap,
   Trash2,
-  Github
+  Code
 } from "lucide-react";
 
 // Create categories for our settings
@@ -26,7 +24,7 @@ const settingsCategories = [
   {
     id: 'connected',
     label: 'Connected Accounts',
-    icon: <Github className="w-4 h-4" />,
+    icon: <Code className="w-4 h-4" />,
   },
   {
     id: 'security',
@@ -76,50 +74,33 @@ const Settings = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center">
-          <Settings2 className="w-8 h-8 mr-2 text-sortmy-blue" />
-          Account Settings
-        </h1>
-        <p className="text-gray-400 mt-1">
-          Manage your account preferences and profile settings
-        </p>
-      </div>
-
       {/* Main Content */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar */}
-        <div className="lg:w-64 flex-shrink-0">
-          <div className="bg-sortmy-darker/70 backdrop-blur-md rounded-lg border border-sortmy-blue/20 p-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical">
-              <TabsList className="flex flex-col w-full space-y-1">
-                {settingsCategories.map((category) => (
-                  <TabsTrigger
-                    key={category.id}
-                    value={category.id}
-                    className={`justify-start px-4 py-2.5 w-full text-left ${
-                      activeTab === category.id
-                        ? 'bg-sortmy-blue/10 text-sortmy-blue border-l-2 border-sortmy-blue'
-                        : 'text-gray-400 hover:text-white hover:bg-sortmy-blue/5'
-                    }`}
-                  >
-                    <span className="flex items-center gap-3">
-                      {category.icon}
-                      {category.label}
-                    </span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+        {/* Simple button list instead of tabs */}
+        <div className="w-52 lg:w-56 flex-shrink-0">
+          <div className="flex flex-col space-y-1.5">
+            {settingsCategories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setActiveTab(category.id)}
+                className={`flex items-center gap-3 px-3 py-2 rounded text-left text-sm ${
+                  activeTab === category.id
+                    ? 'bg-sortmy-blue/10 text-sortmy-blue border-l-2 border-sortmy-blue'
+                    : 'text-gray-400 hover:text-white hover:bg-sortmy-blue/5'
+                }`}
+              >
+                <span className="flex-shrink-0">{category.icon}</span>
+                <span>{category.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Content Area */}
         <div className="flex-1">
           <div className="bg-sortmy-darker/70 backdrop-blur-md rounded-lg border border-sortmy-blue/20 p-6">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsContent value="general">
+            <div>
+              {activeTab === 'general' && (
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -173,9 +154,9 @@ const Settings = () => {
                     </div>
                   </div>
                 </CardContent>
-              </TabsContent>
+              )}
 
-              <TabsContent value="security">
+              {activeTab === 'security' && (
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -204,9 +185,9 @@ const Settings = () => {
                     </div>
                   </div>
                 </CardContent>
-              </TabsContent>
+              )}
 
-              <TabsContent value="intern">
+              {activeTab === 'intern' && (
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -217,7 +198,6 @@ const Settings = () => {
                         </p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Label htmlFor="intern-badge">Show Badge</Label>
                         <input
                           type="checkbox"
                           id="intern-badge"
@@ -225,13 +205,14 @@ const Settings = () => {
                           onChange={(e) => handleInputChange('showInternBadge', e.target.checked)}
                           className="toggle"
                         />
+                        <Label htmlFor="intern-badge">Show Badge</Label>
                       </div>
                     </div>
                   </div>
                 </CardContent>
-              </TabsContent>
+              )}
 
-              <TabsContent value="danger">
+              {activeTab === 'danger' && (
                 <CardContent>
                   <div className="space-y-4">
                     <div>
@@ -240,8 +221,8 @@ const Settings = () => {
                         Once you delete your account, there is no going back. Please be certain.
                       </p>
                     </div>
-                    <NeonButton 
-                      variant="outline" 
+                    <NeonButton
+                      variant="outline"
                       className="w-full bg-red-500/10 border-red-500/50 text-red-500 hover:bg-red-500/20"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
@@ -249,9 +230,9 @@ const Settings = () => {
                     </NeonButton>
                   </div>
                 </CardContent>
-              </TabsContent>
-              
-              <TabsContent value="connected">
+              )}
+
+              {activeTab === 'connected' && (
                 <CardContent>
                   <div className="space-y-4">
                     <div>
@@ -263,7 +244,7 @@ const Settings = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between p-3 border border-sortmy-blue/20 rounded-md">
                         <div className="flex items-center">
-                          <Github className="w-5 h-5 mr-3 text-white" />
+                          <Code className="w-5 h-5 mr-3 text-white" />
                           <div>
                             <p className="text-sm font-medium">GitHub</p>
                             <p className="text-xs text-gray-400">Not connected</p>
@@ -274,9 +255,9 @@ const Settings = () => {
                     </div>
                   </div>
                 </CardContent>
-              </TabsContent>
-              
-              <TabsContent value="academy">
+              )}
+
+              {activeTab === 'academy' && (
                 <CardContent>
                   <div className="space-y-4">
                     <div>
@@ -297,8 +278,8 @@ const Settings = () => {
                     </div>
                   </div>
                 </CardContent>
-              </TabsContent>
-            </Tabs>
+              )}
+            </div>
 
             <div className="mt-6 flex justify-end">
               <NeonButton onClick={handleSaveSettings}>
