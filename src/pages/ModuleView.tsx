@@ -159,19 +159,23 @@ const ModuleView = ({ module, onBack }: ModuleViewProps) => {
                 
                 <div className="border-t border-sortmy-blue/10 pt-3 mt-3">
                   <h4 className="text-xs font-medium mb-4 text-gray-300">AI Tools</h4>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-4 gap-3">
                     {aiTools.map((tool, index) => (
-                      <Button
+                      <button
                         key={index}
-                        variant="outline"
                         onClick={() => handleToolClick(tool.url)}
-                        className="flex flex-col items-center p-2 h-auto bg-sortmy-darker/50 
-                                hover:bg-sortmy-blue/10 border border-sortmy-blue/20 
-                                hover:border-sortmy-blue/40 transition-all duration-300"
+                        className="group flex flex-col items-center"
                       >
-                        <span className="text-xl mb-1">{tool.icon}</span>
-                        <span className="text-[10px] text-gray-300 truncate w-full text-center">{tool.name}</span>
-                      </Button>
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-700 
+                                    flex items-center justify-center shadow-lg border border-gray-600/20
+                                    hover:scale-105 transition-transform duration-200">
+                          <span className="text-2xl">{tool.icon}</span>
+                        </div>
+                        <span className="text-[10px] text-gray-400 mt-1 group-hover:text-white 
+                                     transition-colors duration-200">
+                          {tool.name}
+                        </span>
+                      </button>
                     ))}
                   </div>
                 </div>
