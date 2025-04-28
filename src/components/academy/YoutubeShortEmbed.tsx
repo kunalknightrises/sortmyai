@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Play } from 'lucide-react';
 
@@ -12,10 +12,22 @@ interface YoutubeShortEmbedProps {
 const YoutubeShortEmbed = ({ videoId, title, onProgressChange }: YoutubeShortEmbedProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isShort, setIsShort] = useState(true);
   
   const embedUrl = `https://www.youtube.com/embed/${videoId}?playsinline=1&autoplay=0&rel=0`;
   const thumbnailUrl = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
   const directUrl = `https://youtube.com/shorts/${videoId}`;
+
+  useEffect(() => {
+    // Check if the video is a Short by attempting to fetch it
+    fetch(`https://youtube.com/shorts/${videoId}`)
+      .then(response => {
+        setIsShort(response.ok);
+      })
+      .catch(() => {
+        setIsShort(false);
+      });
+  }, [videoId]);
 
   const handleLoad = () => {
     setIsLoaded(true);
@@ -34,7 +46,6 @@ const YoutubeShortEmbed = ({ videoId, title, onProgressChange }: YoutubeShortEmb
     setIsError(true);
   };
 
-  // Fallback to thumbnail with link when iframe fails or during loading
   if (isError) {
     return (
       <a 
@@ -42,11 +53,11 @@ const YoutubeShortEmbed = ({ videoId, title, onProgressChange }: YoutubeShortEmb
         target="_blank" 
         rel="noopener noreferrer"
         className="block relative rounded-lg overflow-hidden group transition-all"
-        aria-label={title ? `Watch YouTube Short: ${title}` : 'Watch YouTube Short'}
+        aria-label={title ? `Watch YouTube video: ${title}` : 'Watch YouTube video'}
       >
         <img 
           src={thumbnailUrl} 
-          alt={title || 'YouTube Short thumbnail'} 
+          alt={title || 'YouTube video thumbnail'} 
           className="w-full h-auto transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/50 transition-colors">
@@ -63,7 +74,7 @@ const YoutubeShortEmbed = ({ videoId, title, onProgressChange }: YoutubeShortEmb
           <div className="w-full">
             <img 
               src={thumbnailUrl} 
-              alt={title || 'Loading YouTube Short'} 
+              alt={title || 'Loading YouTube video'} 
               className="w-full h-auto opacity-70"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/40">
@@ -76,10 +87,10 @@ const YoutubeShortEmbed = ({ videoId, title, onProgressChange }: YoutubeShortEmb
         </div>
       )}
       
-      <AspectRatio ratio={9/16} className="bg-sortmy-darker rounded-lg overflow-hidden">
+      <AspectRatio ratio={isShort ? 9/16 : 16/9} className="bg-sortmy-darker rounded-lg overflow-hidden">
         <iframe
           src={embedUrl}
-          title={title || "YouTube Short"}
+          title={title || "YouTube video"}
           allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
           className={`w-full h-full ${isLoaded ? 'opacity-100' : 'opacity-0'}`}

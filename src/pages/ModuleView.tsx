@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Zap, Copy, Check, ArrowLeft } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -64,9 +63,7 @@ const ModuleView = ({ module, onBack }: ModuleViewProps) => {
 
   return (
     <div className="flex gap-6 p-4 min-h-screen">
-      {/* Main Content */}
       <div className="flex-1 space-y-6">
-        {/* Navigation and Mission Briefing */}
         <GlassCard className="p-6">
           <div className="space-y-4">
             <div className="flex items-start justify-between">
@@ -102,15 +99,13 @@ const ModuleView = ({ module, onBack }: ModuleViewProps) => {
           </div>
         </GlassCard>
 
-        {/* Main Layout: Side by Side Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Panel - YouTube Short */}
-          <GlassCard className="flex-1 overflow-hidden flex flex-col h-[calc(100vh-24rem)]">
+          <GlassCard className="flex-1 overflow-hidden flex flex-col">
             <div className="bg-sortmy-blue/10 p-3 flex items-center">
               <h3 className="text-md font-semibold text-white">Learn</h3>
             </div>
             <div className="flex-1 flex items-center justify-center p-4">
-              <div className="w-full max-w-[315px] mx-auto h-[560px]"> {/* Standard YouTube Shorts dimensions */}
+              <div className="w-full max-w-3xl mx-auto"> 
                 <YoutubeShortEmbed
                   videoId={module.videoId || ""}
                   title={module.title}
@@ -120,10 +115,8 @@ const ModuleView = ({ module, onBack }: ModuleViewProps) => {
             </div>
           </GlassCard>
 
-          {/* Right Panel - Resources & Tools */}
           <div className="flex flex-col gap-6">
-            {/* Resources Section (Top) */}
-            <GlassCard className="flex-1 overflow-hidden flex flex-col h-[calc(100vh-24rem)]">
+            <GlassCard className="flex-1 overflow-hidden flex flex-col">
               <div className="bg-sortmy-blue/10 p-3 flex items-center">
                 <h3 className="text-md font-semibold text-white">Resources</h3>
               </div>
@@ -165,19 +158,19 @@ const ModuleView = ({ module, onBack }: ModuleViewProps) => {
                 </div>
                 
                 <div className="border-t border-sortmy-blue/10 pt-3 mt-3">
-                  <h4 className="text-sm font-medium mb-4 text-gray-300">AI Tools</h4>
+                  <h4 className="text-xs font-medium mb-4 text-gray-300">AI Tools</h4>
                   <div className="grid grid-cols-4 gap-2">
                     {aiTools.map((tool, index) => (
                       <Button
                         key={index}
                         variant="outline"
                         onClick={() => handleToolClick(tool.url)}
-                        className="flex flex-col items-center p-3 h-auto bg-sortmy-darker/50 
+                        className="flex flex-col items-center p-2 h-auto bg-sortmy-darker/50 
                                 hover:bg-sortmy-blue/10 border border-sortmy-blue/20 
                                 hover:border-sortmy-blue/40 transition-all duration-300"
                       >
-                        <span className="text-2xl mb-1">{tool.icon}</span>
-                        <span className="text-xs text-gray-300">{tool.name}</span>
+                        <span className="text-xl mb-1">{tool.icon}</span>
+                        <span className="text-[10px] text-gray-300 truncate w-full text-center">{tool.name}</span>
                       </Button>
                     ))}
                   </div>
