@@ -25,51 +25,51 @@ export const validateEnv = () => {
     VITE_FIREBASE_DATABASE_URL: "https://smai-og-default-rtdb.firebaseio.com"
   };
 
-  // List of required environment variables
-  const requiredEnvVars = [
-    'VITE_FIREBASE_API_KEY',
-    'VITE_FIREBASE_AUTH_DOMAIN',
-    'VITE_FIREBASE_PROJECT_ID',
-    'VITE_FIREBASE_STORAGE_BUCKET',
-    'VITE_FIREBASE_MESSAGING_SENDER_ID',
-    'VITE_FIREBASE_APP_ID',
-    'VITE_FIREBASE_MEASUREMENT_ID',
-  ];
+  // IMPORTANT: Always return the default config for Lovable preview environments
+  // This is a direct fix for the Lovable preview environment issue
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLovablePreview =
+      hostname.includes('lovableproject.com') ||
+      hostname.includes('cluster-') ||
+      hostname.includes('preview.lovable.dev');
 
+    if (isLovablePreview) {
+      console.log('Running in Lovable preview environment, using default Firebase config');
+      return defaultConfig as ImportMetaEnv;
+    }
+  }
+
+  // For non-Lovable environments, try to use environment variables first
   try {
-    // Check if all required environment variables are available
-    const hasAllEnvVars = requiredEnvVars.every(
-      (envVar) => import.meta.env[envVar as keyof ImportMetaEnv]
-    );
+    // List of required environment variables
+    const requiredEnvVars = [
+      'VITE_FIREBASE_API_KEY',
+      'VITE_FIREBASE_AUTH_DOMAIN',
+      'VITE_FIREBASE_PROJECT_ID',
+      'VITE_FIREBASE_STORAGE_BUCKET',
+      'VITE_FIREBASE_MESSAGING_SENDER_ID',
+      'VITE_FIREBASE_APP_ID',
+      'VITE_FIREBASE_MEASUREMENT_ID',
+    ];
 
-    // If all environment variables are available, use them
-    if (hasAllEnvVars) {
-      console.log('Using environment variables for Firebase config');
-      return import.meta.env as ImportMetaEnv;
+    // Check if we have access to import.meta.env
+    if (typeof import.meta.env !== 'undefined') {
+      // Check if all required environment variables are available
+      const hasAllEnvVars = requiredEnvVars.every(
+        (envVar) => import.meta.env[envVar as keyof ImportMetaEnv]
+      );
+
+      // If all environment variables are available, use them
+      if (hasAllEnvVars) {
+        console.log('Using environment variables for Firebase config');
+        return import.meta.env as ImportMetaEnv;
+      }
     }
 
-    // If any environment variables are missing, use the default configuration
+    // If we reach here, some environment variables are missing or import.meta.env is not available
     console.log('Some environment variables are missing, using default Firebase config');
-
-    // Create a merged configuration that uses environment variables when available
-    // and falls back to default values when they're not
-    const mergedConfig = { ...defaultConfig } as ImportMetaEnv;
-
-    // Copy any available environment variables
-    for (const key of Object.keys(defaultConfig)) {
-      if (import.meta.env[key as keyof ImportMetaEnv]) {
-        mergedConfig[key as keyof ImportMetaEnv] = import.meta.env[key as keyof ImportMetaEnv];
-      }
-    }
-
-    // Copy any additional environment variables not in the default config
-    for (const key in import.meta.env) {
-      if (!(key in defaultConfig) && key.startsWith('VITE_')) {
-        mergedConfig[key as keyof ImportMetaEnv] = import.meta.env[key as keyof ImportMetaEnv];
-      }
-    }
-
-    return mergedConfig;
+    return defaultConfig as ImportMetaEnv;
   } catch (error) {
     // If there's any error, fall back to the default configuration
     console.error('Error accessing environment variables:', error);
