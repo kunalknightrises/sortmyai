@@ -6,7 +6,6 @@ import GlassCard from "@/components/ui/GlassCard";
 import { Module } from "@/types/academy";
 import YoutubeShortEmbed from "@/components/academy/YoutubeShortEmbed";
 import { useToast } from "@/hooks/use-toast";
-import ModuleSidebar from "@/components/academy/ModuleSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -28,12 +27,10 @@ const ModuleView = ({ module, onBack }: ModuleViewProps) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
   
-  // Sample resources that would change as the video plays
   const [currentPrompt, setCurrentPrompt] = useState(
     "I want to create a video explaining [TOPIC] using AI voice generation."
   );
   
-  // Sample AI tools that are relevant to the module
   const aiTools: AITool[] = [
     { name: "ChatGPT", icon: "⚡", url: "https://chat.openai.com" },
     { name: "HeyGen", icon: "🎬", url: "https://www.heygen.com" },
@@ -106,14 +103,14 @@ const ModuleView = ({ module, onBack }: ModuleViewProps) => {
         </GlassCard>
 
         {/* Main Layout: Side by Side Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[70vh]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Panel - YouTube Short */}
-          <GlassCard className="flex-1 overflow-hidden flex flex-col h-full">
+          <GlassCard className="flex-1 overflow-hidden flex flex-col h-[calc(100vh-24rem)]">
             <div className="bg-sortmy-blue/10 p-3 flex items-center">
               <h3 className="text-md font-semibold text-white">Learn</h3>
             </div>
             <div className="flex-1 flex items-center justify-center p-4">
-              <div className="w-full max-w-[400px] mx-auto">
+              <div className="w-full max-w-[315px] mx-auto h-[560px]"> {/* Standard YouTube Shorts dimensions */}
                 <YoutubeShortEmbed
                   videoId={module.videoId || ""}
                   title={module.title}
@@ -124,9 +121,9 @@ const ModuleView = ({ module, onBack }: ModuleViewProps) => {
           </GlassCard>
 
           {/* Right Panel - Resources & Tools */}
-          <div className="flex flex-col gap-6 h-full">
+          <div className="flex flex-col gap-6">
             {/* Resources Section (Top) */}
-            <GlassCard className="flex-1 overflow-hidden flex flex-col">
+            <GlassCard className="flex-1 overflow-hidden flex flex-col h-[calc(100vh-24rem)]">
               <div className="bg-sortmy-blue/10 p-3 flex items-center">
                 <h3 className="text-md font-semibold text-white">Resources</h3>
               </div>
@@ -168,45 +165,28 @@ const ModuleView = ({ module, onBack }: ModuleViewProps) => {
                 </div>
                 
                 <div className="border-t border-sortmy-blue/10 pt-3 mt-3">
-                  <h4 className="text-sm font-medium mb-2 text-gray-300">Key Takeaways</h4>
-                  <ul className="list-disc list-inside text-sm text-gray-400 space-y-1">
-                    <li>Understand AI voice synthesis basics</li>
-                    <li>Learn prompt structure for voice generation</li>
-                    <li>Explore emotion and tone in AI voice</li>
-                  </ul>
-                </div>
-              </div>
-            </GlassCard>
-
-            {/* AI Tools Section (Bottom) */}
-            <GlassCard className="flex-1 overflow-hidden flex flex-col">
-              <div className="bg-sortmy-blue/10 p-3 flex items-center">
-                <h3 className="text-md font-semibold text-white">AI Tools</h3>
-              </div>
-              <div className="flex-1 flex items-center p-4">
-                <div className="grid grid-cols-2 gap-2 w-full">
-                  {aiTools.map((tool, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      onClick={() => handleToolClick(tool.url)}
-                      className="bg-sortmy-darker/50 text-white border border-sortmy-blue/20 
-                              hover:bg-sortmy-blue/10 hover:border-sortmy-blue/40 hover:shadow-[0_0_8px_rgba(0,102,255,0.3)]
-                              transition-all duration-300 p-4 h-auto"
-                    >
-                      <span className="mr-2 text-lg">{tool.icon}</span>
-                      {tool.name}
-                    </Button>
-                  ))}
+                  <h4 className="text-sm font-medium mb-4 text-gray-300">AI Tools</h4>
+                  <div className="grid grid-cols-4 gap-2">
+                    {aiTools.map((tool, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        onClick={() => handleToolClick(tool.url)}
+                        className="flex flex-col items-center p-3 h-auto bg-sortmy-darker/50 
+                                hover:bg-sortmy-blue/10 border border-sortmy-blue/20 
+                                hover:border-sortmy-blue/40 transition-all duration-300"
+                      >
+                        <span className="text-2xl mb-1">{tool.icon}</span>
+                        <span className="text-xs text-gray-300">{tool.name}</span>
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </GlassCard>
           </div>
         </div>
       </div>
-
-      {/* Sidebar */}
-      <ModuleSidebar />
     </div>
   );
 };
