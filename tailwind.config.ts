@@ -65,15 +65,15 @@ export default {
         sortmy: {
           dark: '#0F1115',
           darker: '#070809',
-          blue: '#0EA5E9',
-          'blue-glow': '#0EA5E920',
+          blue: '#0E96D5',
+          'blue-glow': '#0E96D520',
           gray: '#2A2C32',
           'gray-light': '#3A3D45'
         },
         'sortmy-dark': '#0B1121',
         'sortmy-darker': '#070C17',
         'sortmy-gray': '#1E293B',
-        'sortmy-blue': '#0EA5E9',
+        'sortmy-blue': '#0E96D5',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -90,11 +90,11 @@ export default {
           to: { height: "0" },
         },
         'pulse-glow': {
-          '0%, 100%': { 
-            boxShadow: '0 0 15px 1px rgba(14, 165, 233, 0.3)'
+          '0%, 100%': {
+            boxShadow: '0 0 15px 1px rgba(14, 150, 213, 0.3)'
           },
-          '50%': { 
-            boxShadow: '0 0 30px 4px rgba(14, 165, 233, 0.5)'
+          '50%': {
+            boxShadow: '0 0 30px 4px rgba(14, 150, 213, 0.5)'
           }
         },
         float: {

@@ -2,7 +2,7 @@
 
 :root {
   /* Base Colors - Using SortMyAI colors */
-  --sortmy-blue: #0066ff;
+  --sortmy-blue: #0e96d5;
   --sortmy-dark: #121212;
   --sortmy-darker: #0a0a0a;
   --sortmy-gray: #2a2a2a;
@@ -23,15 +23,15 @@
 
   --glass-gradient: linear-gradient(
     135deg,
-    rgba(0, 102, 255, 0.1) 0%,
+    rgba(14, 150, 213, 0.1) 0%,
     rgba(42, 42, 42, 0.1) 100%
   );
 
   /* Shadows */
-  --neon-shadow: 0 0 10px rgba(0, 102, 255, 0.5), 0 0 20px rgba(0, 102, 255, 0.3);
+  --neon-shadow: 0 0 10px rgba(14, 150, 213, 0.5),
+    0 0 20px rgba(14, 150, 213, 0.3);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --neumorphic-shadow:
-    8px 8px 16px rgba(0, 0, 0, 0.4),
+  --neumorphic-shadow: 8px 8px 16px rgba(0, 0, 0, 0.4),
     -8px -8px 16px rgba(42, 42, 42, 0.1);
 
   /* Animations */
@@ -45,13 +45,13 @@
 /* Animation Keyframes */
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(0, 102, 255, 0.4);
+    box-shadow: 0 0 0 0 rgba(14, 150, 213, 0.4);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(0, 102, 255, 0);
+    box-shadow: 0 0 0 10px rgba(14, 150, 213, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(0, 102, 255, 0);
+    box-shadow: 0 0 0 0 rgba(14, 150, 213, 0);
   }
 }
 
@@ -91,7 +91,7 @@
 .bg-glass {
   background: rgba(10, 10, 10, 0.6);
   backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(0, 102, 255, 0.2);
+  border: 1px solid rgba(14, 150, 213, 0.2);
   box-shadow: var(--glass-shadow);
 }
 
@@ -121,7 +121,7 @@
 .card-glass {
   background: rgba(10, 10, 10, 0.6);
   backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(0, 102, 255, 0.2);
+  border: 1px solid rgba(14, 150, 213, 0.2);
   border-radius: 12px;
   box-shadow: var(--glass-shadow);
   transition: all 0.3s ease;
@@ -129,7 +129,7 @@
 
 .card-glass:hover {
   border-color: var(--sortmy-blue);
-  box-shadow: 0 0 15px rgba(0, 102, 255, 0.5);
+  box-shadow: 0 0 15px rgba(14, 150, 213, 0.5);
 }
 
 .card-neumorphic {
@@ -141,8 +141,7 @@
 
 .card-neumorphic:hover {
   transform: translateY(-5px);
-  box-shadow:
-    12px 12px 20px rgba(0, 0, 0, 0.5),
+  box-shadow: 12px 12px 20px rgba(0, 0, 0, 0.5),
     -12px -12px 20px rgba(42, 42, 42, 0.2);
 }
 
@@ -198,7 +197,7 @@
 }
 
 .xp-bar-progress::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   right: 0;
@@ -244,8 +243,11 @@
   height: 100%;
   z-index: -1;
   opacity: 0.1;
-  background:
-    radial-gradient(circle at 20% 30%, var(--sortmy-blue), transparent 40%),
+  background: radial-gradient(
+      circle at 20% 30%,
+      var(--sortmy-blue),
+      transparent 40%
+    ),
     radial-gradient(circle at 80% 70%, var(--sortmy-blue), transparent 40%);
   filter: blur(60px);
   animation: float 10s ease-in-out infinite alternate;
@@ -271,8 +273,8 @@
 
 /* Grid Pattern */
 .bg-grid-pattern {
-  background-image: linear-gradient(rgba(0, 102, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 102, 255, 0.1) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(14, 150, 213, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 150, 213, 0.1) 1px, transparent 1px);
   background-size: 40px 40px;
   background-position: center center;
 }
@@ -319,7 +321,7 @@
 }
 
 .scanline-effect::before {
-  content: '';
+  content: "";
   position: absolute;
   width: 100%;
   height: 2px;

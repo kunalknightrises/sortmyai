@@ -40,7 +40,7 @@ const ChallengeCard = ({ challenge, onStart, className }: ChallengeCardProps) =>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-base bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{challenge.name}</CardTitle>
+            <CardTitle className="text-base bg-gradient-to-r from-sortmy-blue to-[#0E96D5] text-transparent bg-clip-text">{challenge.name}</CardTitle>
             <CardDescription>{challenge.description}</CardDescription>
           </div>
           <Badge

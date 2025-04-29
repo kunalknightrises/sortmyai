@@ -25,9 +25,9 @@ const HoverEffect: React.FC<HoverEffectProps> = ({
   // Color styles
   const colorMap = {
     blue: {
-      low: 'rgba(0, 102, 255, 0.2)',
-      medium: 'rgba(0, 102, 255, 0.4)',
-      high: 'rgba(0, 102, 255, 0.6)',
+      low: 'rgba(14, 150, 213, 0.2)',
+      medium: 'rgba(14, 150, 213, 0.4)',
+      high: 'rgba(14, 150, 213, 0.6)',
     },
     gray: {
       low: 'rgba(42, 42, 42, 0.2)',

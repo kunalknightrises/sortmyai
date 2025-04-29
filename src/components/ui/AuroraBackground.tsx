@@ -63,7 +63,7 @@ const AuroraBackground: React.FC<AuroraBackgroundProps> = ({
 
       // Add a more visible grid effect
       if (intensity > 10) { // Lower threshold so it's always visible
-        ctx.strokeStyle = 'rgba(0, 102, 255, 0.15)'; // More visible blue color
+        ctx.strokeStyle = 'rgba(14, 150, 213, 0.15)'; // More visible blue color
         ctx.lineWidth = 1;
 
         const gridSize = 40; // Smaller grid

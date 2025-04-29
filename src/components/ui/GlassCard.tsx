@@ -41,8 +41,8 @@ const GlassCard: React.FC<GlassCardProps> = ({
   // Hover effects
   const hoverStyles = {
     default: 'hover:border-white/20',
-    bordered: 'hover:border-[#0066ff]/60 hover:shadow-[#0066ff]/20',
-    glowing: 'hover:border-[#0066ff]/70 hover:shadow-[#0066ff]/30 hover:shadow-xl',
+    bordered: 'hover:border-[#0E96D5]/60 hover:shadow-[#0E96D5]/20',
+    glowing: 'hover:border-[#0E96D5]/70 hover:shadow-[#0E96D5]/30 hover:shadow-xl',
   };
 
   return (

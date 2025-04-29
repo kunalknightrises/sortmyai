@@ -239,7 +239,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
           ${isArchived ? 'opacity-70' : ''}
           ${isDraft ? 'border-yellow-500/30' : ''}
           ${isDeleted ? 'opacity-50 grayscale' : ''}
-          ${isReel ? 'border-l-4 border-l-blue-500' : ''}`}
+          ${isReel ? 'border-l-4 border-l-[#0E96D5]' : ''}`}
         onMouseEnter={handleCardMouseEnter}
         onMouseLeave={handleCardMouseLeave}
       >

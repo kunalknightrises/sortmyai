@@ -415,7 +415,7 @@ const StatsCard = ({ title, value, description, icon, link }: {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-[#03ABEE]">{value}</div>
+          <div className="text-3xl font-bold text-[#0E96D5]">{value}</div>
           <p className="text-xs text-gray-300 mt-1">{description}</p>
         </CardContent>
       </Link>
