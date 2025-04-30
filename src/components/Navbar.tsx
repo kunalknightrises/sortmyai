@@ -32,7 +32,7 @@ const Navbar = () => {
         <div className="flex items-center space-x-3">
           <Link to="/explore">
             <ClickEffect effect="ripple" color="blue">
-              <NeonButton variant="cyan" className="text-sm">
+              <NeonButton variant="cyan" className="text-sm text-white">
                 <Users className="w-4 h-4 mr-2 md:mr-1" />
                 <span className="hidden md:inline">Explore Creators</span>
               </NeonButton>
@@ -42,13 +42,13 @@ const Navbar = () => {
           {!user ? (
             <>
               <Link to="/login">
-                <Button variant="ghost" className="hidden md:flex hover:bg-sortmy-blue/10 text-sm border border-transparent hover:border-sortmy-blue/20 transition-all duration-300">
-                  <span className="bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">Log In</span>
+                <Button variant="ghost" className="hidden md:flex hover:bg-sortmy-blue/10 text-sm text-white border border-transparent hover:border-sortmy-blue/20 transition-all duration-300">
+                  Log In
                 </Button>
               </Link>
               <Link to="/signup">
                 <ClickEffect effect="ripple" color="blue">
-                  <NeonButton variant="gradient" className="text-sm">
+                  <NeonButton variant="gradient" className="text-sm text-white">
                     <User className="w-4 h-4 mr-2 md:mr-1" />
                     <span className="hidden md:inline">Sign Up</span>
                   </NeonButton>
@@ -58,7 +58,7 @@ const Navbar = () => {
           ) : (
             <Link to="/dashboard">
               <ClickEffect effect="ripple" color="blue">
-                <NeonButton variant="gradient" className="text-sm">
+                <NeonButton variant="gradient" className="text-sm text-white">
                   <User className="w-4 h-4 mr-2 md:mr-1" />
                   <span className="hidden md:inline">Command Centre</span>
                 </NeonButton>

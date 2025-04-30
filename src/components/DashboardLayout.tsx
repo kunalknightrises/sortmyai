@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useBackground } from '@/contexts/BackgroundContext';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import {
   Home,
   LayoutGrid,
@@ -12,7 +12,8 @@ import {
   MessageSquare,
   Menu,
   X,
-  Sparkles
+  Sparkles,
+  Users2
 } from 'lucide-react';
 import SortMyAILogo from './ui/SortMyAILogo';
 import { useMessageNotifications } from '@/contexts/MessageNotificationContext';
@@ -21,7 +22,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AuroraBackground from '@/components/ui/AuroraBackground';
-
+import NeonButton from '@/components/ui/NeonButton'; // Updated import
 
 // import GlassCard from '@/components/ui/GlassCard';
 
