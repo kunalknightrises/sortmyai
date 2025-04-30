@@ -22,6 +22,7 @@ import ExplorePosts from '@/components/dashboard/ExplorePosts';
 import InstagramStylePortfolio from '@/pages/InstagramStylePortfolio';
 import Index from '@/pages/Index';
 import Dashboard from '@/components/Dashboard';
+import Explore from '@/components/dashboard/Explore';
 import Achievements from '@/pages/Achievements';
 import { useEffect } from 'react';
 import Academy from '@/pages/Academy';
@@ -59,7 +60,11 @@ function App() {
         <Route path="/popup-login" element={<SimpleLogin />} />
         <Route path="/old-login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/portfolio/:username" element={<InstagramStylePortfolio />} />
+        <Route path="/portfolio/:username" element={
+          <div className="public-profile-container">
+            <InstagramStylePortfolio />
+          </div>
+        } />
         <Route path="/explore" element={<ExploreCreators />} />
         <Route path="/explore/posts" element={<ExplorePosts />} />
 
@@ -125,22 +130,21 @@ function App() {
               <AddPortfolio />
             </DashboardLayout>
           </ProtectedRoute>
-        } />
-
-        <Route path="/dashboard/explore-creators" element={
+        } />        <Route path="/dashboard/explore" element={
           <ProtectedRoute>
             <DashboardLayout>
-              <ExploreCreators />
+              <Explore />
             </DashboardLayout>
           </ProtectedRoute>
+        } />
+
+        {/* Redirect old routes to new combined explore page */}
+        <Route path="/dashboard/explore-creators" element={
+          <Navigate to="/dashboard/explore" replace state={{ view: 'creators' }} />
         } />
 
         <Route path="/dashboard/explore-posts" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <ExplorePosts />
-            </DashboardLayout>
-          </ProtectedRoute>
+          <Navigate to="/dashboard/explore" replace state={{ view: 'posts' }} />
         } />
 
         <Route path="/dashboard/achievements" element={

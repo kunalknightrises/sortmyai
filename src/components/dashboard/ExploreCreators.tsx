@@ -5,7 +5,7 @@ import { User } from '@/types';
 import { fetchCreatorsWithPortfolio, searchCreators } from '@/services/creatorService';
 import { CreatorCard } from '@/components/creators/CreatorCard';
 import { Input } from '@/components/ui/input';
-import { Search, Users, RefreshCw, Lock, Sparkles } from 'lucide-react';
+import { Search, Users, RefreshCw, Lock, Sparkles, Trophy, Crown, Users2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import GlassCard from '@/components/ui/GlassCard';
 import NeonButton from '@/components/ui/NeonButton';
@@ -13,6 +13,8 @@ import ClickEffect from '@/components/ui/ClickEffect';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 
 import { Button } from '@/components/ui/button';
 import AuroraBackground from '@/components/ui/AuroraBackground';
@@ -71,18 +73,6 @@ const ExploreCreators = () => {
 
   return (
     <div className="space-y-8 relative px-4 sm:px-6 md:px-8 py-6 max-w-7xl mx-auto">
-      {/* Background */}
-      <div className="fixed inset-0 z-0">
-        {backgroundType === 'aurora' ? (
-          <AuroraBackground intensity={50} className="z-0" />
-        ) : (
-          <div className="absolute inset-0 bg-sortmy-dark">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#0d001a] to-[#0a0a2e] opacity-80"></div>
-            <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-          </div>
-        )}
-      </div>
-
       {/* Background toggle button at bottom right - only show when not in dashboard */}
       {!isInDashboard && (
         <div className="fixed bottom-4 right-4 z-50">
@@ -99,8 +89,7 @@ const ExploreCreators = () => {
       )}
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text flex items-center">
+        <div>          <h1 className="text-3xl font-bold text-white flex items-center">
             <Users className="w-8 h-8 mr-2 text-sortmy-blue" />
             Explore Creators
           </h1>
@@ -205,15 +194,102 @@ const ExploreCreators = () => {
           <p className="text-gray-400">
             {searchQuery ? 'Try a different search term' : 'Check back later for new creators'}
           </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
-          {creators.map((creator) => (
-            <CreatorCard key={creator.id} creator={creator} />
-          ))}
+        </div>      ) : (
+        <div className="flex gap-6 relative z-10">
+          <div className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {creators.map((creator) => (
+                <CreatorCard key={creator.id} creator={creator} />
+              ))}
+            </div>
+          </div>
+            {/* Leaderboard Preview */}
+          <div className="hidden xl:block w-80">
+            <div className="sticky top-20 h-[calc(100vh-6rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-sortmy-blue/20 scrollbar-track-sortmy-darker">
+              <LeaderboardPreview />
+            </div>
+          </div>
         </div>
       )}
     </div>
+  );
+};
+
+const LeaderboardPreview = () => {
+  return (
+    <Card className="bg-sortmy-gray/10 border-sortmy-blue/20 relative overflow-hidden backdrop-blur-sm">
+      {/* Blur overlay */}
+      <div className="absolute inset-0 bg-sortmy-darker/30 backdrop-blur-[2px] z-0" />
+      
+      <CardContent className="relative z-10 p-6">
+        <div className="flex flex-col items-center text-center space-y-6">
+          {/* Header Section */}
+          <div className="space-y-4">
+            <Trophy className="w-12 h-12 text-sortmy-blue/80 animate-pulse" />
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-white">Creator Leaderboard</h3>
+              <p className="text-sm text-gray-400">
+                Compete with other creators and climb the ranks!
+              </p>
+            </div>
+          </div>
+
+          {/* Preview Rankings */}
+          <div className="w-full space-y-4">
+            <div className="space-y-3">
+              {[1, 2, 3].map((rank) => (
+                <div key={rank} className="flex items-center gap-3 p-3 rounded-lg bg-sortmy-darker/50 border border-sortmy-gray/10">
+                  <div className="w-8 h-8 rounded-full bg-sortmy-blue/10 flex items-center justify-center text-sortmy-blue font-semibold">
+                    {rank}
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-sortmy-gray/20" />
+                  <div className="flex-1">
+                    <div className="h-3 w-24 bg-sortmy-gray/20 rounded" />
+                    <div className="h-2 w-16 bg-sortmy-gray/20 rounded mt-2" />
+                  </div>
+                  <div className="h-6 w-16 bg-sortmy-blue/10 rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats Preview */}
+          <div className="grid grid-cols-2 gap-4 w-full">
+            <div className="p-3 rounded-lg bg-sortmy-darker/50 border border-sortmy-gray/10 text-center">
+              <p className="text-xs text-gray-400">Total Creators</p>
+              <div className="h-3 w-12 bg-sortmy-gray/20 rounded mx-auto mt-2" />
+            </div>
+            <div className="p-3 rounded-lg bg-sortmy-darker/50 border border-sortmy-gray/10 text-center">
+              <p className="text-xs text-gray-400">Total XP</p>
+              <div className="h-3 w-12 bg-sortmy-gray/20 rounded mx-auto mt-2" />
+            </div>
+          </div>
+
+          {/* Coming Soon Badge */}
+          <div>
+            <Badge variant="outline" className="bg-sortmy-blue/10 text-sortmy-blue">
+              Coming Soon
+            </Badge>
+          </div>
+
+          {/* Feature List */}
+          <div className="w-full space-y-2 text-left">
+            <p className="text-xs text-gray-400 flex items-center gap-2">
+              <Star className="w-4 h-4 text-sortmy-blue" />
+              Global & Regional Rankings
+            </p>
+            <p className="text-xs text-gray-400 flex items-center gap-2">
+              <Crown className="w-4 h-4 text-sortmy-blue" />
+              Monthly Competitions
+            </p>
+            <p className="text-xs text-gray-400 flex items-center gap-2">
+              <Users2 className="w-4 h-4 text-sortmy-blue" />
+              Creator Achievements
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

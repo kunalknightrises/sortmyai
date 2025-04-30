@@ -23,12 +23,13 @@ import {
   Briefcase,
   LayoutGrid,
   User as UserIcon,
-  Settings,
-  Brain,
+  Settings,  Brain,
   GraduationCap,
   Sparkles,
   Users,
-  Lock
+  Lock,
+  MessageSquare,
+  ImageIcon
 } from 'lucide-react';
 
 const InstagramStylePortfolio = () => {
@@ -39,10 +40,21 @@ const InstagramStylePortfolio = () => {
   const { backgroundType, cycleBackgroundType } = useBackground();
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
-  const location = useLocation();
-
-  // Check if we're in the dashboard layout
+  const location = useLocation();  // Check if this is a public profile view or dashboard view
   const isInDashboard = location.pathname.includes('/dashboard');
+  const isPublicView = !isInDashboard;
+
+  // Hide dashboard layout for public profile views
+  useEffect(() => {
+    if (isPublicView) {
+      document.body.classList.add('public-profile-view');
+    } else {
+      document.body.classList.remove('public-profile-view');
+    }
+    return () => {
+      document.body.classList.remove('public-profile-view');
+    };
+  }, [isPublicView]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,7 +107,6 @@ const InstagramStylePortfolio = () => {
       fetchData();
     }
   }, [username, toast]);
-
   // Sidebar component for authenticated users
   const Sidebar = () => {
     const sidebarItems = [
@@ -103,6 +114,8 @@ const InstagramStylePortfolio = () => {
       { icon: <Briefcase size={20} />, label: "Tool Tracker", path: "/dashboard/tools" },
       { icon: <LayoutGrid size={20} />, label: "Portfolio", path: "/dashboard/portfolio" },
       { icon: <Users size={20} />, label: "Explore Creators", path: "/dashboard/explore-creators" },
+      { icon: <ImageIcon size={20} />, label: "Explore Posts", path: "/dashboard/explore-posts" },
+      { icon: <MessageSquare size={20} />, label: "Messages", path: "/dashboard/messages" },
       { icon: <GraduationCap size={20} />, label: "Academy", path: "/dashboard/academy" },
       { icon: <UserIcon size={20} />, label: "Profile", path: "/dashboard/profile" },
       { icon: <Settings size={20} />, label: "Settings", path: "/dashboard/settings" },

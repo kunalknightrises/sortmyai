@@ -35,13 +35,12 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const isPublicView = document.body.classList.contains('public-profile-view');
 
-  const sidebarItems = [
-    { icon: <LayoutDashboard size={20} />, label: "Command Centre", path: "/dashboard" },
+  const sidebarItems = [    { icon: <LayoutDashboard size={20} />, label: "Command Centre", path: "/dashboard" },
     { icon: <Briefcase size={20} />, label: "Tool Tracker", path: "/dashboard/tools" },
     { icon: <LayoutGrid size={20} />, label: "Portfolio", path: "/dashboard/portfolio" },
-    { icon: <Users size={20} />, label: "Explore Creators", path: "/dashboard/explore-creators" },
-    { icon: <ImageIcon size={20} />, label: "Explore Posts", path: "/dashboard/explore-posts" },
+    { icon: <Users size={20} />, label: "Explore", path: "/dashboard/explore" },
     { icon: <MessageSquare size={20} />, label: "Messages", path: "/dashboard/messages" },
     { icon: <GraduationCap size={20} />, label: "Academy", path: "/dashboard/academy" },
     { icon: <User size={20} />, label: "Profile", path: "/dashboard/profile" },
@@ -105,9 +104,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       setBackgroundIntensity('low');
     }
   }, [window.location.pathname]);
+  if (isPublicView) {
+    return <>{children}</>;
+  }
 
   return (
-    <div className="flex h-screen bg-sortmy-dark text-white overflow-hidden relative">
+    <div className="flex h-screen bg-sortmy-dark text-white overflow-hidden relative dashboard-layout">
       {/* Background */}
       {backgroundType === 'aurora' ? (
         <AuroraBackground intensity={50} className="z-0" />

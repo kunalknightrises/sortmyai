@@ -35,30 +35,25 @@ service cloud.firestore {
         allow read: if true;  // Allow public read access to nested collections
         allow write: if isOwner(userId);
       }
-    }
-
-    // Portfolio items collection
+    }    // Portfolio items collection
     match /portfolio/{itemId} {
       allow read: if true; // Public read access
       allow create: if isAuthenticated();
-
-      // Allow update for owners or for comment/like count updates
       allow update: if isAuthenticated() && (
-        // Owner can update everything
         resource.data.user_id == request.auth.uid ||
-        // Anyone can update likes count
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']) ||
-        // Anyone can update comments count
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments']) ||
-        // Allow updating both likes and comments at the same time
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'comments'])
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes_count', 'views_count', 'comments_count'])
       );
+
+      match /interactions/{type} {
+        allow read: if true;
+        allow write: if isAuthenticated();
+      }
 
       // Special rule for incrementing comments count
       allow update: if isAuthenticated() &&
-        ('comments' in request.resource.data) &&
-        ('comments' in resource.data) &&
-        request.resource.data.comments == resource.data.comments + 1;
+        ('comments_count' in request.resource.data) &&
+        ('comments_count' in resource.data) &&
+        request.resource.data.comments_count == resource.data.comments_count + 1;
 
       allow delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
     }
