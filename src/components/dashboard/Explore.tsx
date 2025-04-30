@@ -2,17 +2,15 @@ import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBackground } from '@/contexts/BackgroundContext';
-import { Button } from '@/components/ui/button';
-import { Sparkles, Users, ImageIcon } from 'lucide-react';
+import { Users, ImageIcon } from 'lucide-react';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import ExploreCreators from './ExploreCreators';
 import ExplorePosts from './ExplorePosts';
 import GlassCard from '@/components/ui/GlassCard';
 
 const Explore = () => {
-  const { backgroundType, cycleBackgroundType } = useBackground();
+  const { backgroundType } = useBackground();
   const location = useLocation();
-  const isInDashboard = location.pathname.includes('/dashboard');
   
   // Initialize view from URL state or default to 'posts'
   const [view, setView] = useState<'creators' | 'posts'>(
@@ -35,39 +33,6 @@ const Explore = () => {
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-white flex items-center">
-              {view === 'creators' ? (
-                <Users className="w-8 h-8 mr-2 text-sortmy-blue" />
-              ) : (
-                <ImageIcon className="w-8 h-8 mr-2 text-sortmy-blue" />
-              )}
-              Explore {view === 'creators' ? 'Creators' : 'Posts'}
-            </h1>
-            <p className="text-gray-400 mt-1">
-              {view === 'creators' 
-                ? 'Discover talented AI creators and their portfolios'
-                : 'Discover amazing AI creations from the community'
-              }
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {!isInDashboard && (
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 bg-sortmy-darker/70 border-sortmy-blue/20"
-                onClick={cycleBackgroundType}
-                title="Toggle Background Style"
-              >
-                <Sparkles className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-
         {/* View Toggle */}
         <GlassCard className="mb-6">
           <Tabs 

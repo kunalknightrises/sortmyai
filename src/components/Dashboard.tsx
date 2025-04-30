@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Activity, Award, Target, Zap, Image, Video, BarChart2 } from 'lucide-react';
+import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Activity, Award, Target, Zap, Image, Video, BarChart2, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import XPProgress from './gamification/XPProgress';
 import StreakCounter from './gamification/StreakCounter';
 import BadgeDisplay from './gamification/BadgeDisplay';
 import AIKnowledgeMeter from './gamification/AIKnowledgeMeter';
 import { Badge as BadgeType } from '@/types/gamification';
-import EnhancedXPProgress from './gamification/EnhancedXPProgress';
-// import EnhancedStreakCounter from './gamification/EnhancedStreakCounter';
+// import EnhancedXPProgress from './gamification/EnhancedXPProgress';
 import GlassCard from './ui/GlassCard';
 import NeuCard from './ui/NeuCard';
 import NeonButton from './ui/NeonButton';
@@ -150,10 +149,10 @@ const Dashboard = () => {
             <div className="space-y-8 max-w-7xl mx-auto">
               <div className="flex justify-end items-center mb-4">
                 <ClickEffect effect="ripple" color="blue">
-                  <Link to="/dashboard/tools/add">
-                    <NeonButton variant="gradient">
-                      <PlusCircle className="w-4 h-4 mr-2" />
-                      Add a Tool
+                  <Link to="/dashboard/tools">
+                    <NeonButton variant="cyan">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Tool
                     </NeonButton>
                   </Link>
                 </ClickEffect>
@@ -209,7 +208,7 @@ const Dashboard = () => {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center">
                       <Activity className="w-5 h-5 mr-2 text-sortmy-blue" />
-                      <span className="bg-gradient-to-r from-[#0066ff] to-[#4d94ff] text-transparent bg-clip-text font-bold">Your Progress</span>
+                      <span className="text-white font-bold">Your Progress</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -218,11 +217,15 @@ const Dashboard = () => {
                         <span className="text-sm text-gray-300">XP Progress</span>
                         <span className="text-sm font-medium text-sortmy-blue">{enhancedUser?.xp || 0} / 500 XP</span>
                       </div>
-                      <EnhancedXPProgress
-                        xp={enhancedUser?.xp || 0}
-                        level={enhancedUser?.level || 1}
-                        xpForNextLevel={500}
-                      />
+                      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ 
+                            width: `${(enhancedUser?.xp || 0) / 5}%`,
+                            backgroundColor: '#00BBFF'
+                          }}
+                        />
+                      </div>
                     </div>
 
                     <BadgeDisplay badges={mockBadges} className="pt-2" />

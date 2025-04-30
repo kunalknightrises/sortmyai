@@ -1,20 +1,18 @@
-
 import React, { useEffect } from 'react';
 import { useBackground } from '@/contexts/BackgroundContext';
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  Briefcase,
+  Home,
   LayoutGrid,
-  User,
   Settings,
+  User,
+  Briefcase,
+  Globe,
+  Trophy,
+  MessageSquare,
   Menu,
   X,
-  GraduationCap,
-  Sparkles,
-  Users,
-  MessageSquare,
-  ImageIcon
+  Sparkles
 } from 'lucide-react';
 import SortMyAILogo from './ui/SortMyAILogo';
 import { useMessageNotifications } from '@/contexts/MessageNotificationContext';
@@ -37,12 +35,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const isPublicView = document.body.classList.contains('public-profile-view');
 
-  const sidebarItems = [    { icon: <LayoutDashboard size={20} />, label: "Command Centre", path: "/dashboard" },
+  const sidebarItems = [    { icon: <Home size={20} />, label: "Command Centre", path: "/dashboard" },
     { icon: <Briefcase size={20} />, label: "Tool Tracker", path: "/dashboard/tools" },
     { icon: <LayoutGrid size={20} />, label: "Portfolio", path: "/dashboard/portfolio" },
-    { icon: <Users size={20} />, label: "Explore", path: "/dashboard/explore" },
+    { icon: <Globe size={20} />, label: "Explore", path: "/dashboard/explore" },
     { icon: <MessageSquare size={20} />, label: "Messages", path: "/dashboard/messages" },
-    { icon: <GraduationCap size={20} />, label: "Academy", path: "/dashboard/academy" },
+    { icon: <Trophy size={20} />, label: "Academy", path: "/dashboard/academy" },
     { icon: <User size={20} />, label: "Profile", path: "/dashboard/profile" },
     { icon: <Settings size={20} />, label: "Settings", path: "/dashboard/settings" },
   ];

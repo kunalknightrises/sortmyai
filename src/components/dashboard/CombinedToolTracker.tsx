@@ -33,6 +33,7 @@ const CombinedToolTracker = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const libraryRef = useRef<HTMLDivElement>(null);
 
   // Common state
   const [searchQuery, setSearchQuery] = useState('');
@@ -536,12 +537,16 @@ const CombinedToolTracker = () => {
     setFailedImages(prev => new Set(prev).add(toolId));
   };
 
+  const scrollToLibrary = () => {
+    libraryRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <p className="text-gray-400">Track and organize your AI tools</p>
+          <h2 className="text-2xl font-bold text-white mb-2">Tool Tracker</h2>
         </div>
 
         <div className="flex gap-3">
@@ -585,27 +590,14 @@ const CombinedToolTracker = () => {
                       flex items-center p-2 rounded-md cursor-pointer
                       ${selectedSuggestionIndex === index ? 'bg-[#01AAE9]/20' : 'hover:bg-[#01AAE9]/10'}
                     `}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleSelectSuggestion(suggestion);
-                    }}
+                    onClick={() => handleSelectSuggestion(suggestion)}
                   >
                     {/* Icon based on suggestion type */}
-                    {suggestion.type === 'name' && (
-                      <Search className="h-4 w-4 mr-2 text-[#01AAE9]" />
-                    )}
-                    {suggestion.type === 'description' && (
-                      <FileText className="h-4 w-4 mr-2 text-[#01AAE9]" />
-                    )}
-                    {suggestion.type === 'category' && (
-                      <Bookmark className="h-4 w-4 mr-2 text-[#01AAE9]" />
-                    )}
-                    {suggestion.type === 'tag' && (
-                      <Hash className="h-4 w-4 mr-2 text-[#01AAE9]" />
-                    )}
+                    {suggestion.type === 'name' && <Search className="h-4 w-4 mr-2 text-[#01AAE9]" />}
+                    {suggestion.type === 'description' && <FileText className="h-4 w-4 mr-2 text-[#01AAE9]" />}
+                    {suggestion.type === 'category' && <Bookmark className="h-4 w-4 mr-2 text-[#01AAE9]" />}
+                    {suggestion.type === 'tag' && <Hash className="h-4 w-4 mr-2 text-[#01AAE9]" />}
 
-                    {/* Suggestion text */}
                     <div className="flex-1">
                       <span className="text-sm text-white">{suggestion.text}</span>
                       <span className="ml-2 text-xs text-gray-400">
@@ -616,21 +608,18 @@ const CombinedToolTracker = () => {
                     </div>
 
                     {/* Source indicator */}
-                    <div className="ml-2">
-                      <Badge
-                        variant="outline"
-                        className={`
-                          text-xs
-                          ${suggestion.source === 'user' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                            suggestion.source === 'library' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                            'bg-purple-500/10 text-purple-400 border-purple-500/20'}
-                        `}
-                      >
-                        {suggestion.source === 'user' ? 'Your Tool' :
-                         suggestion.source === 'library' ? 'Library' :
-                         'Both'}
-                      </Badge>
-                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`
+                        text-xs
+                        ${suggestion.source === 'user' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                          suggestion.source === 'library' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                          'bg-purple-500/10 text-purple-400 border-purple-500/20'}
+                      `}
+                    >
+                      {suggestion.source === 'user' ? 'Your Tool' :
+                       suggestion.source === 'library' ? 'Library' : 'Both'}
+                    </Badge>
                   </div>
                 ))
               ) : (
@@ -645,13 +634,13 @@ const CombinedToolTracker = () => {
         )}
       </div>
 
-      {/* Tags Filter */}
+      {/* Tags Filter - Limit to 8 tags */}
       <div className="flex flex-wrap gap-2">
         <div className="flex items-center mr-2">
           <Tag className="h-4 w-4 text-[#01AAE9] mr-1" />
           <span className="text-sm font-medium text-white">Tags:</span>
         </div>
-        {allTags.map(tag => (
+        {allTags.slice(0, 8).map(tag => (
           <Badge
             key={tag}
             variant={selectedTags.includes(tag) ? "default" : "outline"}
@@ -713,7 +702,14 @@ const CombinedToolTracker = () => {
               <div key={tool.id} className="bg-sortmy-darker border border-[#01AAE9]/20 rounded-lg overflow-hidden">
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-semibold text-[#01AAE9]">{(tool as any).name}</h3>
+                    <a 
+                      href={(tool as any).website || (tool as any).website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-lg font-semibold text-[#01AAE9] hover:underline"
+                    >
+                      {(tool as any).name}
+                    </a>
                     {(tool as any).logo_url && (
                       <div className="w-10 h-10 rounded-md overflow-hidden bg-white p-1">
                         <img
@@ -744,17 +740,16 @@ const CombinedToolTracker = () => {
                     )}
                   </div>
 
+                  {/* Switch Visit and Delete button positions */}
                   <div className="flex items-center justify-between">
-                    <div className="flex space-x-2">
-                      <a
-                        href={(tool as any).website || (tool as any).website_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#01AAE9] hover:underline flex items-center text-sm"
+                    <div className="flex space-x-4">
+                      <button
+                        onClick={() => handleDeleteClick(tool)}
+                        className="text-red-400 hover:text-red-500"
+                        title="Delete"
                       >
-                        <ExternalLink className="w-4 h-4 mr-1" />
-                        Visit
-                      </a>
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => navigate(`/dashboard/tools/edit/${tool.id}`)}
                         className="text-[#01AAE9] hover:underline flex items-center text-sm"
@@ -763,12 +758,15 @@ const CombinedToolTracker = () => {
                         Edit
                       </button>
                     </div>
-                    <button
-                      onClick={() => handleDeleteClick(tool)}
-                      className="text-red-400 hover:text-red-500"
+                    <a
+                      href={(tool as any).website || (tool as any).website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#01AAE9] hover:underline flex items-center text-sm"
                     >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                      <ExternalLink className="w-4 h-4 mr-1" />
+                      Visit
+                    </a>
                   </div>
                 </div>
               </div>
@@ -779,12 +777,13 @@ const CombinedToolTracker = () => {
             <Briefcase className="mx-auto w-12 h-12 mb-3 opacity-30" />
             <p className="text-gray-400">You haven't added any tools yet</p>
             <div className="flex justify-center mt-4">
-              <Link to="/dashboard/tools/add">
-                <button className="px-4 py-2 bg-[#01AAE9] text-white rounded-md flex items-center hover:bg-[#01AAE9]/90 transition-colors">
-                  <PlusCircle className="w-4 h-4 mr-2" />
-                  Add Your First Tool
-                </button>
-              </Link>
+              <button
+                onClick={scrollToLibrary}
+                className="px-4 py-2 bg-[#01AAE9] text-white rounded-md flex items-center hover:bg-[#01AAE9]/90 transition-colors"
+              >
+                <PlusCircle className="w-4 h-4 mr-2" />
+                Browse Library
+              </button>
             </div>
           </div>
         )}
@@ -793,8 +792,8 @@ const CombinedToolTracker = () => {
       {/* Separator */}
       <Separator className="bg-sortmy-blue/20 my-8" />
 
-      {/* AI Tools Library Section */}
-      <div className="space-y-4">
+      {/* AI Tools Library Section - Add ref here */}
+      <div ref={libraryRef} className="space-y-4">
         <h3 className="text-xl font-semibold text-white">AI Tools Library</h3>
         <p className="text-gray-400">Discover and add new AI tools to your collection</p>
 
@@ -821,7 +820,19 @@ const CombinedToolTracker = () => {
                   <CardHeader className="pb-2">
                     <div className="flex justify-between">
                       <div className="space-y-1">
-                        <CardTitle className="text-xl bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text">{tool.name}</CardTitle>
+                        <CardTitle 
+                          className="text-xl bg-gradient-to-r from-sortmy-blue to-[#4d94ff] text-transparent bg-clip-text cursor-pointer hover:opacity-80"
+                          onClick={() => window.open(formatWebsiteUrl(tool.website || tool.websiteLink || ''), '_blank')}
+                        >
+                          <a 
+                            href={formatWebsiteUrl(tool.website || tool.websiteLink || '')}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:underline"
+                          >
+                            {tool.name}
+                          </a>
+                        </CardTitle>
                         <CardDescription className="line-clamp-2">
                           {tool.useCase || tool.description}
                         </CardDescription>

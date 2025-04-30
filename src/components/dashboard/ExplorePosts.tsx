@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { collection, getDocs, getDoc, doc, query, where, orderBy, limit, QuerySnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,8 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PortfolioItemCard } from '@/components/portfolio/PortfolioItemCard';
 import { Lightbox } from '@/components/ui/Lightbox';
-import { Button } from '@/components/ui/button';
-import { Users2, Star, ImageIcon, TrendingUp } from 'lucide-react';
+import { Users2, Star, TrendingUp } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 import { useToast } from '@/hooks/use-toast';
 
@@ -30,8 +28,6 @@ const ExplorePosts = () => {
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [userCache, setUserCache] = useState<Record<string, User>>({});
-  const location = useLocation();
-  const isInDashboard = location.pathname.includes('/dashboard');
 
   const fetchPosts = async () => {
     if (!user) return;

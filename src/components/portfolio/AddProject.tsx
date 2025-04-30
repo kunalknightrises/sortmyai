@@ -19,6 +19,7 @@ import NeonButton from '@/components/ui/NeonButton';
 import ClickEffect from '@/components/ui/ClickEffect';
 import NeonSkeleton from '@/components/ui/NeonSkeleton';
 import PortfolioOnboarding from '@/components/portfolio/PortfolioOnboarding';
+import { ArrowLeft } from 'lucide-react';
 
 
 const Portfolio = () => {
@@ -554,6 +555,20 @@ const Portfolio = () => {
 
   return (
     <div className="max-w-screen-lg mx-auto px-4">
+
+      {/* Back Button */}
+      <div className="mb-6">
+        <ClickEffect effect="ripple" color="blue">
+          <NeonButton
+            variant="cyan"
+            onClick={() => navigate('/dashboard/portfolio')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Portfolio
+          </NeonButton>
+        </ClickEffect>
+      </div>
 
       {/* Profile Header */}
       {loading ? (

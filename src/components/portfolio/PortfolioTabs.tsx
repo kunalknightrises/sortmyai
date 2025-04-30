@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Lightbox } from "@/components/ui/Lightbox";
-import { Video, AlertTriangle, Image, Link2 } from "lucide-react";
+import { Video, AlertTriangle, Image, Link2, Film } from "lucide-react";
 
 interface PortfolioTabsProps {
   loading: boolean;
@@ -34,15 +34,12 @@ export const PortfolioTabs = ({ loading, filteredItems, onTabChange }: Portfolio
       <TabsList className="grid w-full grid-cols-3 mb-6">
         <TabsTrigger value="images" className="flex items-center justify-center">
           <Image className="w-4 h-4 mr-2" />
-          Images
         </TabsTrigger>
         <TabsTrigger value="reels" className="flex items-center justify-center">
-          <Video className="w-4 h-4 mr-2" />
-          Reels
+          <Film className="w-4 h-4 mr-2" />
         </TabsTrigger>
         <TabsTrigger value="links" className="flex items-center justify-center">
           <Link2 className="w-4 h-4 mr-2" />
-          Links
         </TabsTrigger>
       </TabsList>
 
@@ -127,15 +124,12 @@ export const PortfolioTabsWithLightbox = ({
         <TabsList className="grid w-full grid-cols-3 mb-6">
           <TabsTrigger value="images" className="flex items-center justify-center">
             <Image className="w-4 h-4 mr-2" />
-            Images
           </TabsTrigger>
           <TabsTrigger value="reels" className="flex items-center justify-center">
-            <Video className="w-4 h-4 mr-2" />
-            Reels
+            <Film className="w-4 h-4 mr-2" />
           </TabsTrigger>
           <TabsTrigger value="links" className="flex items-center justify-center">
             <Link2 className="w-4 h-4 mr-2" />
-            Links
           </TabsTrigger>
         </TabsList>
 

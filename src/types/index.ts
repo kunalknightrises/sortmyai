@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   uid: string;
@@ -26,6 +25,7 @@ export interface User {
     overall: number;
     categories: Record<string, number>;
   };
+  onboarded?: boolean; // New field for onboarding status
 }
 
 export interface PortfolioItem {
@@ -60,21 +60,12 @@ export interface PortfolioItem {
 export interface Tool {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   logo_url?: string;
   website_url?: string;
-  website?: string;  // For backward compatibility
-  tags: string[];
-  created_at: string;
-  user_id: string;
-  // Optional fields
   category?: string;
-  is_favorite?: boolean;
-  usage_frequency?: 'daily' | 'weekly' | 'monthly' | 'rarely';
-  rating?: number;
-  price_tier?: 'free' | 'freemium' | 'paid' | 'subscription';
-  notes?: string;
-  updated_at?: string;
+  created_at?: string;
+  user_id?: string;
 }
 
 export interface AITool {

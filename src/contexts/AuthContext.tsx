@@ -23,7 +23,8 @@ export interface AuthUser extends User {
 
 // Define context value type
 interface AuthContextValue {
-  user: AuthUser | null;
+  user: User | null;
+  updateUserData: (data: Partial<User>) => Promise<void>;
   isLoading: boolean;
   isAdmin?: boolean;
   isIntern?: boolean;
@@ -210,6 +211,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Add updateUserData function
+  const updateUserData = async (data: Partial<User>) => {
+    if (!user) return;
+    try {
+      const userRef = doc(db, 'users', user.id);
+      await setDoc(userRef, data, { merge: true });
+      await refreshUser();
+    } catch (error) {
+      console.error('Error updating user data:', error);
+      throw error;
+    }
+  };
+
   // Determine user roles
   const isAdmin = user?.role === 'admin';
   const isIntern = user?.role === 'intern';
@@ -295,7 +309,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [toast]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAdmin, isIntern, signInWithProvider, signOut, refreshUser }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        isLoading, 
+        isAdmin, 
+        isIntern, 
+        signInWithProvider, 
+        signOut, 
+        refreshUser,
+        updateUserData 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

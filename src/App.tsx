@@ -5,6 +5,7 @@ import DashboardLayout from './components/DashboardLayout';
 import PushNotificationInitializer from './components/PushNotificationInitializer';
 import PortfolioProvider from './contexts/PortfolioContext';
 import BackgroundProvider from './contexts/BackgroundContext';
+import { useAuth } from './contexts/AuthContext';
 
 // Pages
 import Login from '@/pages/Login';
@@ -44,10 +45,17 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const { user, isLoading } = useAuth();
+
   // Initialize Capacitor when the app starts
   useEffect(() => {
     initializeCapacitor().catch(console.error);
   }, []);
+
+  // Wait for auth to load
+  if (isLoading) {
+    return null; // or your loading spinner
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -55,154 +63,158 @@ function App() {
         <PortfolioProvider>
           <PushNotificationInitializer />
           <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/login" element={<EmailLogin />} />
-        <Route path="/popup-login" element={<SimpleLogin />} />
-        <Route path="/old-login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/portfolio/:username" element={
-          <div className="public-profile-container">
-            <InstagramStylePortfolio />
-          </div>
-        } />
-        <Route path="/explore" element={<ExploreCreators />} />
-        <Route path="/explore/posts" element={<ExplorePosts />} />
+            {/* Redirect root to dashboard if logged in */}
+            <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Index />} />
+            
+            {/* Redirect login to dashboard if already logged in */}
+            <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <EmailLogin />} />
+            <Route path="/popup-login" element={user ? <Navigate to="/dashboard" replace /> : <SimpleLogin />} />
+            <Route path="/old-login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+            <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <Signup />} />
 
-        {/* Dashboard and related routes */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Dashboard />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            <Route path="/portfolio/:username" element={
+              <div className="public-profile-container">
+                <InstagramStylePortfolio />
+              </div>
+            } />
+            <Route path="/explore" element={<ExploreCreators />} />
+            <Route path="/explore/posts" element={<ExplorePosts />} />
 
-        <Route path="/dashboard/profile" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Profile />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            {/* Dashboard and related routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Dashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        <Route path="/dashboard/settings" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Settings />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            <Route path="/dashboard/profile" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Profile />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        <Route path="/dashboard/tools" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <CombinedToolTracker />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            <Route path="/dashboard/settings" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Settings />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        <Route path="/dashboard/tools/add" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <AddTool />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            <Route path="/dashboard/tools" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <CombinedToolTracker />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        {/* Redirect old library path to the combined tool tracker */}
-        <Route path="/dashboard/tools/library" element={
-          <Navigate to="/dashboard/tools" replace />
-        } />
+            <Route path="/dashboard/tools/add" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <AddTool />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        <Route path="/dashboard/portfolio" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Portfolio />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            {/* Redirect old library path to the combined tool tracker */}
+            <Route path="/dashboard/tools/library" element={
+              <Navigate to="/dashboard/tools" replace />
+            } />
 
-        {/* This route is redundant - using InstagramStylePortfolio instead */}
+            <Route path="/dashboard/portfolio" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Portfolio />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        <Route path="/dashboard/portfolio/add" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <AddPortfolio />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />        <Route path="/dashboard/explore" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Explore />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            {/* This route is redundant - using InstagramStylePortfolio instead */}
 
-        {/* Redirect old routes to new combined explore page */}
-        <Route path="/dashboard/explore-creators" element={
-          <Navigate to="/dashboard/explore" replace state={{ view: 'creators' }} />
-        } />
+            <Route path="/dashboard/portfolio/add" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <AddPortfolio />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />        <Route path="/dashboard/explore" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Explore />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        <Route path="/dashboard/explore-posts" element={
-          <Navigate to="/dashboard/explore" replace state={{ view: 'posts' }} />
-        } />
+            {/* Redirect old routes to new combined explore page */}
+            <Route path="/dashboard/explore-creators" element={
+              <Navigate to="/dashboard/explore" replace state={{ view: 'creators' }} />
+            } />
 
-        <Route path="/dashboard/achievements" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Achievements />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            <Route path="/dashboard/explore-posts" element={
+              <Navigate to="/dashboard/explore" replace state={{ view: 'posts' }} />
+            } />
 
-        {/* New Academy route */}
-        <Route path="/dashboard/academy" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Academy />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            <Route path="/dashboard/achievements" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Achievements />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        {/* AI Tools Upload route - Admin only */}
-        <Route path="/dashboard/ai-tools-upload" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <AIToolsUpload />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            {/* New Academy route */}
+            <Route path="/dashboard/academy" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Academy />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        {/* Messages route */}
-        <Route path="/dashboard/messages" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Messages />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            {/* AI Tools Upload route - Admin only */}
+            <Route path="/dashboard/ai-tools-upload" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <AIToolsUpload />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        {/* User Interactions route */}
-        <Route path="/dashboard/interactions" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <UserInteractions />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            {/* Messages route */}
+            <Route path="/dashboard/messages" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Messages />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
-        {/* Analytics route */}
-        <Route path="/dashboard/analytics" element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Analytics />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } />
+            {/* User Interactions route */}
+            <Route path="/dashboard/interactions" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <UserInteractions />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
+
+            {/* Analytics route */}
+            <Route path="/dashboard/analytics" element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Analytics />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } />
 
 
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </PortfolioProvider>
       </BackgroundProvider>

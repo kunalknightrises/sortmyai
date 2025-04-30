@@ -17,7 +17,6 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
 import { Button } from '@/components/ui/button';
-import AuroraBackground from '@/components/ui/AuroraBackground';
 
 
 const ExploreCreators = () => {
@@ -25,7 +24,7 @@ const ExploreCreators = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const { backgroundType, cycleBackgroundType } = useBackground();
+  const { cycleBackgroundType } = useBackground();
   const { toast } = useToast();
   const { user } = useAuth();
   const location = useLocation();
