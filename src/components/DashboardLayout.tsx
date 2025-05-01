@@ -1,19 +1,18 @@
 import React, { useEffect } from 'react';
 import { useBackground } from '@/contexts/BackgroundContext';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   Home,
-  LayoutGrid,
-  Settings,
+  MessageSquare,
   User,
+  Settings,
+  Menu,
+  X,
+  LayoutGrid,
   Briefcase,
   Globe,
   Trophy,
-  MessageSquare,
-  Menu,
-  X,
-  Sparkles,
-  Users2
+  Sparkles
 } from 'lucide-react';
 import SortMyAILogo from './ui/SortMyAILogo';
 import { useMessageNotifications } from '@/contexts/MessageNotificationContext';
@@ -22,13 +21,9 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AuroraBackground from '@/components/ui/AuroraBackground';
-import NeonButton from '@/components/ui/NeonButton'; // Updated import
-
-// import GlassCard from '@/components/ui/GlassCard';
-
 
 interface DashboardLayoutProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
@@ -36,14 +31,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const isPublicView = document.body.classList.contains('public-profile-view');
 
-  const sidebarItems = [    { icon: <Home size={20} />, label: "Command Centre", path: "/dashboard" },
-    { icon: <Briefcase size={20} />, label: "Tool Tracker", path: "/dashboard/tools" },
-    { icon: <LayoutGrid size={20} />, label: "Portfolio", path: "/dashboard/portfolio" },
-    { icon: <Globe size={20} />, label: "Explore", path: "/dashboard/explore" },
-    { icon: <MessageSquare size={20} />, label: "Messages", path: "/dashboard/messages" },
-    { icon: <Trophy size={20} />, label: "Academy", path: "/dashboard/academy" },
-    { icon: <User size={20} />, label: "Profile", path: "/dashboard/profile" },
-    { icon: <Settings size={20} />, label: "Settings", path: "/dashboard/settings" },
+  const sidebarItems = [{ icon: <Home size={20} />, label: "Command Centre", path: "/dashboard" },
+  { icon: <Briefcase size={20} />, label: "Tool Tracker", path: "/dashboard/tools" },
+  { icon: <LayoutGrid size={20} />, label: "Portfolio", path: "/dashboard/portfolio" },
+  { icon: <Globe size={20} />, label: "Explore", path: "/dashboard/explore" },
+  { icon: <MessageSquare size={20} />, label: "Messages", path: "/dashboard/messages" },
+  { icon: <Trophy size={20} />, label: "Academy", path: "/dashboard/academy" },
+  { icon: <User size={20} />, label: "Profile", path: "/dashboard/profile" },
+  { icon: <Settings size={20} />, label: "Settings", path: "/dashboard/settings" },
   ];
 
   const SidebarContent = () => {

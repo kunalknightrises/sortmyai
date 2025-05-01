@@ -155,7 +155,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
   // Check if the item has media errors
   const hasMediaError = (!item.media_url && (!item.media_urls || item.media_urls.length === 0)) ||
     (item.media_url && item.media_url.includes('drive.google.com') &&
-     !item.media_url.includes('/d/') && !item.media_url.includes('id='));
+      !item.media_url.includes('/d/') && !item.media_url.includes('id='));
 
   // Handle status-specific actions
   const handleEdit = (e: React.MouseEvent) => {
@@ -239,113 +239,113 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
           ${isArchived ? 'opacity-70' : ''}
           ${isDraft ? 'border-yellow-500/30' : ''}
           ${isDeleted ? 'opacity-50 grayscale' : ''}
-          ${isReel ? 'border-l-4 border-l-[#0E96D5]' : ''}`}
+          ${isReel ? 'border-l-4 border-l-[#0E96D5] aspect-[9/16]' : ''}`}
         onMouseEnter={handleCardMouseEnter}
         onMouseLeave={handleCardMouseLeave}
       >
-      <div className="relative aspect-square">
-        {/* Status indicators */}
-        {isDraft && (
-          <div className="absolute top-2 left-2 z-10 bg-yellow-500/80 text-black px-2 py-0.5 rounded text-xs font-medium">
-            Draft
-          </div>
-        )}
-        {isArchived && (
-          <div className="absolute top-2 left-2 z-10 bg-gray-500/80 text-white px-2 py-0.5 rounded text-xs font-medium">
-            Archived
-          </div>
-        )}
-        {isDeleted && (
-          <div className="absolute top-2 left-2 z-10 bg-red-500/80 text-white px-2 py-0.5 rounded text-xs font-medium">
-            Deleted
-          </div>
-        )}
-        {isReel && (
-          <div className="absolute top-2 right-2 z-10 bg-blue-500/80 text-white px-2 py-0.5 rounded text-xs font-medium">
-            Reel
-          </div>
-        )}
-        {/* Show media error placeholder if there's an issue with the media */}
-        {hasMediaError && (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-sortmy-gray/20 p-4 text-center">
-            <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-2">
-              <AlertTriangle className="w-6 h-6 text-red-400" />
+        <div className="relative aspect-square">
+          {/* Status indicators */}
+          {isDraft && (
+            <div className="absolute top-2 left-2 z-10 bg-yellow-500/80 text-black px-2 py-0.5 rounded text-xs font-medium">
+              Draft
             </div>
-            <p className="text-sm text-gray-400 mb-1">Media Error</p>
-            <p className="text-xs text-gray-500">This item has invalid or missing media</p>
-            {isOwner && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onDelete) onDelete(item);
-                }}
-                className="mt-3 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded flex items-center gap-1 transition-colors"
-              >
-                <Trash2 className="w-3 h-3" />
-                Delete Item
-              </button>
-            )}
-          </div>
-        )}
-        {item.media_type === 'image' && images.length > 0 && !hasMediaError && (
-          <>
-            {/* Image navigation controls if multiple images */}
-            {images.length > 1 && (
-              <>
-                <div className="absolute top-2 right-2 z-10 bg-black/50 rounded-md px-2 py-1 text-xs text-white">
-                  {currentImageIndex + 1} / {images.length}
-                </div>
-                <AnimatedTooltip content="Previous image" position="left">
-                  <button
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-black/50 hover:bg-sortmy-blue/30 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentImageIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
-                    }}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                </AnimatedTooltip>
-                <AnimatedTooltip content="Next image" position="right">
-                  <button
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-black/50 hover:bg-sortmy-blue/30 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentImageIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
-                    }}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </AnimatedTooltip>
-              </>
-            )}
+          )}
+          {isArchived && (
+            <div className="absolute top-2 left-2 z-10 bg-gray-500/80 text-white px-2 py-0.5 rounded text-xs font-medium">
+              Archived
+            </div>
+          )}
+          {isDeleted && (
+            <div className="absolute top-2 left-2 z-10 bg-red-500/80 text-white px-2 py-0.5 rounded text-xs font-medium">
+              Deleted
+            </div>
+          )}
+          {isReel && (
+            <div className="absolute top-2 right-2 z-10 bg-blue-500/80 text-white px-2 py-0.5 rounded text-xs font-medium">
+              Reel
+            </div>
+          )}
+          {/* Show media error placeholder if there's an issue with the media */}
+          {hasMediaError && (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-sortmy-gray/20 p-4 text-center">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-2">
+                <AlertTriangle className="w-6 h-6 text-red-400" />
+              </div>
+              <p className="text-sm text-gray-400 mb-1">Media Error</p>
+              <p className="text-xs text-gray-500">This item has invalid or missing media</p>
+              {isOwner && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onDelete) onDelete(item);
+                  }}
+                  className="mt-3 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs rounded flex items-center gap-1 transition-colors"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Delete Item
+                </button>
+              )}
+            </div>
+          )}
+          {item.media_type === 'image' && images.length > 0 && !hasMediaError && (
+            <>
+              {/* Image navigation controls if multiple images */}
+              {images.length > 1 && (
+                <>
+                  <div className="absolute top-2 right-2 z-10 bg-black/50 rounded-md px-2 py-1 text-xs text-white">
+                    {currentImageIndex + 1} / {images.length}
+                  </div>
+                  <AnimatedTooltip content="Previous image" position="left">
+                    <button
+                      className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-black/50 hover:bg-sortmy-blue/30 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
+                      }}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                  </AnimatedTooltip>
+                  <AnimatedTooltip content="Next image" position="right">
+                    <button
+                      className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-black/50 hover:bg-sortmy-blue/30 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
+                      }}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </AnimatedTooltip>
+                </>
+              )}
 
-            {/* Current image display */}
-            {images[currentImageIndex].includes('drive.google.com') ? (
-              <div className="w-full h-full overflow-hidden bg-sortmy-gray/10">
-                {(() => {
-                  const fileId = images[currentImageIndex].match(/id=([^&]+)/)?.[1] ||
-                                 images[currentImageIndex].match(/\/d\/([^\/]+)/)?.[1];
-                  if (fileId) {
-                    return (
-                      <img
-                        src={`https://lh3.googleusercontent.com/d/${fileId}`}
-                        alt={item.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        onError={(e) => {
-                          // If this fails, try a different URL format
-                          const target = e.target as HTMLImageElement;
-                          target.onerror = () => {
-                            // If this also fails, show a fallback with a link
-                            target.onerror = null;
-                            target.style.display = 'none';
+              {/* Current image display */}
+              {images[currentImageIndex].includes('drive.google.com') ? (
+                <div className="w-full h-full overflow-hidden bg-sortmy-gray/10">
+                  {(() => {
+                    const fileId = images[currentImageIndex].match(/id=([^&]+)/)?.[1] ||
+                      images[currentImageIndex].match(/\/d\/([^\/]+)/)?.[1];
+                    if (fileId) {
+                      return (
+                        <img
+                          src={`https://lh3.googleusercontent.com/d/${fileId}`}
+                          alt={item.title}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            // If this fails, try a different URL format
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = () => {
+                              // If this also fails, show a fallback with a link
+                              target.onerror = null;
+                              target.style.display = 'none';
 
-                            // Create a fallback element
-                            const container = target.parentElement;
-                            if (container) {
-                              const fallback = document.createElement('div');
-                              fallback.className = 'w-full h-full flex items-center justify-center';
-                              fallback.innerHTML = `
+                              // Create a fallback element
+                              const container = target.parentElement;
+                              if (container) {
+                                const fallback = document.createElement('div');
+                                fallback.className = 'w-full h-full flex items-center justify-center';
+                                fallback.innerHTML = `
                                 <a href="https://drive.google.com/file/d/${fileId}/view" target="_blank" rel="noopener noreferrer"
                                    class="flex flex-col items-center justify-center p-4 text-center">
                                   <div class="w-12 h-12 mb-2 rounded-full bg-blue-500/10 flex items-center justify-center">
@@ -354,253 +354,253 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
                                   <span class="text-sm text-white">View Image</span>
                                 </a>
                               `;
-                              container.appendChild(fallback);
-                            }
-                          };
-                          target.src = `https://drive.usercontent.google.com/download?id=${fileId}&export=view`;
-                        }}
-                        crossOrigin="anonymous"
-                        referrerPolicy="no-referrer"
-                      />
-                    );
-                  }
-                  return (
-                    <div className="w-full h-full flex items-center justify-center bg-sortmy-gray/20">
-                      <p className="text-sm text-gray-400">Preview not available</p>
-                    </div>
-                  );
-                })()}
-              </div>
-            ) : (
-              <ImageItem
-                src={images[currentImageIndex]}
-                alt={item.title}
-                className="w-full h-full"
-              />
-            )}
-          </>
-        )}
-        {item.media_type === 'video' && !hasMediaError && (
-          <div className="relative w-full h-full">
-            {/* Option A: Google Drive Embed */}
-            {item.media_url && item.media_url.includes('drive.google.com') && (
-              <div className="w-full h-full">
-                {(() => {
-                  const fileId = getGoogleDriveFileId(item.media_url);
-                  if (fileId) {
-                    // For reels, use a thumbnail with play button instead of iframe
-                    if (isReel) {
-                      return (
-                        <div className="relative w-full h-full bg-sortmy-gray/10">
-                          <img
-                            src={`https://lh3.googleusercontent.com/d/${fileId}`}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
-                            }}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            <div className="bg-blue-500/80 rounded-full p-3">
-                              <Play className="w-8 h-8 text-white" fill="white" />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    } else {
-                      // For regular videos, use iframe
-                      return (
-                        <>
-                          <iframe
-                            src={`https://drive.google.com/file/d/${fileId}/preview`}
-                            allow="autoplay"
-                            className="w-full h-full border-0"
-                          />
-                          {/* Play button overlay for better UX */}
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="bg-black/30 rounded-full p-3 backdrop-blur-sm">
-                              <Play className="w-8 h-8 text-white" />
-                            </div>
-                          </div>
-                        </>
+                                container.appendChild(fallback);
+                              }
+                            };
+                            target.src = `https://drive.usercontent.google.com/download?id=${fileId}&export=view`;
+                          }}
+                          crossOrigin="anonymous"
+                          referrerPolicy="no-referrer"
+                        />
                       );
                     }
-                  }
-                  return (
-                    <div className="w-full h-full flex items-center justify-center bg-sortmy-gray/20">
-                      <p className="text-sm text-gray-400">Video preview not available</p>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {/* Option B: Direct video for non-Google Drive videos */}
-            {item.media_url && !item.media_url.includes('drive.google.com') && (
-              <>
-                <video
-                  ref={videoRef}
-                  src={item.media_url}
-                  className="w-full h-full object-cover"
-                  muted={isMuted}
-                  loop
-                  playsInline
-                  onClick={(e) => e.stopPropagation()}
-                  poster={item.thumbnail_url} // Use thumbnail if available
-                />
-
-                {/* Video controls overlay */}
-                <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between bg-black/50 rounded-md px-2 py-1 z-10">
-                  <AnimatedTooltip content={isPlaying ? "Pause" : "Play"} position="top">
-                    <button
-                      onClick={togglePlay}
-                      className="p-1 hover:bg-sortmy-blue/20 rounded-full transition-colors"
-                    >
-                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    </button>
-                  </AnimatedTooltip>
-                  <AnimatedTooltip content={isMuted ? "Unmute" : "Mute"} position="top">
-                    <button
-                      onClick={toggleMute}
-                      className="p-1 hover:bg-sortmy-blue/20 rounded-full transition-colors"
-                    >
-                      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                    </button>
-                  </AnimatedTooltip>
+                    return (
+                      <div className="w-full h-full flex items-center justify-center bg-sortmy-gray/20">
+                        <p className="text-sm text-gray-400">Preview not available</p>
+                      </div>
+                    );
+                  })()}
                 </div>
+              ) : (
+                <ImageItem
+                  src={images[currentImageIndex]}
+                  alt={item.title}
+                  className="w-full h-full"
+                />
+              )}
+            </>
+          )}
+          {item.media_type === 'video' && !hasMediaError && (
+            <div className="relative w-full h-full">
+              {/* Option A: Google Drive Embed */}
+              {item.media_url && item.media_url.includes('drive.google.com') && (
+                <div className="w-full h-full">
+                  {(() => {
+                    const fileId = getGoogleDriveFileId(item.media_url);
+                    if (fileId) {
+                      // For reels, use a thumbnail with play button instead of iframe
+                      if (isReel) {
+                        return (
+                          <div className="relative w-full h-full bg-sortmy-gray/10">
+                            <img
+                              src={`https://lh3.googleusercontent.com/d/${fileId}`}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+                              }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                              <div className="bg-blue-500/80 rounded-full p-3">
+                                <Play className="w-8 h-8 text-white" fill="white" />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      } else {
+                        // For regular videos, use iframe
+                        return (
+                          <>
+                            <iframe
+                              src={`https://drive.google.com/file/d/${fileId}/preview`}
+                              allow="autoplay"
+                              className="w-full h-full border-0"
+                            />
+                            {/* Play button overlay for better UX */}
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="bg-black/30 rounded-full p-3 backdrop-blur-sm">
+                                <Play className="w-8 h-8 text-white" />
+                              </div>
+                            </div>
+                          </>
+                        );
+                      }
+                    }
+                    return (
+                      <div className="w-full h-full flex items-center justify-center bg-sortmy-gray/20">
+                        <p className="text-sm text-gray-400">Video preview not available</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
 
-                {/* Play button overlay for better UX when paused */}
-                {!isPlaying && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="bg-black/30 rounded-full p-3 backdrop-blur-sm">
-                      <Play className="w-8 h-8 text-white" />
-                    </div>
+              {/* Option B: Direct video for non-Google Drive videos */}
+              {item.media_url && !item.media_url.includes('drive.google.com') && (
+                <>
+                  <video
+                    ref={videoRef}
+                    src={item.media_url}
+                    className="w-full h-full object-cover"
+                    muted={isMuted}
+                    loop
+                    playsInline
+                    onClick={(e) => e.stopPropagation()}
+                    poster={item.thumbnail_url} // Use thumbnail if available
+                  />
+
+                  {/* Video controls overlay */}
+                  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between bg-black/50 rounded-md px-2 py-1 z-10">
+                    <AnimatedTooltip content={isPlaying ? "Pause" : "Play"} position="top">
+                      <button
+                        onClick={togglePlay}
+                        className="p-1 hover:bg-sortmy-blue/20 rounded-full transition-colors"
+                      >
+                        {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                      </button>
+                    </AnimatedTooltip>
+                    <AnimatedTooltip content={isMuted ? "Unmute" : "Mute"} position="top">
+                      <button
+                        onClick={toggleMute}
+                        className="p-1 hover:bg-sortmy-blue/20 rounded-full transition-colors"
+                      >
+                        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                      </button>
+                    </AnimatedTooltip>
                   </div>
-                )}
-              </>
-            )}
 
-            {/* Reel indicator */}
-            {isReel && (
-              <div className="absolute top-2 left-2 z-10 bg-blue-500/80 text-white px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
-                <Play className="w-3 h-3" />
-                Reel
-              </div>
-            )}
-          </div>
-        )}
-        {!item.is_public && (
-          <div className="absolute top-2 right-2 bg-sortmy-darker/80 backdrop-blur-sm p-1 rounded-full">
-            <Lock className="w-4 h-4 text-sortmy-blue" />
-          </div>
-        )}
-      </div>
-
-      <div className="p-4">
-        {showUsername && username && (
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-5 h-5 rounded-full bg-sortmy-blue/20 flex items-center justify-center text-xs text-white">
-              {username.charAt(0).toUpperCase()}
-            </div>
-            <span className="text-sm text-gray-300 hover:text-sortmy-blue transition-colors">
-              {username}
-            </span>
-          </div>
-        )}
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold text-white truncate">{item.title}</h3>
-          {isOwner && (
-            <div className="relative">
-              <AnimatedTooltip content="Actions" position="left">
-                <button
-                  onClick={toggleActions}
-                  className="p-1 hover:bg-sortmy-blue/20 rounded-full transition-colors"
-                >
-                  <MoreVertical className="w-5 h-5 text-slate-400" />
-                </button>
-              </AnimatedTooltip>
-              {showActions && (
-                <div className="absolute right-0 mt-1 w-48 bg-sortmy-darker border border-sortmy-blue/20 rounded-lg shadow-lg overflow-hidden z-10 backdrop-blur-sm">
-                  {!isDeleted && (
-                    <button
-                      onClick={(e) => handleEdit(e)}
-                      className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Edit Project
-                    </button>
+                  {/* Play button overlay for better UX when paused */}
+                  {!isPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="bg-black/30 rounded-full p-3 backdrop-blur-sm">
+                        <Play className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
                   )}
+                </>
+              )}
 
-                  {!isArchived && !isDeleted && (
-                    <button
-                      onClick={(e) => handleArchive(e)}
-                      className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
-                    >
-                      <Archive className="w-4 h-4" />
-                      Archive Project
-                    </button>
-                  )}
-
-                  {(isArchived || isDraft) && !isDeleted && (
-                    <button
-                      onClick={(e) => handleRestore(e)}
-                      className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
-                    >
-                      <AlertCircle className="w-4 h-4" />
-                      Restore Project
-                    </button>
-                  )}
-
-                  <button
-                    onClick={(e) => handleDelete(e)}
-                    className="w-full px-4 py-2 text-left text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    {isDeleted ? 'Permanently Delete' : 'Delete Project'}
-                  </button>
+              {/* Reel indicator */}
+              {isReel && (
+                <div className="absolute top-2 left-2 z-10 bg-blue-500/80 text-white px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1">
+                  <Play className="w-3 h-3" />
+                  Reel
                 </div>
               )}
             </div>
           )}
-        </div>
-
-        <p className="text-slate-400 text-sm line-clamp-2 mb-4">
-          {item.description}
-        </p>        <div className="flex flex-wrap gap-2 mb-4">
-          {item.tools_used?.map((tool: string, index: number) => (
-            <span
-              key={`${item.id}-tool-${index}`}
-              className="px-2 py-1 text-xs bg-sortmy-blue/10 text-slate-300 rounded-full hover:bg-sortmy-blue/20 transition-colors cursor-pointer"
-            >
-              {tool}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex justify-between items-center text-sm text-slate-400">
-          <div className="flex items-center gap-4">
-            <LikeButton
-              postId={item.id}
-              initialLikeCount={likeCount}
-              initialLiked={userHasLiked}
-              onLikeChange={(liked, newCount) => {
-                setUserHasLiked(liked);
-                setLikeCount(newCount);
-              }}
-              size="sm"
-            />
-            <div className="flex items-center gap-1">
-              <MessageSquare className="w-4 h-4" />
-              <span>{commentCount}</span>
+          {!item.is_public && (
+            <div className="absolute top-2 right-2 bg-sortmy-darker/80 backdrop-blur-sm p-1 rounded-full">
+              <Lock className="w-4 h-4 text-sortmy-blue" />
             </div>
-          </div>
-          <span title={new Date(item.created_at).toLocaleString()}>
-            {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
-          </span>
+          )}
         </div>
-      </div>
-    </GlassCard>
+
+        <div className="p-4">
+          {showUsername && username && (
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-5 h-5 rounded-full bg-sortmy-blue/20 flex items-center justify-center text-xs text-white">
+                {username.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-sm text-gray-300 hover:text-sortmy-blue transition-colors">
+                {username}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-lg font-semibold text-white truncate">{item.title}</h3>
+            {isOwner && (
+              <div className="relative">
+                <AnimatedTooltip content="Actions" position="left">
+                  <button
+                    onClick={toggleActions}
+                    className="p-1 hover:bg-sortmy-blue/20 rounded-full transition-colors"
+                  >
+                    <MoreVertical className="w-5 h-5 text-slate-400" />
+                  </button>
+                </AnimatedTooltip>
+                {showActions && (
+                  <div className="absolute right-0 mt-1 w-48 bg-sortmy-darker border border-sortmy-blue/20 rounded-lg shadow-lg overflow-hidden z-10 backdrop-blur-sm">
+                    {!isDeleted && (
+                      <button
+                        onClick={(e) => handleEdit(e)}
+                        className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit Project
+                      </button>
+                    )}
+
+                    {!isArchived && !isDeleted && (
+                      <button
+                        onClick={(e) => handleArchive(e)}
+                        className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
+                      >
+                        <Archive className="w-4 h-4" />
+                        Archive Project
+                      </button>
+                    )}
+
+                    {(isArchived || isDraft) && !isDeleted && (
+                      <button
+                        onClick={(e) => handleRestore(e)}
+                        className="w-full px-4 py-2 text-left hover:bg-sortmy-blue/10 transition-colors flex items-center gap-2"
+                      >
+                        <AlertCircle className="w-4 h-4" />
+                        Restore Project
+                      </button>
+                    )}
+
+                    <button
+                      onClick={(e) => handleDelete(e)}
+                      className="w-full px-4 py-2 text-left text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {isDeleted ? 'Permanently Delete' : 'Delete Project'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <p className="text-slate-400 text-sm line-clamp-2 mb-4">
+            {item.description}
+          </p>        <div className="flex flex-wrap gap-2 mb-4">
+            {item.tools_used?.map((tool: string, index: number) => (
+              <span
+                key={`${item.id}-tool-${index}`}
+                className="px-2 py-1 text-xs bg-sortmy-blue/10 text-slate-300 rounded-full hover:bg-sortmy-blue/20 transition-colors cursor-pointer"
+              >
+                {tool}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex justify-between items-center text-sm text-slate-400">
+            <div className="flex items-center gap-4">
+              <LikeButton
+                postId={item.id}
+                initialLikeCount={likeCount}
+                initialLiked={userHasLiked}
+                onLikeChange={(liked, newCount) => {
+                  setUserHasLiked(liked);
+                  setLikeCount(newCount);
+                }}
+                size="sm"
+              />
+              <div className="flex items-center gap-1">
+                <MessageSquare className="w-4 h-4" />
+                <span>{commentCount}</span>
+              </div>
+            </div>
+            <span title={new Date(item.created_at).toLocaleString()}>
+              {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+            </span>
+          </div>
+        </div>
+      </GlassCard>
     </div>
   );
 }
