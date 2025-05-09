@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Activity, Award, Target, Zap, Image, Video, BarChart2, Plus } from 'lucide-react';
+import { PlusCircle, Briefcase, LayoutGrid, ArrowRight, Activity, Award, Target, Zap, Image, Video, BarChart2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import XPProgress from './gamification/XPProgress';
 import StreakCounter from './gamification/StreakCounter';
