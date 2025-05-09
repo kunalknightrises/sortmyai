@@ -1,5 +1,7 @@
 import React from 'react';
-import { Twitter, Linkedin, Github } from "lucide-react";
+import { Linkedin, Github } from "lucide-react";
+import { X as XLogo } from "lucide-react";
+import SortMyAILogo from '@/components/ui/SortMyAILogo';
 
 const Footer = () => {
   return (
@@ -8,7 +10,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between mb-12">
           <div className="mb-8 md:mb-0">
             <div className="flex items-center mb-4">
-              <LogoIcon className="w-6 h-6 mr-2" />
+              <SortMyAILogo className="w-8 h-8 mr-2 text-sortmy-blue" />
               <span className="text-lg font-bold">
                 <span className="text-white">SortMy</span>
                 <span className="text-sortmy-blue">AI</span>
@@ -18,7 +20,7 @@ const Footer = () => {
               A sleek, fast, no-nonsense digital tool to help organize your AI outputs and digital chaos.
             </p>
             <div className="flex space-x-4 mt-4">
-              <SocialLink icon={<Twitter size={18} />} href="#" />
+              <SocialLink icon={<XLogo size={18} />} href="https://twitter.com/sortmyai" />
               <SocialLink icon={<Linkedin size={18} />} href="#" />
               <SocialLink icon={<Github size={18} />} href="#" />
             </div>
@@ -98,19 +100,5 @@ const FooterLinkGroup = ({ title, links }: { title: string; links: LinkItem[] })
     </div>
   );
 };
-
-const LogoIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    <circle cx="12" cy="12" r="10" stroke="#0EA5E9" strokeWidth="1.5" />
-    <path d="M8 10C8 8.89543 8.89543 8 10 8H14C15.1046 8 16 8.89543 16 10V14C16 15.1046 15.1046 16 14 16H10C8.89543 16 8 15.1046 8 14V10Z" fill="#0EA5E9" />
-    <path d="M11 7V17" stroke="#0EA5E9" strokeWidth="1.5" strokeLinecap="round" />
-    <path d="M7 11H17" stroke="#0EA5E9" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-);
 
 export default Footer;
