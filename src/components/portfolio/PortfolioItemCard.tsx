@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { PortfolioItem } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -6,12 +5,12 @@ import { MoreVertical, Lock, ChevronLeft, ChevronRight, Edit, Archive, Trash2, A
 import { ImageItem } from '../ui/ImageItem';
 import { useToast } from '@/hooks/use-toast';
 import GlassCard from '@/components/ui/GlassCard';
-// import HoverEffect from '@/components/ui/HoverEffect';
 import AnimatedTooltip from '@/components/ui/AnimatedTooltip';
 import LikeButton from '@/components/interactions/LikeButton';
-import { getPostInteractionStats } from '@/services/interactionService';
 import { trackView } from '@/services/analyticsService';
 import { useAuth } from '@/contexts/AuthContext';
+import { collection, doc, getDocs, addDoc, deleteDoc, query, where, limit, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface PortfolioItemCardProps {
   item: PortfolioItem;
@@ -33,13 +32,75 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
-  const [likeCount, setLikeCount] = useState(item.likes || 0);
+  const [likeCount, setLikeCount] = useState(0); // Always start at 0, real-time listener will update
   const [commentCount, setCommentCount] = useState(item.comments || 0);
   const [userHasLiked, setUserHasLiked] = useState(false);
 
+  // Defensive: Don't render LikeButton if item.id is missing
+  const canLike = !!item.id;
+
+  // Real-time listener for likes
+  useEffect(() => {
+    if (!item.id) return;
+    const likesRef = collection(db, 'likes');
+    const q = query(likesRef, where('postId', '==', item.id));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setLikeCount(snapshot.size);
+      if (user) {
+        setUserHasLiked(snapshot.docs.some(doc => doc.data().userId === (user.id || user.uid)));
+      } else {
+        setUserHasLiked(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [item.id, user]);
+
+  // Like/unlike handler for LikeButton
+  const handleLikePost = async (postId: string, userId: string, liked: boolean) => {
+    // Always use the global /likes collection for robust tracking
+    const likesRef = collection(db, 'likes');
+    const q = query(likesRef, where('userId', '==', userId), where('postId', '==', postId), limit(1));
+    const snapshot = await getDocs(q);
+    if (liked) {
+      // Like: create a like doc if not exists
+      if (snapshot.empty) {
+        const payload = { userId, postId, createdAt: new Date().toISOString() };
+        await addDoc(likesRef, payload);
+      }
+    } else {
+      // Unlike: remove like doc if exists
+      if (!snapshot.empty) {
+        await deleteDoc(doc(db, 'likes', snapshot.docs[0].id));
+      }
+    }
+    // No need to update the likes field in the portfolio doc for UI display
+    // The real-time listener will update the UI
+  };
+
+  // Helper to get like/comment stats for a post and user
+  async function getPostInteractionStats(postId: string, userId?: string) {
+    // Count likes from likes collection
+    const likesRef = collection(db, 'likes');
+    const likesSnap = await getDocs(query(likesRef, where('postId', '==', postId)));
+    const likes = likesSnap.size;
+    let userHasLiked = false;
+    if (userId) {
+      userHasLiked = !(
+        await getDocs(query(likesRef, where('postId', '==', postId), where('userId', '==', userId), limit(1)))
+      ).empty;
+    }
+    // Count comments if you have a comments collection (optional)
+    // For now, fallback to item.comments if available
+    return {
+      likes,
+      comments: 0, // You can implement comment counting if needed
+      userHasLiked,
+    };
+  }
+
   // Fetch interaction stats and track view when component mounts
   useEffect(() => {
-    const fetchInteractionStats = async () => {
+    const fetchStats = async () => {
       try {
         // Use default values if item.id is not defined
         if (!item.id) {
@@ -47,10 +108,9 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
           return;
         }
 
-        const stats = await getPostInteractionStats(item.id, user?.uid);
-        setLikeCount(stats.likes);
+        // Use the correct user id for check
+        const stats = await getPostInteractionStats(item.id, user?.id || user?.uid);
         setCommentCount(stats.comments);
-        setUserHasLiked(stats.userHasLiked);
 
         // Track view for analytics
         if (!isOwner) { // Don't track views from the owner
@@ -64,14 +124,12 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
       } catch (error) {
         console.error('Error fetching interaction stats:', error);
         // Use default values on error
-        setLikeCount(item.likes || 0);
         setCommentCount(item.comments || 0);
-        setUserHasLiked(false);
       }
     };
 
-    fetchInteractionStats();
-  }, [item.id, user, isOwner, item.likes, item.comments]);
+    fetchStats();
+  }, [item.id, user, isOwner, item.comments]);
 
   // Extract Google Drive file ID if present
   const getGoogleDriveFileId = (url: string): string | null => {
@@ -580,16 +638,23 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
 
           <div className="flex justify-between items-center text-sm text-slate-400">
             <div className="flex items-center gap-4">
-              <LikeButton
-                postId={item.id}
-                initialLikeCount={likeCount}
-                initialLiked={userHasLiked}
-                onLikeChange={(liked, newCount) => {
-                  setUserHasLiked(liked);
-                  setLikeCount(newCount);
-                }}
-                size="sm"
-              />
+              {canLike && (
+                <LikeButton
+                  postId={item.id}
+                  initialLikeCount={likeCount}
+                  initialLiked={userHasLiked}
+                  user={user ? { id: user.uid } : null} // Always use user.uid for Firestore rules
+                  likePost={handleLikePost}
+                  onLikeChange={async (liked: boolean, newCount: number) => {
+                    setUserHasLiked(liked);
+                    setLikeCount(newCount);
+                  }}
+                  size="sm"
+                />
+              )}
+              {!canLike && (
+                <span className="text-xs text-red-400">Like unavailable</span>
+              )}
               <div className="flex items-center gap-1">
                 <MessageSquare className="w-4 h-4" />
                 <span>{commentCount}</span>

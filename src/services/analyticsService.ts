@@ -26,6 +26,11 @@ import {
 } from '@/types/analytics';
 import { format } from 'date-fns';
 
+// Utility to remove undefined fields from an object
+export function removeUndefinedFields<T extends Record<string, any>>(obj: T): Record<string, any> {
+  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
+}
+
 // Helper function to get user info
 const getUserInfo = async (userId: string): Promise<{
   username?: string;
@@ -156,7 +161,7 @@ export const trackView = async (
     };
 
     // Add to analytics_views collection
-    const viewRef = await addDoc(collection(db, 'analytics_views'), viewEvent);
+    const viewRef = await addDoc(collection(db, 'analytics_views'), removeUndefinedFields(viewEvent));
 
     // Update the item's view count
     if (itemType === 'portfolio') {
@@ -206,7 +211,7 @@ export const trackInteraction = async (
     };
 
     // Add to analytics_interactions collection
-    const interactionRef = await addDoc(collection(db, 'analytics_interactions'), interactionEvent);
+    const interactionRef = await addDoc(collection(db, 'analytics_interactions'), removeUndefinedFields(interactionEvent));
 
     // Update analytics summary
     await updateAnalyticsSummary(itemId, itemType, interactionType, user.uid);
@@ -232,7 +237,7 @@ const updateAnalyticsSummary = async (
 
     if (!summaryDoc.exists()) {
       // Create a new summary document if it doesn't exist
-      await setDoc(summaryRef, {
+      await setDoc(summaryRef, removeUndefinedFields({
         totalViews: eventType === 'view' ? 1 : 0,
         uniqueViewers: eventType === 'view' && userId ? 1 : 0,
         totalLikes: eventType === 'like' ? 1 : 0,
@@ -250,7 +255,7 @@ const updateAnalyticsSummary = async (
         commenters: eventType === 'comment' ? [userId] : [],
         followers: eventType === 'follow' ? [userId] : [],
         lastUpdated: new Date().toISOString()
-      });
+      }));
     } else {
       // Update existing summary
       const summaryData = summaryDoc.data();
@@ -571,57 +576,57 @@ export const getUserPortfolioAnalytics = async (userId: string): Promise<Analyti
         const summaryDoc = await getDoc(summaryRef);
 
         if (summaryDoc.exists()) {
-        // Process viewers
-        const summaryData = summaryDoc.data() as DocumentData;
+          // Process viewers
+          const summaryData = summaryDoc.data() as DocumentData;
 
-        if (summaryData?.viewers && Array.isArray(summaryData.viewers)) {
-          summaryData.viewers.forEach((viewerId: string) => {
-            if (viewerId) {
-              allViewers.add(viewerId);
-              viewerCounts[viewerId] = (viewerCounts[viewerId] || 0) + 1;
-            }
-          });
-        }
+          if (summaryData?.viewers && Array.isArray(summaryData.viewers)) {
+            summaryData.viewers.forEach((viewerId: string) => {
+              if (viewerId) {
+                allViewers.add(viewerId);
+                viewerCounts[viewerId] = (viewerCounts[viewerId] || 0) + 1;
+              }
+            });
+          }
 
-        // Process likers
-        if (summaryData?.likers && Array.isArray(summaryData.likers)) {
-          summaryData.likers.forEach((likerId: string) => {
-            if (likerId) {
-              allLikers.add(likerId);
-              likerCounts[likerId] = (likerCounts[likerId] || 0) + 1;
-            }
-          });
-        }
+          // Process likers
+          if (summaryData?.likers && Array.isArray(summaryData.likers)) {
+            summaryData.likers.forEach((likerId: string) => {
+              if (likerId) {
+                allLikers.add(likerId);
+                likerCounts[likerId] = (likerCounts[likerId] || 0) + 1;
+              }
+            });
+          }
 
-        // Process commenters
-        if (summaryData?.commenters && Array.isArray(summaryData.commenters)) {
-          summaryData.commenters.forEach((commenterId: string) => {
-            if (commenterId) {
-              allCommenters.add(commenterId);
-              commenterCounts[commenterId] = (commenterCounts[commenterId] || 0) + 1;
-            }
-          });
-        }
+          // Process commenters
+          if (summaryData?.commenters && Array.isArray(summaryData.commenters)) {
+            summaryData.commenters.forEach((commenterId: string) => {
+              if (commenterId) {
+                allCommenters.add(commenterId);
+                commenterCounts[commenterId] = (commenterCounts[commenterId] || 0) + 1;
+              }
+            });
+          }
 
-        // Aggregate time series data
-        if (summaryData?.viewsOverTime && Array.isArray(summaryData.viewsOverTime)) {
-          summaryData.viewsOverTime.forEach((entry: {date: string, count: number}) => {
-            viewsByDate[entry.date] = (viewsByDate[entry.date] || 0) + entry.count;
-          });
-        }
+          // Aggregate time series data
+          if (summaryData?.viewsOverTime && Array.isArray(summaryData.viewsOverTime)) {
+            summaryData.viewsOverTime.forEach((entry: { date: string, count: number }) => {
+              viewsByDate[entry.date] = (viewsByDate[entry.date] || 0) + entry.count;
+            });
+          }
 
-        if (summaryData?.likesOverTime && Array.isArray(summaryData.likesOverTime)) {
-          summaryData.likesOverTime.forEach((entry: {date: string, count: number}) => {
-            likesByDate[entry.date] = (likesByDate[entry.date] || 0) + entry.count;
-          });
-        }
+          if (summaryData?.likesOverTime && Array.isArray(summaryData.likesOverTime)) {
+            summaryData.likesOverTime.forEach((entry: { date: string, count: number }) => {
+              likesByDate[entry.date] = (likesByDate[entry.date] || 0) + entry.count;
+            });
+          }
 
-        if (summaryData?.commentsOverTime && Array.isArray(summaryData.commentsOverTime)) {
-          summaryData.commentsOverTime.forEach((entry: {date: string, count: number}) => {
-            commentsByDate[entry.date] = (commentsByDate[entry.date] || 0) + entry.count;
-          });
+          if (summaryData?.commentsOverTime && Array.isArray(summaryData.commentsOverTime)) {
+            summaryData.commentsOverTime.forEach((entry: { date: string, count: number }) => {
+              commentsByDate[entry.date] = (commentsByDate[entry.date] || 0) + entry.count;
+            });
+          }
         }
-      }
       } catch (error) {
         console.error('Error getting analytics summary:', error);
       }
@@ -701,9 +706,9 @@ export const getAnalyticsForDateRange = async (
   views: number;
   likes: number;
   comments: number;
-  viewsOverTime: {date: string, count: number}[];
-  likesOverTime: {date: string, count: number}[];
-  commentsOverTime: {date: string, count: number}[];
+  viewsOverTime: { date: string, count: number }[];
+  likesOverTime: { date: string, count: number }[];
+  commentsOverTime: { date: string, count: number }[];
 }> => {
   try {
     // Format dates
@@ -723,9 +728,9 @@ export const getAnalyticsForDateRange = async (
       views: 0,
       likes: 0,
       comments: 0,
-      viewsOverTime: [] as {date: string, count: number}[],
-      likesOverTime: [] as {date: string, count: number}[],
-      commentsOverTime: [] as {date: string, count: number}[]
+      viewsOverTime: [] as { date: string, count: number }[],
+      likesOverTime: [] as { date: string, count: number }[],
+      commentsOverTime: [] as { date: string, count: number }[]
     };
 
     // Aggregate data from all portfolio items
@@ -743,38 +748,38 @@ export const getAnalyticsForDateRange = async (
         const summaryDoc = await getDoc(summaryRef);
 
         if (summaryDoc.exists()) {
-        // Process views over time
-        const summaryData = summaryDoc.data() as DocumentData;
+          // Process views over time
+          const summaryData = summaryDoc.data() as DocumentData;
 
-        if (summaryData?.viewsOverTime && Array.isArray(summaryData.viewsOverTime)) {
-          summaryData.viewsOverTime.forEach((entry: {date: string, count: number}) => {
-            if (entry.date >= startDateStr && entry.date <= endDateStr) {
-              viewsByDate[entry.date] = (viewsByDate[entry.date] || 0) + entry.count;
-              result.views += entry.count;
-            }
-          });
-        }
+          if (summaryData?.viewsOverTime && Array.isArray(summaryData.viewsOverTime)) {
+            summaryData.viewsOverTime.forEach((entry: { date: string, count: number }) => {
+              if (entry.date >= startDateStr && entry.date <= endDateStr) {
+                viewsByDate[entry.date] = (viewsByDate[entry.date] || 0) + entry.count;
+                result.views += entry.count;
+              }
+            });
+          }
 
-        // Process likes over time
-        if (summaryData?.likesOverTime && Array.isArray(summaryData.likesOverTime)) {
-          summaryData.likesOverTime.forEach((entry: {date: string, count: number}) => {
-            if (entry.date >= startDateStr && entry.date <= endDateStr) {
-              likesByDate[entry.date] = (likesByDate[entry.date] || 0) + entry.count;
-              result.likes += entry.count;
-            }
-          });
-        }
+          // Process likes over time
+          if (summaryData?.likesOverTime && Array.isArray(summaryData.likesOverTime)) {
+            summaryData.likesOverTime.forEach((entry: { date: string, count: number }) => {
+              if (entry.date >= startDateStr && entry.date <= endDateStr) {
+                likesByDate[entry.date] = (likesByDate[entry.date] || 0) + entry.count;
+                result.likes += entry.count;
+              }
+            });
+          }
 
-        // Process comments over time
-        if (summaryData?.commentsOverTime && Array.isArray(summaryData.commentsOverTime)) {
-          summaryData.commentsOverTime.forEach((entry: {date: string, count: number}) => {
-            if (entry.date >= startDateStr && entry.date <= endDateStr) {
-              commentsByDate[entry.date] = (commentsByDate[entry.date] || 0) + entry.count;
-              result.comments += entry.count;
-            }
-          });
+          // Process comments over time
+          if (summaryData?.commentsOverTime && Array.isArray(summaryData.commentsOverTime)) {
+            summaryData.commentsOverTime.forEach((entry: { date: string, count: number }) => {
+              if (entry.date >= startDateStr && entry.date <= endDateStr) {
+                commentsByDate[entry.date] = (commentsByDate[entry.date] || 0) + entry.count;
+                result.comments += entry.count;
+              }
+            });
+          }
         }
-      }
       } catch (error) {
         console.error('Error getting analytics summary for date range:', error);
       }

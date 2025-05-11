@@ -1,136 +1,97 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { likePost, unlikePost, checkUserLiked } from '@/services/interactionService';
-import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
 
 interface LikeButtonProps {
-  postId: string;
+  initialLiked: boolean;
   initialLikeCount: number;
-  initialLiked?: boolean;
+  postId: string;
+  user: { id: string } | null;
+  likePost: (postId: string, userId: string, liked: boolean, postType?: string) => Promise<void>;
+  postType?: string; // 'portfolio' | 'video' | etc.
   onLikeChange?: (liked: boolean, newCount: number) => void;
   size?: 'sm' | 'md' | 'lg';
-  showCount?: boolean;
-  className?: string;
 }
 
 const LikeButton: React.FC<LikeButtonProps> = ({
-  postId,
+  initialLiked,
   initialLikeCount,
-  initialLiked = false,
+  postId,
+  user,
+  likePost,
+  postType = 'portfolio',
   onLikeChange,
   size = 'md',
-  showCount = true,
-  className
 }) => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const [liked, setLiked] = useState(initialLiked);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [loading, setLoading] = useState(false);
-
-  // Check if user has liked the post
-  useEffect(() => {
-    const checkLiked = async () => {
-      if (!user) return;
-      
-      try {
-        const hasLiked = await checkUserLiked(user.uid, postId);
-        setLiked(hasLiked);
-      } catch (error) {
-        console.error('Error checking if post is liked:', error);
-      }
-    };
-
-    checkLiked();
-  }, [user, postId]);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLikeClick = async () => {
-    if (!user) {
-      toast({
-        title: 'Sign in required',
-        description: 'Please sign in to like posts',
-        variant: 'destructive'
-      });
-      navigate('/login');
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+    const prevLiked = liked;
+    const prevCount = likeCount;
+    // Prevent double-like
+    if (liked && prevLiked) {
+      setLoading(false);
       return;
     }
-
-    setLoading(true);
-
+    setLiked(!liked);
+    setLikeCount(likeCount + (liked ? -1 : 1));
+    onLikeChange?.(!liked, likeCount + (liked ? -1 : 1));
     try {
-      if (liked) {
-        // Unlike the post
-        await unlikePost(user.uid, postId);
-        setLiked(false);
-        setLikeCount(prev => Math.max(0, prev - 1));
-        onLikeChange?.(false, Math.max(0, likeCount - 1));
-      } else {
-        // Like the post
-        await likePost(user.uid, postId);
-        setLiked(true);
-        setLikeCount(prev => prev + 1);
-        onLikeChange?.(true, likeCount + 1);
-      }
-    } catch (error) {
+      await likePost(postId, user.id, !liked, postType);
+    } catch (error: any) {
+      setLiked(prevLiked);
+      setLikeCount(prevCount);
+      onLikeChange?.(prevLiked, prevCount);
+      setError(error?.message || 'Error toggling like');
       console.error('Error toggling like:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to update like',
-        variant: 'destructive'
-      });
     } finally {
       setLoading(false);
     }
   };
 
-  const sizeClasses = {
-    sm: 'h-8 px-2 text-xs',
-    md: 'h-10 px-3 text-sm',
-    lg: 'h-12 px-4 text-base'
-  };
-
-  const iconSizes = {
-    sm: 'h-4 w-4',
-    md: 'h-5 w-5',
-    lg: 'h-6 w-6'
-  };
-
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className={cn(
-        sizeClasses[size],
-        "gap-1.5 hover:bg-transparent",
-        liked ? "text-red-500 hover:text-red-600" : "text-gray-400 hover:text-gray-300",
-        loading && "opacity-70 cursor-not-allowed",
-        className
+    <>
+      <button
+        type="button"
+        onClick={handleLikeClick}
+        disabled={loading}
+        style={{
+          cursor: loading ? 'not-allowed' : 'pointer',
+          background: 'none',
+          border: 'none',
+          outline: 'none',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          fontWeight: 500,
+          fontSize: size === 'sm' ? 14 : size === 'lg' ? 20 : 16,
+          color: liked ? '#ef4444' : '#94a3b8',
+          transition: 'color 0.2s',
+        }}
+        aria-label={liked ? 'Unlike' : 'Like'}
+      >
+        <Heart
+          fill={liked ? '#ef4444' : 'none'}
+          stroke={liked ? '#ef4444' : '#94a3b8'}
+          width={size === 'sm' ? 18 : size === 'lg' ? 28 : 22}
+          height={size === 'sm' ? 18 : size === 'lg' ? 28 : 22}
+          style={{ marginRight: 6, transition: 'fill 0.2s, stroke 0.2s' }}
+        />
+        <span>{likeCount}</span>
+      </button>
+      {error && (
+        <div style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+          {error}
+        </div>
       )}
-      onClick={handleLikeClick}
-      disabled={loading}
-    >
-      <Heart
-        className={cn(
-          iconSizes[size],
-          liked ? "fill-current" : "fill-none",
-          "transition-all duration-300",
-          liked && "scale-110"
-        )}
-      />
-      {showCount && (
-        <span className={cn(
-          "font-medium",
-          liked ? "text-red-500" : "text-gray-400"
-        )}>
-          {likeCount}
-        </span>
-      )}
-    </Button>
+    </>
   );
 };
 
