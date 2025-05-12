@@ -55,24 +55,27 @@ const LikeButton: React.FC<LikeButtonProps> = ({
 
       // Track like interaction in analytics
       if (!liked) {  // Only track when adding a like, not removing
+        // Create a clean user object with no undefined values
+        const userForAnalytics = {
+          id: user.id,
+          uid: userId,
+          email: user.email || '',
+          username: user.username || '',
+          xp: user.xp || 0,
+          level: user.level || 1,
+          streak_days: user.streak_days || 0,
+          badges: user.badges || [],
+          following: user.following || [],
+          followers_count: user.followers_count || 0,
+          following_count: user.following_count || 0,
+          last_login: new Date().toISOString()
+        };
+
         await trackInteraction(
           postId,
           postType === 'portfolio' ? 'portfolio' : 'profile',
           'like',
-          {
-            ...user,
-            uid: userId,
-            username: user.username || '',
-            xp: user.xp || 0,
-            level: user.level || 1,
-            streak_days: user.streak_days || 0,
-            email: user.email || '',
-            last_login: new Date().toISOString(),
-            badges: [],  // Required by User type
-            following: [],  // Required by User type
-            followers_count: 0,  // Required by User type
-            following_count: 0   // Required by User type
-          }
+          userForAnalytics
         );
       }
     } catch (error: any) {
