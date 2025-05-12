@@ -8,9 +8,31 @@ import { Badge } from './badge';
 import LikeButton from '@/components/interactions/LikeButton';
 import CommentSection from '@/components/interactions/CommentSection';
 import LikesModal from '@/components/interactions/LikesModal';
-import { getPostInteractionStats } from '@/services/interactionService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Separator } from './separator';
+import { collection, query, where, onSnapshot, getDocs, addDoc, deleteDoc, doc, limit } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { trackView } from '@/services/analyticsService';
+
+// Helper function to get interaction stats
+async function getPostInteractionStats(postId: string, userId?: string) {
+  const likesRef = collection(db, 'likes');
+  const likesSnap = await getDocs(query(likesRef, where('postId', '==', postId)));
+  const likes = likesSnap.size;
+  let userHasLiked = false;
+
+  if (userId) {
+    userHasLiked = !(
+      await getDocs(query(likesRef, where('postId', '==', postId), where('userId', '==', userId), limit(1)))
+    ).empty;
+  }
+
+  return {
+    likes,
+    comments: 0, // Implement comment counting if needed
+    userHasLiked,
+  };
+}
 
 interface LightboxProps {
   item: PortfolioItem | null;
@@ -28,6 +50,48 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
   const [commentCount, setCommentCount] = useState(0);
   const [userHasLiked, setUserHasLiked] = useState(false);
   const [showLikesModal, setShowLikesModal] = useState(false);
+  const [hasTrackedView, setHasTrackedView] = useState(false);
+
+  // Add real-time listener for likes
+  useEffect(() => {
+    if (!item?.id || !isOpen) return;
+
+    const likesRef = collection(db, 'likes');
+    const q = query(likesRef, where('postId', '==', item.id));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setLikeCount(snapshot.size);
+      if (user) {
+        setUserHasLiked(snapshot.docs.some(doc => doc.data().userId === (user.id || user.uid)));
+      } else {
+        setUserHasLiked(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [item?.id, isOpen, user]);
+
+  // Update handleLikePost to use the same logic as PortfolioItemCard
+  const handleLikePost = async (postId: string, userId: string, liked: boolean) => {
+    const likesRef = collection(db, 'likes');
+    const q = query(likesRef, where('userId', '==', userId), where('postId', '==', postId));
+    const snapshot = await getDocs(q);
+
+    if (liked) {
+      // Like: create if not exists
+      if (snapshot.empty) {
+        await addDoc(likesRef, {
+          userId,
+          postId,
+          createdAt: new Date().toISOString()
+        });
+      }
+    } else {
+      // Unlike: remove if exists
+      if (!snapshot.empty) {
+        await deleteDoc(doc(db, 'likes', snapshot.docs[0].id));
+      }
+    }
+  };
 
   // Reset image index and fetch interaction stats when item changes
   useEffect(() => {
@@ -110,7 +174,35 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
     };
   }, []);
 
-  // Removed this line as we now check at the beginning of the render function
+  // Track view when lightbox opens
+  useEffect(() => {
+    const trackViewIfNeeded = async () => {
+      if (isOpen && item && user && !hasTrackedView) {
+        try {
+          await trackView(item.id, 'portfolio', {
+            ...user,
+            uid: user.uid || user.id,
+            username: user.username || '',
+            xp: user.xp || 0,
+            level: user.level || 1,
+            streak_days: user.streak_days || 0,
+            email: user.email || '',
+            last_login: new Date().toISOString()
+          });
+          setHasTrackedView(true);
+        } catch (error) {
+          console.error('Error tracking lightbox view:', error);
+        }
+      }
+    };
+
+    trackViewIfNeeded();
+  }, [isOpen, item, user]);
+
+  // Reset view tracking when item changes
+  useEffect(() => {
+    setHasTrackedView(false);
+  }, [item?.id]);
 
   // Handle multiple images if available
   const images = item?.media_urls ? item.media_urls : item?.media_url ? [item.media_url] : [];
@@ -285,6 +377,8 @@ export const Lightbox: React.FC<LightboxProps> = ({ item, isOpen, onClose }) => 
                 postId={item.id}
                 initialLikeCount={likeCount}
                 initialLiked={userHasLiked}
+                user={user}
+                likePost={handleLikePost}
                 onLikeChange={(liked, newCount) => {
                   setUserHasLiked(liked);
                   setLikeCount(newCount);

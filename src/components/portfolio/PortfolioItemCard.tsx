@@ -47,7 +47,8 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setLikeCount(snapshot.size);
       if (user) {
-        setUserHasLiked(snapshot.docs.some(doc => doc.data().userId === (user.id || user.uid)));
+        const userId = user.uid || user.id;
+        setUserHasLiked(snapshot.docs.some(doc => doc.data().userId === userId));
       } else {
         setUserHasLiked(false);
       }
@@ -57,24 +58,26 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
 
   // Like/unlike handler for LikeButton
   const handleLikePost = async (postId: string, userId: string, liked: boolean) => {
-    // Always use the global /likes collection for robust tracking
     const likesRef = collection(db, 'likes');
-    const q = query(likesRef, where('userId', '==', userId), where('postId', '==', postId), limit(1));
+    const q = query(likesRef,
+      where('userId', '==', userId),
+      where('postId', '==', postId)
+    );
     const snapshot = await getDocs(q);
+
     if (liked) {
-      // Like: create a like doc if not exists
       if (snapshot.empty) {
-        const payload = { userId, postId, createdAt: new Date().toISOString() };
-        await addDoc(likesRef, payload);
+        await addDoc(likesRef, {
+          userId,
+          postId,
+          createdAt: new Date().toISOString()
+        });
       }
     } else {
-      // Unlike: remove like doc if exists
       if (!snapshot.empty) {
         await deleteDoc(doc(db, 'likes', snapshot.docs[0].id));
       }
     }
-    // No need to update the likes field in the portfolio doc for UI display
-    // The real-time listener will update the UI
   };
 
   // Helper to get like/comment stats for a post and user
@@ -112,10 +115,19 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
         const stats = await getPostInteractionStats(item.id, user?.id || user?.uid);
         setCommentCount(stats.comments);
 
-        // Track view for analytics
-        if (!isOwner) { // Don't track views from the owner
+        // Track view for analytics but don't track views from the owner
+        if (!isOwner && user) {
           try {
-            await trackView(item.id, 'portfolio', user);
+            await trackView(item.id, 'portfolio', {
+              ...user,
+              uid: user.uid || user.id,
+              username: user.username || '',
+              xp: user.xp || 0,
+              level: user.level || 1,
+              streak_days: user.streak_days || 0,
+              email: user.email || '',
+              last_login: new Date().toISOString()
+            });
           } catch (viewError) {
             console.error('Error tracking view:', viewError);
             // Continue anyway, this is just analytics
@@ -124,12 +136,12 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
       } catch (error) {
         console.error('Error fetching interaction stats:', error);
         // Use default values on error
-        setCommentCount(item.comments || 0);
+        setCommentCount(0);
       }
     };
 
     fetchStats();
-  }, [item.id, user, isOwner, item.comments]);
+  }, [item.id, user, isOwner]);
 
   // Extract Google Drive file ID if present
   const getGoogleDriveFileId = (url: string): string | null => {
