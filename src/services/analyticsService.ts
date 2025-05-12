@@ -10,8 +10,7 @@ import {
   where,
   orderBy,
   limit,
-  increment,
-  DocumentData
+  increment
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { User } from '@/types';
@@ -328,39 +327,99 @@ export const getPortfolioItemAnalytics = async (itemId: string): Promise<Portfol
 
     // Get analytics summary
     const summaryDoc = await getDoc(doc(db, 'analytics_summary_portfolio', itemId));
+    let summaryData = summaryDoc.exists() ? summaryDoc.data() : undefined;
+    let viewsByDate: Record<string, number> = {};
+    let likesByDate: Record<string, number> = {};
+    let commentsByDate: Record<string, number> = {};
+
     if (!summaryDoc.exists()) {
-      // Return basic analytics if no summary exists
-      return {
-        itemId,
-        title: portfolioData.title,
-        views: portfolioData.views || 0,
-        likes: portfolioData.likes || 0,
-        comments: portfolioData.comments || 0,
-        viewsOverTime: [],
-        recentViewers: [],
-        recentLikers: [],
-        recentCommenters: []
+      // Get views and build viewsByDate
+      const viewsQuery = query(
+        collection(db, 'analytics_views'),
+        where('itemId', '==', itemId),
+        where('itemType', '==', 'portfolio')
+      );
+      const viewsSnap = await getDocs(viewsQuery);
+      const uniqueViewers = new Set<string>();
+
+      viewsSnap.forEach(doc => {
+        const data = doc.data();
+        const date = format(new Date(data.timestamp), 'yyyy-MM-dd');
+        viewsByDate[date] = (viewsByDate[date] || 0) + 1;
+        if (data.userId) {
+          uniqueViewers.add(data.userId);
+        }
+      });
+
+      // Get likes and comments and build likesByDate and commentsByDate
+      const interactionsQuery = query(
+        collection(db, 'analytics_interactions'),
+        where('itemId', '==', itemId),
+        where('itemType', '==', 'portfolio')
+      );
+      const interactionsSnap = await getDocs(interactionsQuery);
+      const uniqueLikers = new Set<string>();
+      const uniqueCommenters = new Set<string>();
+
+      interactionsSnap.forEach(doc => {
+        const data = doc.data();
+        const date = format(new Date(data.timestamp), 'yyyy-MM-dd');
+        if (data.interactionType === 'like') {
+          likesByDate[date] = (likesByDate[date] || 0) + 1;
+          if (data.userId) {
+            uniqueLikers.add(data.userId);
+          }
+        } else if (data.interactionType === 'comment') {
+          commentsByDate[date] = (commentsByDate[date] || 0) + 1;
+          if (data.userId) {
+            uniqueCommenters.add(data.userId);
+          }
+        }
+      });
+
+      // Calculate totals 
+      const totalViews = Object.values(viewsByDate).reduce((a, b) => a + b, 0);
+      const totalLikes = Object.values(likesByDate).reduce((a, b) => a + b, 0);
+      const totalComments = Object.values(commentsByDate).reduce((a, b) => a + b, 0);
+
+      // Create and save the new summary document
+      const newSummaryData = {
+        totalViews,
+        uniqueViewers: uniqueViewers.size,
+        totalLikes,
+        uniqueLikers: uniqueLikers.size,
+        totalComments,
+        uniqueCommenters: uniqueCommenters.size,
+        viewsOverTime: Object.entries(viewsByDate).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)),
+        likesOverTime: Object.entries(likesByDate).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)),
+        commentsOverTime: Object.entries(commentsByDate).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)),
+        viewers: Array.from(uniqueViewers),
+        likers: Array.from(uniqueLikers),
+        commenters: Array.from(uniqueCommenters),
+        lastUpdated: new Date().toISOString()
       };
+
+      // Save the new summary
+      await setDoc(doc(db, 'analytics_summary_portfolio', itemId), newSummaryData);
+      summaryData = newSummaryData;
     }
 
-    const summaryData = summaryDoc.data();
-
-    // Get recent viewers
+    // Get recent interactors
     const recentViewers = await getRecentInteractors(itemId, 'portfolio', 'view', 5);
-
-    // Get recent likers
     const recentLikers = await getRecentInteractors(itemId, 'portfolio', 'like', 5);
-
-    // Get recent commenters
     const recentCommenters = await getRecentInteractors(itemId, 'portfolio', 'comment', 5);
 
+    // Return analytics with most recent counts from the item document
+    // and time series data from summary
     return {
       itemId,
       title: portfolioData.title,
       views: portfolioData.views || 0,
       likes: portfolioData.likes || 0,
       comments: portfolioData.comments || 0,
-      viewsOverTime: summaryData.viewsOverTime || [],
+      viewsOverTime: summaryData?.viewsOverTime || [],
+      likesOverTime: summaryData?.likesOverTime || [],
+      commentsOverTime: summaryData?.commentsOverTime || [],
       recentViewers,
       recentLikers,
       recentCommenters
@@ -518,18 +577,39 @@ export const getRecentInteractors = async (
 
 // Get analytics summary for a user's portfolio
 export const getUserPortfolioAnalytics = async (userId: string): Promise<AnalyticsSummary | null> => {
-  try {
-    // Get all portfolio items for this user
+  try {    // First get all portfolio items for this user
     const portfolioQuery = query(
       collection(db, 'portfolio'),
       where('user_id', '==', userId)
     );
-
     const portfolioSnapshot = await getDocs(portfolioQuery);
+    const userItemIds = portfolioSnapshot.docs.map(doc => doc.id);
 
-    if (portfolioSnapshot.empty) {
-      return null;
+    // If user has no portfolio items, return empty analytics
+    if (userItemIds.length === 0) {
+      return {
+        totalViews: 0,
+        uniqueViewers: 0,
+        totalLikes: 0,
+        uniqueLikers: 0,
+        totalComments: 0,
+        uniqueCommenters: 0,
+        viewsOverTime: [],
+        likesOverTime: [],
+        commentsOverTime: [],
+        topViewers: [],
+        topLikers: [],
+        topCommenters: []
+      };
     }
+
+    // Get view events for this user's portfolio items
+    const viewsQuery = query(
+      collection(db, 'analytics_views'),
+      where('itemType', '==', 'portfolio'),
+      where('itemId', 'in', userItemIds)
+    );
+    const viewsSnapshot = await getDocs(viewsQuery);
 
     // Initialize summary
     const summary: AnalyticsSummary = {
@@ -547,101 +627,65 @@ export const getUserPortfolioAnalytics = async (userId: string): Promise<Analyti
       topCommenters: []
     };
 
-    // Aggregate data from all portfolio items
-    const allViewers = new Set<string>();
-    const allLikers = new Set<string>();
-    const allCommenters = new Set<string>();
-
+    // Process view events
+    const uniqueViewers = new Set<string>();
+    const viewsByDate: Record<string, number> = {};
     const viewerCounts: Record<string, number> = {};
+
+    for (const docSnapshot of viewsSnapshot.docs) {
+      const viewData = docSnapshot.data();
+      summary.totalViews++;
+      if (viewData.userId) {
+        uniqueViewers.add(viewData.userId);
+        viewerCounts[viewData.userId] = (viewerCounts[viewData.userId] || 0) + 1;
+      }
+
+      const viewDate = format(new Date(viewData.timestamp), 'yyyy-MM-dd');
+      viewsByDate[viewDate] = (viewsByDate[viewDate] || 0) + 1;
+    }
+
+    // Update unique viewers count
+    summary.uniqueViewers = uniqueViewers.size;
+
+    // Convert views timeseries
+    summary.viewsOverTime = Object.entries(viewsByDate)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));    // Get interactions (likes and comments) - filtering by user's items
+    const interactionsQuery = query(
+      collection(db, 'analytics_interactions'),
+      where('itemType', '==', 'portfolio'),
+      where('itemId', 'in', userItemIds)
+    );
+
+    const interactionsSnapshot = await getDocs(interactionsQuery);
+    const uniqueLikers = new Set<string>();
+    const uniqueCommenters = new Set<string>();
+    const likesByDate: Record<string, number> = {};
+    const commentsByDate: Record<string, number> = {};
     const likerCounts: Record<string, number> = {};
     const commenterCounts: Record<string, number> = {};
 
-    const viewsByDate: Record<string, number> = {};
-    const likesByDate: Record<string, number> = {};
-    const commentsByDate: Record<string, number> = {};
+    for (const docSnapshot of interactionsSnapshot.docs) {
+      const data = docSnapshot.data();
+      const interactionDate = format(new Date(data.timestamp), 'yyyy-MM-dd');
 
-    // Process each portfolio item
-    for (const docSnapshot of portfolioSnapshot.docs) {
-      const itemId = docSnapshot.id;
-      const itemData = docSnapshot.data();
-
-      // Add to total counts
-      summary.totalViews += itemData.views || 0;
-      summary.totalLikes += itemData.likes || 0;
-      summary.totalComments += itemData.comments || 0;
-
-      // Get item analytics summary
-      try {
-        const summaryRef = doc(db, 'analytics_summary_portfolio', itemId);
-        const summaryDoc = await getDoc(summaryRef);
-
-        if (summaryDoc.exists()) {
-          // Process viewers
-          const summaryData = summaryDoc.data() as DocumentData;
-
-          if (summaryData?.viewers && Array.isArray(summaryData.viewers)) {
-            summaryData.viewers.forEach((viewerId: string) => {
-              if (viewerId) {
-                allViewers.add(viewerId);
-                viewerCounts[viewerId] = (viewerCounts[viewerId] || 0) + 1;
-              }
-            });
-          }
-
-          // Process likers
-          if (summaryData?.likers && Array.isArray(summaryData.likers)) {
-            summaryData.likers.forEach((likerId: string) => {
-              if (likerId) {
-                allLikers.add(likerId);
-                likerCounts[likerId] = (likerCounts[likerId] || 0) + 1;
-              }
-            });
-          }
-
-          // Process commenters
-          if (summaryData?.commenters && Array.isArray(summaryData.commenters)) {
-            summaryData.commenters.forEach((commenterId: string) => {
-              if (commenterId) {
-                allCommenters.add(commenterId);
-                commenterCounts[commenterId] = (commenterCounts[commenterId] || 0) + 1;
-              }
-            });
-          }
-
-          // Aggregate time series data
-          if (summaryData?.viewsOverTime && Array.isArray(summaryData.viewsOverTime)) {
-            summaryData.viewsOverTime.forEach((entry: { date: string, count: number }) => {
-              viewsByDate[entry.date] = (viewsByDate[entry.date] || 0) + entry.count;
-            });
-          }
-
-          if (summaryData?.likesOverTime && Array.isArray(summaryData.likesOverTime)) {
-            summaryData.likesOverTime.forEach((entry: { date: string, count: number }) => {
-              likesByDate[entry.date] = (likesByDate[entry.date] || 0) + entry.count;
-            });
-          }
-
-          if (summaryData?.commentsOverTime && Array.isArray(summaryData.commentsOverTime)) {
-            summaryData.commentsOverTime.forEach((entry: { date: string, count: number }) => {
-              commentsByDate[entry.date] = (commentsByDate[entry.date] || 0) + entry.count;
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error getting analytics summary:', error);
+      if (data.interactionType === 'like') {
+        summary.totalLikes++;
+        uniqueLikers.add(data.userId);
+        likerCounts[data.userId] = (likerCounts[data.userId] || 0) + 1;
+        likesByDate[interactionDate] = (likesByDate[interactionDate] || 0) + 1;
+      } else if (data.interactionType === 'comment') {
+        summary.totalComments++;
+        uniqueCommenters.add(data.userId);
+        commenterCounts[data.userId] = (commenterCounts[data.userId] || 0) + 1;
+        commentsByDate[interactionDate] = (commentsByDate[interactionDate] || 0) + 1;
       }
     }
 
-    // Set unique counts
-    summary.uniqueViewers = allViewers.size;
-    summary.uniqueLikers = allLikers.size;
-    summary.uniqueCommenters = allCommenters.size;
+    summary.uniqueLikers = uniqueLikers.size;
+    summary.uniqueCommenters = uniqueCommenters.size;
 
-    // Convert time series data
-    summary.viewsOverTime = Object.entries(viewsByDate)
-      .map(([date, count]) => ({ date, count }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
+    // Convert likes and comments timeseries
     summary.likesOverTime = Object.entries(likesByDate)
       .map(([date, count]) => ({ date, count }))
       .sort((a, b) => a.date.localeCompare(b.date));
@@ -651,9 +695,9 @@ export const getUserPortfolioAnalytics = async (userId: string): Promise<Analyti
       .sort((a, b) => a.date.localeCompare(b.date));
 
     // Get top interactors
-    summary.topViewers = await getTopInteractors(Array.from(allViewers), viewerCounts, 10);
-    summary.topLikers = await getTopInteractors(Array.from(allLikers), likerCounts, 10);
-    summary.topCommenters = await getTopInteractors(Array.from(allCommenters), commenterCounts, 10);
+    summary.topViewers = await getTopInteractors(Array.from(uniqueViewers), viewerCounts, 10);
+    summary.topLikers = await getTopInteractors(Array.from(uniqueLikers), likerCounts, 10);
+    summary.topCommenters = await getTopInteractors(Array.from(uniqueCommenters), commenterCounts, 10);
 
     return summary;
   } catch (error) {
@@ -711,18 +755,6 @@ export const getAnalyticsForDateRange = async (
   commentsOverTime: { date: string, count: number }[];
 }> => {
   try {
-    // Format dates
-    const startDateStr = format(startDate, 'yyyy-MM-dd');
-    const endDateStr = format(endDate, 'yyyy-MM-dd');
-
-    // Get all portfolio items for this user
-    const portfolioQuery = query(
-      collection(db, 'portfolio'),
-      where('user_id', '==', userId)
-    );
-
-    const portfolioSnapshot = await getDocs(portfolioQuery);
-
     // Initialize result
     const result = {
       views: 0,
@@ -733,55 +765,57 @@ export const getAnalyticsForDateRange = async (
       commentsOverTime: [] as { date: string, count: number }[]
     };
 
-    // Aggregate data from all portfolio items
+    // Get all portfolio items for this user first
+    const portfolioQuery = query(
+      collection(db, 'portfolio'),
+      where('user_id', '==', userId)
+    );
+    const portfolioSnapshot = await getDocs(portfolioQuery);
+    const userItemIds = Array.from(portfolioSnapshot.docs.map(doc => doc.id));
+
+    if (userItemIds.length === 0) return result;
+
+    // Get views within date range
+    const viewsQuery = query(
+      collection(db, 'analytics_views'),
+      where('itemType', '==', 'portfolio'),
+      where('itemId', 'in', userItemIds),
+      where('timestamp', '>=', startDate.toISOString()),
+      where('timestamp', '<=', endDate.toISOString())
+    );
+
+    const viewsSnapshot = await getDocs(viewsQuery);
     const viewsByDate: Record<string, number> = {};
+
+    for (const docSnapshot of viewsSnapshot.docs) {
+      result.views++;
+      const viewDate = format(new Date(docSnapshot.data().timestamp), 'yyyy-MM-dd');
+      viewsByDate[viewDate] = (viewsByDate[viewDate] || 0) + 1;
+    }
+
+    // Get interactions within date range
+    const interactionsQuery = query(
+      collection(db, 'analytics_interactions'),
+      where('itemType', '==', 'portfolio'),
+      where('itemId', 'in', userItemIds),
+      where('timestamp', '>=', startDate.toISOString()),
+      where('timestamp', '<=', endDate.toISOString())
+    );
+
+    const interactionsSnapshot = await getDocs(interactionsQuery);
     const likesByDate: Record<string, number> = {};
     const commentsByDate: Record<string, number> = {};
 
-    // Process each portfolio item
-    for (const docSnapshot of portfolioSnapshot.docs) {
-      const itemId = docSnapshot.id;
+    for (const docSnapshot of interactionsSnapshot.docs) {
+      const data = docSnapshot.data();
+      const interactionDate = format(new Date(data.timestamp), 'yyyy-MM-dd');
 
-      // Get item analytics summary
-      try {
-        const summaryRef = doc(db, 'analytics_summary_portfolio', itemId);
-        const summaryDoc = await getDoc(summaryRef);
-
-        if (summaryDoc.exists()) {
-          // Process views over time
-          const summaryData = summaryDoc.data() as DocumentData;
-
-          if (summaryData?.viewsOverTime && Array.isArray(summaryData.viewsOverTime)) {
-            summaryData.viewsOverTime.forEach((entry: { date: string, count: number }) => {
-              if (entry.date >= startDateStr && entry.date <= endDateStr) {
-                viewsByDate[entry.date] = (viewsByDate[entry.date] || 0) + entry.count;
-                result.views += entry.count;
-              }
-            });
-          }
-
-          // Process likes over time
-          if (summaryData?.likesOverTime && Array.isArray(summaryData.likesOverTime)) {
-            summaryData.likesOverTime.forEach((entry: { date: string, count: number }) => {
-              if (entry.date >= startDateStr && entry.date <= endDateStr) {
-                likesByDate[entry.date] = (likesByDate[entry.date] || 0) + entry.count;
-                result.likes += entry.count;
-              }
-            });
-          }
-
-          // Process comments over time
-          if (summaryData?.commentsOverTime && Array.isArray(summaryData.commentsOverTime)) {
-            summaryData.commentsOverTime.forEach((entry: { date: string, count: number }) => {
-              if (entry.date >= startDateStr && entry.date <= endDateStr) {
-                commentsByDate[entry.date] = (commentsByDate[entry.date] || 0) + entry.count;
-                result.comments += entry.count;
-              }
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error getting analytics summary for date range:', error);
+      if (data.interactionType === 'like') {
+        result.likes++;
+        likesByDate[interactionDate] = (likesByDate[interactionDate] || 0) + 1;
+      } else if (data.interactionType === 'comment') {
+        result.comments++;
+        commentsByDate[interactionDate] = (commentsByDate[interactionDate] || 0) + 1;
       }
     }
 

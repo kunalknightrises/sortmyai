@@ -9,7 +9,7 @@ import AnimatedTooltip from '@/components/ui/AnimatedTooltip';
 import LikeButton from '@/components/interactions/LikeButton';
 import { trackView } from '@/services/analyticsService';
 import { useAuth } from '@/contexts/AuthContext';
-import { collection, doc, getDocs, addDoc, deleteDoc, query, where, limit, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDocs, addDoc, deleteDoc, query, where, limit, onSnapshot, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 interface PortfolioItemCardProps {
@@ -35,6 +35,7 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
   const [likeCount, setLikeCount] = useState(0); // Always start at 0, real-time listener will update
   const [commentCount, setCommentCount] = useState(item.comments || 0);
   const [userHasLiked, setUserHasLiked] = useState(false);
+  const [hasTrackedView, setHasTrackedView] = useState(false);
 
   // Defensive: Don't render LikeButton if item.id is missing
   const canLike = !!item.id;
@@ -82,24 +83,38 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
 
   // Helper to get like/comment stats for a post and user
   async function getPostInteractionStats(postId: string, userId?: string) {
-    // Count likes from likes collection
-    const likesRef = collection(db, 'likes');
-    const likesSnap = await getDocs(query(likesRef, where('postId', '==', postId)));
-    const likes = likesSnap.size;
-    let userHasLiked = false;
-    if (userId) {
-      userHasLiked = !(
-        await getDocs(query(likesRef, where('postId', '==', postId), where('userId', '==', userId), limit(1)))
-      ).empty;
+    try {
+      // First get the portfolio item to get the cached counts
+      const portfolioDoc = await getDoc(doc(db, 'portfolio', postId));
+      let likes = 0;
+      let comments = 0;
+
+      if (portfolioDoc.exists()) {
+        const data = portfolioDoc.data();
+        likes = data.likes || 0;
+        comments = data.comments || 0;
+      }
+
+      // Check if user has liked
+      let userHasLiked = false;
+      if (userId) {
+        const likesRef = collection(db, 'likes');
+        userHasLiked = !(
+          await getDocs(query(likesRef, where('postId', '==', postId), where('userId', '==', userId), limit(1)))
+        ).empty;
+      }
+
+      return { likes, comments, userHasLiked };
+    } catch (error) {
+      console.error('Error getting interaction stats:', error);
+      return { likes: 0, comments: 0, userHasLiked: false };
     }
-    // Count comments if you have a comments collection (optional)
-    // For now, fallback to item.comments if available
-    return {
-      likes,
-      comments: 0, // You can implement comment counting if needed
-      userHasLiked,
-    };
   }
+
+  // Reset view tracking when item changes
+  useEffect(() => {
+    setHasTrackedView(false);
+  }, [item.id]);
 
   // Fetch interaction stats and track view when component mounts
   useEffect(() => {
@@ -116,32 +131,37 @@ export function PortfolioItemCard({ item, onEdit, onDelete, onArchive, onRestore
         setCommentCount(stats.comments);
 
         // Track view for analytics but don't track views from the owner
-        if (!isOwner && user) {
+        if (!isOwner && user && item.id && !hasTrackedView) {
           try {
-            await trackView(item.id, 'portfolio', {
-              ...user,
-              uid: user.uid || user.id,
+            const cleanUser = {
+              id: user.id || user.uid || '',
+              uid: user.uid || user.id || '',
+              email: user.email || '',
               username: user.username || '',
               xp: user.xp || 0,
               level: user.level || 1,
               streak_days: user.streak_days || 0,
-              email: user.email || '',
-              last_login: new Date().toISOString()
-            });
+              last_login: new Date().toISOString(),
+              badges: user.badges || [],
+              following: user.following || [],
+              followers_count: user.followers_count || 0,
+              following_count: user.following_count || 0,
+              avatar_url: undefined // Explicitly set to undefined since we don't track it
+            };
+            await trackView(item.id, 'portfolio', cleanUser);
+            setHasTrackedView(true);
           } catch (viewError) {
             console.error('Error tracking view:', viewError);
-            // Continue anyway, this is just analytics
           }
         }
       } catch (error) {
         console.error('Error fetching interaction stats:', error);
-        // Use default values on error
         setCommentCount(0);
       }
     };
 
     fetchStats();
-  }, [item.id, user, isOwner]);
+  }, [item.id, user, isOwner, hasTrackedView]);
 
   // Extract Google Drive file ID if present
   const getGoogleDriveFileId = (url: string): string | null => {

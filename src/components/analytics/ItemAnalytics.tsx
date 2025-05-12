@@ -148,8 +148,8 @@ const ItemAnalytics: React.FC<ItemAnalyticsProps> = ({ itemId, onBack }) => {
         <CardContent>
           <AnalyticsChart
             viewsData={analytics.viewsOverTime}
-            likesData={[]}
-            commentsData={[]}
+            likesData={analytics.likesOverTime}
+            commentsData={analytics.commentsOverTime}
           />
         </CardContent>
       </GlassCard>

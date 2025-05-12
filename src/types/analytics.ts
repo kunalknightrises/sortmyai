@@ -78,6 +78,14 @@ export interface PortfolioItemAnalytics {
     date: string;
     count: number;
   }[];
+  likesOverTime: {
+    date: string;
+    count: number;
+  }[];
+  commentsOverTime: {
+    date: string;
+    count: number;
+  }[];
   recentViewers: UserInteractionSummary[];
   recentLikers: UserInteractionSummary[];
   recentCommenters: UserInteractionSummary[];
